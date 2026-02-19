@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Tasarim.Core/Tasarim.Core.csproj" Id="98bfb380-6e13-428b-b28e-49766fb3e37c" />
+  <Project Path="Tasarim.Data/Tasarim.Data.csproj" Id="df9d0361-9e77-4b9d-9549-d0e1515bb418" />
+  <Project Path="Tasarim.Service/Tasarim.Service.csproj" Id="5f9ecb7a-f8b1-429e-b5f3-71afbf2b52eb" />
+  <Project Path="Tasarim/Tasarim.csproj" />
+</Solution>
