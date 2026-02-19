@@ -35,6 +35,7 @@ namespace Tasarim.Data
             base.OnConfiguring(optionsBuilder);
         }
 
+        // Ayarlar ve İlişki
         // --- İLİŞKİ VE AYARLAR (Fluent API) ---
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
