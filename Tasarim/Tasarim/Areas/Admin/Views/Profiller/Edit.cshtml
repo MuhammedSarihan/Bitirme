@@ -1,0 +1,142 @@
+﻿@model Tasarim.Core.Entities.Profil
+
+@{
+    ViewData["Title"] = "";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5">
+
+                    <div class="d-flex align-items-center mb-4">
+                        <h3 class="mb-0 text-dark fw-bold">
+                            <i class="fa-solid fa-user-pen text-warning me-2"></i>Müşteri Profilini Düzenle
+                        </h3>
+                    </div>
+                    <hr class="text-muted mb-4" />
+
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
+
+                        <input type="hidden" asp-for="ID" />
+
+                        <div class="row g-5">
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3"><i class="fa-solid fa-address-card me-2"></i>Kişisel Bilgiler</h5>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Ad" class="form-label fw-semibold text-secondary">Ad</label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+                                            <input asp-for="Ad" class="form-control border-start-0 ps-0" placeholder="Müşteri Adı" />
+                                        </div>
+                                        <span asp-validation-for="Ad" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Soyad" class="form-label fw-semibold text-secondary">Soyad</label>
+                                        <input asp-for="Soyad" class="form-control shadow-sm" placeholder="Müşteri Soyadı" />
+                                        <span asp-validation-for="Soyad" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Mail" class="form-label fw-semibold text-secondary">E-Posta Adresi</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
+                                        <input asp-for="Mail" type="email" class="form-control border-start-0 ps-0" placeholder="ornek@mail.com" />
+                                    </div>
+                                    <span asp-validation-for="Mail" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="TelNo" class="form-label fw-semibold text-secondary">Telefon Numarası</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                                        <input asp-for="TelNo" class="form-control border-start-0 ps-0" placeholder="05XX XXX XX XX" />
+                                    </div>
+                                    <span asp-validation-for="TelNo" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Adres" class="form-label fw-semibold text-secondary">Açık Adres</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-location-dot text-muted"></i></span>
+                                        <textarea asp-for="Adres" class="form-control border-start-0 ps-0" rows="2" placeholder="Teslimat adresi detayları..."></textarea>
+                                    </div>
+                                    <span asp-validation-for="Adres" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="text-info mb-3"><i class="fa-solid fa-person-half-dress me-2"></i>Fiziksel Özellikler & Hesap</h5>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Cinsiyet" class="form-label fw-semibold text-secondary">Cinsiyet</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-venus-mars text-muted"></i></span>
+                                        <select asp-for="Cinsiyet" class="form-select border-start-0 ps-0">
+                                            <option value="">-- Cinsiyet Seçin --</option>
+                                            <option value="Kadın">Kadın</option>
+                                            <option value="Erkek">Erkek</option>
+                                        </select>
+                                    </div>
+                                    <span asp-validation-for="Cinsiyet" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <label asp-for="Yas" class="form-label fw-semibold text-secondary">Yaş</label>
+                                        <input asp-for="Yas" class="form-control shadow-sm" type="number" placeholder="Örn: 28" />
+                                        <span asp-validation-for="Yas" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="Boy" class="form-label fw-semibold text-secondary">Boy (cm)</label>
+                                        <input asp-for="Boy" class="form-control shadow-sm" type="number" placeholder="Örn: 187" />
+                                        <span asp-validation-for="Boy" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="Kilo" class="form-label fw-semibold text-secondary">Kilo (kg)</label>
+                                        <input asp-for="Kilo" class="form-control shadow-sm" type="number" placeholder="Örn: 75" />
+                                        <span asp-validation-for="Kilo" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-3 p-3 bg-light rounded-3 border">
+                                    <label asp-for="KullaniciID" class="form-label fw-bold text-dark"><i class="fa-solid fa-user-lock me-2 text-primary"></i>Bağlı Kullanıcı Hesabı</label>
+                                    <select asp-for="KullaniciID" class="form-select shadow-sm" asp-items="ViewBag.KullaniciID">
+                                        <option value="">-- Kullanıcı Hesabı Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="KullaniciID" class="text-danger small"></span>
+                                    <div class="form-text mt-2 text-muted">
+                                        Bu profilin sisteme giriş yaparken kullandığı ana hesap.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="text-muted my-4" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
+                                <i class="fa-solid fa-arrow-left me-2"></i>Listeye Dön
+                            </a>
+                            <button type="submit" class="btn btn-success px-5 rounded-pill shadow-sm fw-bold">
+                                <i class="fa-solid fa-check me-2"></i>Değişiklikleri Kaydet
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

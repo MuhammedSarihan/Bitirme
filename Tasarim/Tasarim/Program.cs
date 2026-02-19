@@ -1,7 +1,12 @@
+
+using Tasarim.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<DatabaseContext>();
 
 var app = builder.Build();
 

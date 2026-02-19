@@ -12,7 +12,7 @@ namespace Tasarim.Core.Entities
         [Display(Name = "Kategori Görseli")]
         public string? KategoriResmi { get; set; }
         [Display(Name = "Sıra No")]
-        public int SiraNo { get; set; }
+        public int? SiraNo { get; set; }
         [Display(Name = "Aktif mi ? ")]
         public bool AktifMi { get; set; }
 
@@ -23,8 +23,8 @@ namespace Tasarim.Core.Entities
         public bool UstteGoster { get; set; }
 
         // Eğer sorun varsa, aşağıdaki kodu kullanarak kendine referans veren ilişki kurulabilir.
-        //[ForeignKey("UstKategoriID")]
-        //public Kategori UstKategori { get; set; }
+        [ForeignKey("UstKategoriID")]
+        public Kategori UstKategori { get; set; }
 
         // İlişkiler
         public ICollection<Urun>? Urunler { get; set; }

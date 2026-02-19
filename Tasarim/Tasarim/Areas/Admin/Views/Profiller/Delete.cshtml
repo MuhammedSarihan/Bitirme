@@ -1,0 +1,117 @@
+﻿@model Tasarim.Core.Entities.Profil
+
+@{
+    ViewData["Title"] = "";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="alert alert-danger shadow-sm rounded-4 mb-4 border-0 border-start border-danger border-5" role="alert">
+                <h5 class="alert-heading fw-bold mb-2 text-danger">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Dikkat! Bu İşlem Geri Alınamaz
+                </h5>
+                <p class="mb-0 text-dark">Aşağıda detayları verilen müşteri profilini kalıcı olarak silmek üzeresiniz. Lütfen bilgileri kontrol edip işleminizi onaylayın.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0 text-dark fw-bold">
+                            <i class="fa-solid fa-user-xmark text-danger me-2"></i>Müşteri Profilini Sil
+                        </h3>
+                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
+                            Profil ID: @Model.ID
+                        </span>
+                    </div>
+                    <hr class="text-muted mb-4" />
+
+                    <div class="row g-5">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3"><i class="fa-solid fa-address-card me-2"></i>Kişisel Bilgiler</h5>
+                            <ul class="list-group list-group-flush shadow-sm rounded-3 border">
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-user me-2"></i>Ad Soyad</span>
+                                    <span class="fw-bold text-dark">@Model.Ad @Model.Soyad</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-envelope me-2"></i>@Html.DisplayNameFor(model => model.Mail)</span>
+                                    <span class="fw-medium text-dark">@Html.DisplayFor(model => model.Mail)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-phone me-2"></i>@Html.DisplayNameFor(model => model.TelNo)</span>
+                                    <span class="fw-medium text-dark">@Html.DisplayFor(model => model.TelNo)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 bg-light opacity-75">
+                                    <div class="text-secondary fw-semibold mb-1"><i class="fa-solid fa-location-dot me-2"></i>@Html.DisplayNameFor(model => model.Adres)</div>
+                                    <div class="text-dark small lh-sm">@Html.DisplayFor(model => model.Adres)</div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="text-info mb-3"><i class="fa-solid fa-person-half-dress me-2"></i>Fiziksel Özellikler & Hesap</h5>
+                            <ul class="list-group list-group-flush shadow-sm rounded-3 border">
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-venus-mars me-2"></i>@Html.DisplayNameFor(model => model.Cinsiyet)</span>
+                                    @if (Model.Cinsiyet == "Kadın")
+                                    {
+                                        <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3"><i class="fa-solid fa-venus me-1"></i>Kadın</span>
+                                    }
+                                    else if (Model.Cinsiyet == "Erkek")
+                                    {
+                                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3"><i class="fa-solid fa-mars me-1"></i>Erkek</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-medium text-dark">@Html.DisplayFor(model => model.Cinsiyet)</span>
+                                    }
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-calendar-days me-2"></i>@Html.DisplayNameFor(model => model.Yas)</span>
+                                    <span class="fw-medium text-dark">@Html.DisplayFor(model => model.Yas)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-ruler-vertical me-2"></i>@Html.DisplayNameFor(model => model.Boy)</span>
+                                    <span class="fw-medium text-dark">@Html.DisplayFor(model => model.Boy) cm</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-weight-scale me-2"></i>@Html.DisplayNameFor(model => model.Kilo)</span>
+                                    <span class="fw-medium text-dark">@Html.DisplayFor(model => model.Kilo) kg</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light opacity-75">
+                                    <span class="text-secondary fw-bold"><i class="fa-solid fa-user-lock me-2 text-primary"></i>Bağlı Kullanıcı</span>
+                                    @if (Model.Kullanici != null)
+                                    {
+                                        <span class="badge bg-primary px-3 py-2 rounded-pill">@@@Html.DisplayFor(model => model.Kullanici.KullaniciAd)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2 rounded-pill">Bağlı Hesap Yok</span>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-5" />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Vazgeç
+                        </a>
+
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="ID" />
+                            <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm fw-bold">
+                                <i class="fa-solid fa-trash-can me-2"></i>Kalıcı Olarak Sil
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

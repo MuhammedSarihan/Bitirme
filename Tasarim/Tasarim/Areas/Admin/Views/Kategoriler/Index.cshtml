@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Tasarim.Core.Entities.Kategori>
+
+@{
+    ViewData["Title"] = "Kategoriler";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="fa-solid fa-plus me-1"></i> Yeni Ekle
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-secondary fw-semibold py-3 ps-4">@Html.DisplayNameFor(model => model.KategoriAd)</th>
+                            <th class="text-secondary fw-semibold">@Html.DisplayNameFor(model => model.KategoriResmi)</th>
+                            <th class="text-secondary fw-semibold text-center">@Html.DisplayNameFor(model => model.SiraNo)</th>
+                            <th class="text-secondary fw-semibold text-center">Durum</th>
+                            <th class="text-secondary fw-semibold text-center">Menüde Göster</th>
+                            <th class="text-secondary fw-semibold">Üst Kategori</th>
+                            <th class="text-secondary fw-semibold text-end pe-4" style="width: 150px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold text-dark ps-4">
+                                    @Html.DisplayFor(modelItem => item.KategoriAd)
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.KategoriResmi))
+                                    {
+                                        <span class="text-muted"><i class="fa-regular fa-image me-1"></i>Görsel Var</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-dark fw-medium">@Html.DisplayFor(modelItem => item.SiraNo)</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.AktifMi)
+                                    {
+                                        <span class="badge rounded-pill bg-success bg-opacity-75 px-3">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3">Pasif</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.UstteGoster)
+                                    {
+                                        <span class="badge rounded-pill bg-info text-dark px-3">Evet</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-light text-secondary border px-3">Hayır</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.UstKategoriID != null || item.UstKategoriID==0)
+                                    {
+                                        <span class="text-secondary fw-semibold">
+                                            <i class="fa-solid fa-level-up-alt fa-rotate-90 me-1 text-muted"></i> @item.UstKategori.KategoriAd
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span >Ana Kategori</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex gap-1">
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-primary " title="Düzenle">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-outline-info " title="Detaylar">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-danger " title="Sil">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
