@@ -35,7 +35,6 @@ namespace Tasarim.Data
             base.OnConfiguring(optionsBuilder);
         }
 
-        // --- İLİŞKİ VE AYARLAR (Fluent API) ---
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // 1. Kullanıcı - Profil (1-1 İlişki)
