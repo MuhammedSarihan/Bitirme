@@ -29,8 +29,9 @@ namespace Tasarim.Data
         public DbSet<YorumAnaliz> YorumAnalizleri { get; set; }
         public DbSet<LLSonuc> LLSonuclari { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {// Kendi SQL Server'ınıza göre düzenleyebilirsiniz -> @"Server=PC_ADINIZ;
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-MUUA55B; Database=dbTasarim; Trusted_Connection=True; TrustServerCertificate=True;");
+        {// Kendi SQL Server'ınıza göre düzenleyebilirsiniz -> @"Server=Server_Ad;
+         // Muhammed: DESKTOP-MUUA55B, Şevval: DESKTOP-BRRDK1D, Rafiga:
+            optionsBuilder.UseSqlServer(@"Server=DESKTOP-BRRDK1D; Database=dbTasarim; Trusted_Connection=True; TrustServerCertificate=True;");
             base.OnConfiguring(optionsBuilder);
         }
 
