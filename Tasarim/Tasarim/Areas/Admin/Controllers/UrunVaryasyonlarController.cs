@@ -46,43 +46,53 @@ namespace Tasarim.Areas.Admin.Controllers
         public IActionResult Create()
         {
             ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod");
-            return View();
+            // Ekrana başlangıçta 5 adet boş beden/stok satırı gönderiyoruz
+            var model = new Models.TopluVaryasyonViewModel();
+            model.Varyasyonlar = new List<UrunVaryasyon>();
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( UrunVaryasyon urunVaryasyon)
+        public async Task<IActionResult> Create(Models.TopluVaryasyonViewModel model)
         {
-            // Urun nesnesi formdan gelmediği için doğrulamadan çıkarıyoruz
-            ModelState.Remove("Urun");
+            // Sadece "Beden" kısmı doldurulmuş ve stoğu 0'dan büyük olan satırları ayıklıyoruz
+            var eklenecekVaryasyonlar = model.Varyasyonlar
+                .Where(v => !string.IsNullOrWhiteSpace(v.Beden) && v.StokAdedi > 0)
+                .ToList();
 
-            if (ModelState.IsValid)
+            // Ürün seçilmişse ve en az 1 tane geçerli beden girilmişse işlemleri yap
+            if (model.SecilenUrunID > 0 && eklenecekVaryasyonlar.Any())
             {
-                // 1. ADIM: Veritabanında aynı Ürün, aynı Beden ve aynı Renk kombinasyonu var mı diye bakıyoruz.
-                var varolanVaryasyon = await _context.UrunVaryasyonlari
-                    .FirstOrDefaultAsync(v => v.UrunID == urunVaryasyon.UrunID
-                                           && v.Beden == urunVaryasyon.Beden);
-
-                if (varolanVaryasyon != null)
+                foreach (var varyasyon in eklenecekVaryasyonlar)
                 {
-                    // 2. ADIM (VARSA): Yeni satır açma! Sadece mevcut stoğun üzerine yeni geleni topla.
-                    varolanVaryasyon.StokAdedi += urunVaryasyon.StokAdedi;
-                    _context.Update(varolanVaryasyon);
-                }
-                else
-                {
-                    // 3. ADIM (YOKSA): Demek ki bu beden/renk ilk defa ekleniyor. Normal kayıt yap.
-                    _context.Add(urunVaryasyon);
+
+                    // 1. ADIM: Veritabanında aynı Ürün ve aynı Beden var mı?
+                    var varolanVaryasyon = await _context.UrunVaryasyonlari
+                        .FirstOrDefaultAsync(v => v.UrunID == varyasyon.UrunID && v.Beden == varyasyon.Beden);
+
+                    if (varolanVaryasyon != null)
+                    {
+                        // 2. ADIM (VARSA): Sadece mevcut stoğun üzerine ekle
+                        varolanVaryasyon.StokAdedi += varyasyon.StokAdedi;
+                        _context.Update(varolanVaryasyon);
+                    }
+                    else
+                    {
+                        // 3. ADIM (YOKSA): Normal kayıt yap
+                        _context.Add(varyasyon);
+                    }
                 }
 
-                // Değişiklikleri kaydet ve listeye dön
+                // Tüm liste döngüden çıktıktan sonra tek seferde kaydet
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            // Hata varsa sayfayı tekrar doldur
-            ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod", urunVaryasyon.UrunID);
-            return View(urunVaryasyon);
+            // Hata veya eksik giriş varsa listeyi tekrar doldur ve sayfaya dön
+            ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod", model.SecilenUrunID);
+            return View(model);
+
         }
         // GET: Admin/UrunVaryasyonlar/Edit/5
         public async Task<IActionResult> Edit(int? id)

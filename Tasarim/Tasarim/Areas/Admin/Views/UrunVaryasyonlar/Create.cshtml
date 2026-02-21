@@ -1,7 +1,7 @@
-﻿@model Tasarim.Core.Entities.UrunVaryasyon
+﻿@model Tasarim.Areas.Admin.Models.TopluVaryasyonViewModel
 
 @{
-    ViewData["Title"] = "";
+    ViewData["Title"] = "Toplu Varyasyon Ekle";
 }
 
 <div class="container-fluid mt-4">
@@ -12,67 +12,69 @@
 
                     <div class="d-flex align-items-center mb-4">
                         <h3 class="mb-0 text-dark fw-bold">
-                            <i class="fa-solid fa-layer-group text-primary me-2"></i>Yeni Beden ve Stok Ekle
+                            <i class="fa-solid fa-layer-group text-primary me-2"></i>Toplu Beden ve Stok Ekle
                         </h3>
                     </div>
                     <hr class="text-muted mb-4" />
 
-                    <form asp-action="Create">
+                    <form asp-action="Create" id="varyasyonForm">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
 
-                        <div class="row g-4">
-                            <div class="col-12">
-                                <div class="form-group mb-2 p-4 bg-light rounded-3 border">
-                                    <label asp-for="UrunID" class="form-label fw-bold text-dark fs-5 mb-3">
-                                        <i class="fa-solid fa-box text-primary me-2"></i>İşlem Yapılacak Ürün Kodu
-                                    </label>
-
-                                    <select asp-for="UrunID" id="urunAramaListesi" class="form-select form-select-lg shadow-sm" asp-items="ViewBag.UrunID">
-                                        <option value="">-- Ürün Kodunu Seçiniz Veya Arayınız --</option>
-                                    </select>
-
-                                    <span asp-validation-for="UrunID" class="text-danger small mt-2 d-block"></span>
-                                    <div class="form-text mt-2 text-muted">
-                                        Listedeki ürünler arasından aradığınızı bulmak için kutuya tıklayıp ürün kodunu yazmaya başlayın.
-                                    </div>
-                                </div>
+                        <div class="row g-3 align-items-end mb-4 bg-light p-4 rounded-3 border">
+                            <div class="col-md-5">
+                                <label asp-for="SecilenUrunID" class="form-label fw-bold text-dark mb-2">
+                                    <i class="fa-solid fa-box text-primary me-2"></i>Ürün Kodu
+                                </label>
+                                <select asp-for="SecilenUrunID" id="urunAramaListesi" class="form-select form-select-lg shadow-sm" asp-items="ViewBag.UrunID">
+                                    <option value="">-- Kod Seçiniz / Arayınız --</option>
+                                </select>
+                                <span asp-validation-for="SecilenUrunID" class="text-danger small mt-2 d-block"></span>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Beden" class="form-label fw-semibold text-secondary">Beden Ölçüsü</label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-ruler text-muted"></i></span>
-                                        <input asp-for="Beden" class="form-control border-start-0 ps-0" placeholder="Örn: 38, 40, Standart..." />
-                                    </div>
-                                    <span asp-validation-for="Beden" class="text-danger small"></span>
-                                </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-dark mb-2">Beden</label>
+                                <input type="text" id="tempBeden" class="form-control form-control-lg shadow-sm" placeholder="Örn: 42, S" />
                             </div>
-
-                            <div class="col-12 mt-3">
-                                <div class="form-group mb-4">
-                                    <label asp-for="StokAdedi" class="form-label fw-bold text-success fs-5">Bu Bedenden Kaç Adet Var?</label>
-                                    <div class="input-group input-group-lg shadow-sm">
-                                        <span class="input-group-text bg-success bg-opacity-10 border-success border-opacity-50 text-success"><i class="fa-solid fa-boxes-stacked"></i></span>
-                                        <input asp-for="StokAdedi" class="form-control border-success border-opacity-50 fw-bold text-success" type="number" min="0" placeholder="0" />
-                                    </div>
-                                    <span asp-validation-for="StokAdedi" class="text-danger small"></span>
-                                </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold text-dark mb-2">Adet</label>
+                                <input type="number" id="tempAdet" class="form-control form-control-lg shadow-sm" min="0" placeholder="0" />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="btnEkle" class="btn btn-outline-dark btn-lg w-100 fw-bold shadow-sm" style="height: 48px;">
+                                    Ekle
+                                </button>
                             </div>
                         </div>
 
-                        <hr class="text-muted my-4" />
+                        <div class="border rounded bg-white shadow-sm mb-4 overflow-hidden">
+                            <table class="table table-hover mb-0 text-center align-middle">
+                                <thead class="table-light border-bottom">
+                                    <tr>
+                                        <th class="text-secondary fw-bold py-3">Kod</th>
+                                        <th class="text-secondary fw-bold py-3">Beden</th>
+                                        <th class="text-secondary fw-bold py-3">Adet</th>
+                                        <th class="text-secondary fw-bold py-3">Sil</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="varyasyonTableBody">
+                                   
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="form-text mb-4 text-muted">
+                            * Eklemek istemediğiniz veya boş kalan satırlar kaydedilmeyecektir.
+                        </div>
 
                         <div class="d-flex justify-content-between align-items-center">
                             <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
                                 <i class="fa-solid fa-arrow-left me-2"></i>Listeye Dön
                             </a>
-                            <button type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm fw-bold">
-                                <i class="fa-solid fa-plus me-2"></i>Stoğu Kaydet
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-2 shadow-sm fw-bold fs-5 text-uppercase border-2" style="letter-spacing: 2px;">
+                                KAYDET
                             </button>
                         </div>
-
                     </form>
+
                 </div>
             </div>
         </div>
@@ -80,25 +82,90 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
     <script>
         $(document).ready(function() {
+            console.log("1. Sayfa yüklendi, jQuery çalışıyor.");
+
+            // Select2 Kurulumu
             $('#urunAramaListesi').select2({
                 placeholder: "-- Ürün Kodunu Arayın veya Seçin --",
                 allowClear: true,
-                width: '100%' // Bootstrap ile uyumlu olması için %100 genişlik veriyoruz
+                width: '100%'
+            });
+
+            // Benzersiz satır sayacı (Silme işlemi için gerekli altyapı)
+            var satirSayaci = 0;
+
+            // "Ekle" Butonu İşlevi
+            $('#btnEkle').click(function(e) {
+                e.preventDefault(); // Sayfanın yenilenmesini durdur
+                console.log("2. Ekle butonuna tıklandı.");
+
+                var secilenUrunId = $('#urunAramaListesi').val();
+                var secilenUrunMetni = $('#urunAramaListesi option:selected').text();
+                var beden = $('#tempBeden').val();
+                var adet = $('#tempAdet').val();
+
+                console.log("3. Alınan Veriler - ID:", secilenUrunId, " Beden:", beden, " Adet:", adet);
+
+                if (!secilenUrunId || !beden || !adet) {
+                    alert('Lütfen Ürün, Beden ve Adet bilgisini eksiksiz giriniz.');
+                    return;
+                }
+              // Çöp Kutusuyla satır silme işlemi
+            $('#varyasyonTableBody').on('click', '.btn-sil', function() {
+                $(this).closest('tr').fadeOut(300, function() {
+                    $(this).remove(); // 300ms'lik hafif bir animasyonla satırı tamamen DOM'dan kaldırır
+                });
+            console.log("Satır silindi.");
+        });
+
+                // ASP.NET Core listeleri için gizli index mühürü
+                var indexInput = '<input type="hidden" name="Varyasyonlar.Index" value="' + satirSayaci + '" />';
+
+                // Yeni Satır HTML'i (Güvenli tırnak formatıyla yazıldı)
+                var yeniSatir = '<tr>' +
+                    '<td class="text-muted fw-medium">' +
+                        indexInput +
+                        '<input type="hidden" name="Varyasyonlar[' + satirSayaci + '].UrunID" value="' + secilenUrunId + '" />' +
+                        (secilenUrunMetni !== "-- Kod Seçiniz / Arayınız --" ? secilenUrunMetni : secilenUrunId) +
+                    '</td>' +
+                    '<td>' +
+                        '<input name="Varyasyonlar[' + satirSayaci + '].Beden" value="' + beden + '" class="form-control text-center border-0 bg-transparent shadow-none" readonly />' +
+                    '</td>' +
+                    '<td>' +
+                        '<input name="Varyasyonlar[' + satirSayaci + '].StokAdedi" value="' + adet + '" type="number" class="form-control text-center border-0 bg-transparent shadow-none fw-bold text-success" readonly />' +
+                    '</td>' +
+                    '<td>' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger btn-sil" title="Bu satırı sil">' +
+                            '<i class="fa-solid fa-trash"></i> Sil' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+
+                // Tabloya satırı ekle
+                $('#varyasyonTableBody').append(yeniSatir);
+                console.log("4. Satır tabloya başarıyla eklendi.");
+
+                satirSayaci++; // Sayacı bir artır
+
+                // Hızlı giriş için geçici inputları temizle ve Beden'e odaklan
+                $('#tempBeden').val('');
+                $('#tempAdet').val('');
+                $('#tempBeden').focus();
             });
         });
     </script>
 
     <style>
-        /* Select2 kutusunun yüksekliğini ve kenarlıklarını Bootstrap'e uydurmak için ufak bir makyaj */
         .select2-container .select2-selection--single {
             height: 48px !important;
             padding: 8px 12px;
