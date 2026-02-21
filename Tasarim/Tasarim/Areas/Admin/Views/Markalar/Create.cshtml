@@ -17,7 +17,7 @@
                     </div>
                     <hr class="text-muted mb-4" />
 
-                    <form asp-action="Create">
+                    <form asp-action="Create" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
 
                         <div class="row g-4">
@@ -37,7 +37,7 @@
                                     <label asp-for="Logo" class="form-label fw-semibold text-secondary">Marka Logosu</label>
                                     <div class="input-group shadow-sm">
                                         <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-image text-muted"></i></span>
-                                        <input asp-for="Logo" class="form-control border-start-0 ps-0" placeholder="Logo linki veya yolu" />
+                                        <input asp-for="Logo" class="form-control border-start-0 ps-0" type="file"/>
                                     </div>
                                     <span asp-validation-for="Logo" class="text-danger small"></span>
                                 </div>

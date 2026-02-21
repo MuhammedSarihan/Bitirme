@@ -11,9 +11,9 @@ namespace Tasarim.Core.Entities
         public string ResimYolu { get; set; }
 
         [Display(Name = "Sıra No")]
-        public int SiraNo { get; set; }
+        public int? SiraNo { get; set; }
 
-        public int UrunID { get; set; }
+        public int? UrunID { get; set; }
         public Urun? Urun { get; set; }
     }
 }

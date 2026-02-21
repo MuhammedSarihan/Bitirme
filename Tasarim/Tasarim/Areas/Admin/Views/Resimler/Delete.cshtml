@@ -1,0 +1,82 @@
+﻿@model Tasarim.Core.Entities.Resim
+
+@{
+    ViewData["Title"] = "Fotoğrafı Sil";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="alert alert-danger shadow-sm rounded-4 mb-4 border-0 border-start border-danger border-5" role="alert">
+                <h5 class="alert-heading fw-bold mb-2 text-danger">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Kalıcı Olarak Silinecek!
+                </h5>
+                <p class="mb-0 text-dark">Aşağıda detayları verilen bu fotoğraf, <strong class="text-danger">sunucu klasörlerinden (fiziksel olarak) kalıcı şekilde silinecektir.</strong> Bu işlemi geri alamazsınız. Onaylıyor musunuz?</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0 text-dark fw-bold">
+                            <i class="fa-solid fa-trash-can text-danger me-2"></i>Fotoğrafı Sil
+                        </h3>
+                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
+                            Foto ID: @Model.ID
+                        </span>
+                    </div>
+                    <hr class="text-muted mb-4" />
+
+                    <div class="row g-5 align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="text-danger mb-3"><i class="fa-solid fa-link-slash me-2"></i>Silinecek Bağlantı</h5>
+
+                            <ul class="list-group list-group-flush shadow-sm rounded-3 border mb-4 opacity-75">
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-box me-2"></i>Ait Olduğu Ürün</span>
+                                    <span class="fw-bold text-dark text-decoration-line-through">@Html.DisplayFor(model => model.Urun.Baslik)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-arrow-down-1-9 me-2"></i>Sıra Numarası</span>
+                                    <span class="text-dark">Sıra: @Html.DisplayFor(model => model.SiraNo)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6 text-center">
+                            <div class="bg-light p-3 rounded-3 border border-dashed shadow-sm h-100 d-flex flex-column justify-content-center">
+                                <span class="d-block text-danger fw-semibold mb-2">Çöpe Atılacak Görsel</span>
+
+                                @if (!string.IsNullOrEmpty(Model.ResimYolu))
+                                {
+                                    <img src="/img/@Model.ResimYolu" alt="Ürün Görseli" class="img-fluid rounded-3 bg-white p-2 shadow-sm mx-auto opacity-50" style="max-height: 200px; object-fit: contain; filter: grayscale(100%);" />
+                                }
+                                else
+                                {
+                                    <div class="text-muted fst-italic py-4 opacity-50"><i class="fa-regular fa-image fs-1 opacity-25"></i><br />Görsel Yok</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-5" />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Vazgeç
+                        </a>
+
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="ID" />
+                            <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm fw-bold">
+                                <i class="fa-solid fa-trash-can me-2"></i>Görseli Kalıcı Sil
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

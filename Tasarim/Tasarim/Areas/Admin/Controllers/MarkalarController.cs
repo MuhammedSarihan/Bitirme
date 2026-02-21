@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using odevVb.Utils;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 
@@ -46,14 +47,13 @@ namespace Tasarim.Areas.Admin.Controllers
         }
 
         // POST: Admin/Markalar/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,MarkaAd,Logo,AktifMi")] Marka marka)
+        public async Task<IActionResult> Create( Marka marka, IFormFile? Logo)
         {
             if (ModelState.IsValid)
             {
+                marka.Logo = await FileHelper.FileLoaderAsync(Logo);
                 _context.Add(marka);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -78,11 +78,9 @@ namespace Tasarim.Areas.Admin.Controllers
         }
 
         // POST: Admin/Markalar/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,MarkaAd,Logo,AktifMi")] Marka marka)
+        public async Task<IActionResult> Edit(int id, Marka marka, IFormFile? Logo, bool cbResmiSil = false)
         {
             if (id != marka.ID)
             {
@@ -93,6 +91,14 @@ namespace Tasarim.Areas.Admin.Controllers
             {
                 try
                 {
+                    if (cbResmiSil)
+                        {
+                            marka.Logo =string.Empty;
+                    }
+                    if (Logo is not null)
+                    {
+                        marka.Logo = await FileHelper.FileLoaderAsync(Logo);
+                    }
                     _context.Update(marka);
                     await _context.SaveChangesAsync();
                 }
@@ -138,6 +144,10 @@ namespace Tasarim.Areas.Admin.Controllers
             var marka = await _context.Markalar.FindAsync(id);
             if (marka != null)
             {
+                if (!string.IsNullOrEmpty(marka.Logo))
+                {
+                    FileHelper.FileRemover(marka.Logo);
+                }
                 _context.Markalar.Remove(marka);
             }
 

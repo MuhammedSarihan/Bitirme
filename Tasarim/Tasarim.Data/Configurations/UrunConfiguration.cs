@@ -11,8 +11,6 @@ namespace Tasarim.Data.Configurations
             builder.Property(x => x.UrunKod).IsRequired().HasColumnType("varchar(20)").HasMaxLength(20);
             builder.Property(x => x.Baslik).IsRequired().HasColumnType("varchar(100)").HasMaxLength(100);
             builder.Property(x => x.Aciklama).HasColumnType("varchar(1000)").HasMaxLength(1000); // Max yerine 1000 karakter
-            builder.Property(x => x.Renk).HasColumnType("varchar(20)").HasMaxLength(20);
-            builder.Property(x => x.Beden).HasColumnType("varchar(5)").HasMaxLength(10);
             builder.Property(x => x.AnaResim).HasColumnType("varchar(150)").HasMaxLength(150);
             // Fiyat Hassasiyeti
             builder.Property(x => x.Fiyat).HasColumnType("decimal(18,2)");

@@ -21,7 +21,7 @@ namespace Tasarim.Data
         public DbSet<SiparisDetay> SiparisDetaylari { get; set; }
         public DbSet<SiparisDurumu> SiparisDurumlari { get; set; }
         public DbSet<Odeme> Odemeler { get; set; }
-
+        public DbSet<UrunVaryasyon> UrunVaryasyonlari { get; set; }
         public DbSet<Slider> Sliders { get; set; }
         public DbSet<Kampanya> Kampanyalar { get; set; }
 

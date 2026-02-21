@@ -1,7 +1,7 @@
 ﻿@model Tasarim.Core.Entities.Marka
 
 @{
-    ViewData["Title"] = "Marka Sil";
+    ViewData["Title"] = "Markayı Sil";
 }
 
 <div class="container-fluid mt-4">
@@ -12,7 +12,7 @@
                 <h5 class="alert-heading fw-bold mb-2 text-danger">
                     <i class="fa-solid fa-triangle-exclamation me-2"></i>Dikkat! Bu İşlem Geri Alınamaz
                 </h5>
-                <p class="mb-0 text-dark">Aşağıda detayları verilen markayı kalıcı olarak silmek üzeresiniz. Lütfen bilgileri kontrol edip işleminizi onaylayın.</p>
+                <p class="mb-0 text-dark">Aşağıda detayları verilen "<strong>@Model.MarkaAd</strong>" markasını sistemden kalıcı olarak silmek üzeresiniz. Bu işlem markaya ait logoyu da kaldıracaktır. Lütfen onaylayın.</p>
             </div>
 
             <div class="card border-0 shadow-sm rounded-4">
@@ -20,58 +20,61 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3 class="mb-0 text-dark fw-bold">
-                            <i class="fa-solid fa-trash-can text-danger me-2"></i>Marka Sil
+                            <i class="fa-solid fa-trash-can text-danger me-2"></i>Markayı Sil
                         </h3>
                         <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
-                            Kayıt ID: @Model.ID
+                            Marka ID: @Model.ID
                         </span>
                     </div>
                     <hr class="text-muted mb-4" />
 
-                    <div class="row g-4">
+                    <div class="row g-5">
                         <div class="col-md-7">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
-                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-copyright me-2"></i>@Html.DisplayNameFor(model => model.MarkaAd)</span>
-                                    <span class="fw-bold text-dark fs-5">@Html.DisplayFor(model => model.MarkaAd)</span>
-                                </li>
+                            <h5 class="text-danger mb-3"><i class="fa-solid fa-copyright me-2"></i>Silinecek Marka Bilgileri</h5>
 
-                                <li class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
-                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-power-off me-2"></i>Durum</span>
+                            <ul class="list-group list-group-flush shadow-sm rounded-3 border mb-4 opacity-75">
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-signature me-2"></i>Marka Adı</span>
+                                    <span class="fw-bold text-dark text-decoration-line-through">@Html.DisplayFor(model => model.MarkaAd)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-power-off me-2"></i>Şu Anki Durumu</span>
                                     @if (Model.AktifMi)
                                     {
-                                        <span class="badge rounded-pill bg-success bg-opacity-75 px-3">Aktif</span>
+                                        <span class="badge rounded-pill bg-success bg-opacity-75 px-3">Müşterilere Açık</span>
                                     }
                                     else
                                     {
-                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3">Pasif</span>
+                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3">Gizli (Pasif)</span>
                                     }
                                 </li>
                             </ul>
                         </div>
 
                         <div class="col-md-5 d-flex flex-column align-items-center justify-content-center bg-light rounded-3 p-4 border border-dashed">
-                            <span class="text-secondary fw-semibold mb-3">@Html.DisplayNameFor(model => model.Logo)</span>
+                            <span class="text-secondary fw-semibold mb-3">Kaybedilecek Logo</span>
 
                             @if (!string.IsNullOrEmpty(Model.Logo))
                             {
-                                <img src="@Model.Logo" alt="@Model.MarkaAd" class="img-fluid rounded-3 shadow-sm mb-2 opacity-50" style="max-height: 150px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                                <div class="text-muted small text-break text-center" style="display:none;">
-                                    <i class="fa-regular fa-image fs-1 mb-2 text-secondary opacity-50"></i><br />
-                                    <span class="fst-italic">@Model.Logo</span>
+                                <div class="bg-white p-3 rounded-3 shadow-sm w-100 text-center">
+                                    <img src="/img/@Model.Logo" alt="@Model.MarkaAd" class="img-fluid opacity-50" style="max-height: 120px; object-fit: contain; filter: grayscale(100%);" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                    <div class="text-muted small text-break text-center mt-2" style="display:none;">
+                                        <i class="fa-regular fa-image fs-1 mb-2 text-secondary opacity-50"></i><br />
+                                        <span class="fst-italic">Görsel bulunamadı: @Model.Logo</span>
+                                    </div>
                                 </div>
                             }
                             else
                             {
-                                <div class="text-center text-muted">
-                                    <i class="fa-regular fa-image fs-1 mb-2 text-secondary opacity-25"></i>
-                                    <p class="small mb-0 fst-italic">Logo Eklenmemiş</p>
+                                <div class="text-center text-muted py-5 w-100 bg-white rounded-3 shadow-sm opacity-50">
+                                    <i class="fa-regular fa-image fs-1 mb-3 text-secondary opacity-25" style="font-size: 3rem !important;"></i>
+                                    <p class="small mb-0 fst-italic">Zaten Logo Yok</p>
                                 </div>
                             }
                         </div>
                     </div>
 
-                    <hr class="text-muted my-4" />
+                    <hr class="text-muted my-5" />
 
                     <div class="d-flex justify-content-between align-items-center">
                         <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
@@ -81,7 +84,7 @@
                         <form asp-action="Delete">
                             <input type="hidden" asp-for="ID" />
                             <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm fw-bold">
-                                <i class="fa-solid fa-trash-can me-2"></i>Kalıcı Olarak Sil
+                                <i class="fa-solid fa-trash-can me-2"></i>Markayı Kalıcı Olarak Sil
                             </button>
                         </form>
                     </div>

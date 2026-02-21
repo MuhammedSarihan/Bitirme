@@ -95,7 +95,7 @@ namespace Tasarim.Data.Migrations
                     b.Property<string>("KategoriResmi")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SiraNo")
+                    b.Property<int?>("SiraNo")
                         .HasColumnType("int");
 
                     b.Property<int?>("UstKategoriID")
@@ -105,6 +105,8 @@ namespace Tasarim.Data.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("UstKategoriID");
 
                     b.ToTable("Kategoriler");
 
@@ -606,11 +608,6 @@ namespace Tasarim.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("Beden")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(5)");
-
                     b.Property<decimal>("Fiyat")
                         .HasColumnType("decimal(18,2)");
 
@@ -620,13 +617,11 @@ namespace Tasarim.Data.Migrations
                     b.Property<int>("MarkaID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Renk")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                    b.Property<string>("ModelKodu")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Stok")
-                        .HasColumnType("int");
+                    b.Property<string>("Renk")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UrunKod")
                         .IsRequired()
@@ -640,6 +635,31 @@ namespace Tasarim.Data.Migrations
                     b.HasIndex("MarkaID");
 
                     b.ToTable("Urunler");
+                });
+
+            modelBuilder.Entity("Tasarim.Core.Entities.UrunVaryasyon", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Beden")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StokAdedi")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UrunID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UrunID");
+
+                    b.ToTable("UrunVaryasyonlari");
                 });
 
             modelBuilder.Entity("Tasarim.Core.Entities.Yorum", b =>
@@ -728,6 +748,15 @@ namespace Tasarim.Data.Migrations
                     b.Navigation("Kullanici");
 
                     b.Navigation("Urun");
+                });
+
+            modelBuilder.Entity("Tasarim.Core.Entities.Kategori", b =>
+                {
+                    b.HasOne("Tasarim.Core.Entities.Kategori", "UstKategori")
+                        .WithMany()
+                        .HasForeignKey("UstKategoriID");
+
+                    b.Navigation("UstKategori");
                 });
 
             modelBuilder.Entity("Tasarim.Core.Entities.LLSonuc", b =>
@@ -861,6 +890,17 @@ namespace Tasarim.Data.Migrations
                     b.Navigation("Marka");
                 });
 
+            modelBuilder.Entity("Tasarim.Core.Entities.UrunVaryasyon", b =>
+                {
+                    b.HasOne("Tasarim.Core.Entities.Urun", "Urun")
+                        .WithMany("Varyasyonlar")
+                        .HasForeignKey("UrunID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Urun");
+                });
+
             modelBuilder.Entity("Tasarim.Core.Entities.Yorum", b =>
                 {
                     b.HasOne("Tasarim.Core.Entities.Kullanici", "Kullanici")
@@ -943,6 +983,8 @@ namespace Tasarim.Data.Migrations
                     b.Navigation("SepetItems");
 
                     b.Navigation("SiparisDetaylari");
+
+                    b.Navigation("Varyasyonlar");
 
                     b.Navigation("Yorumlar");
                 });

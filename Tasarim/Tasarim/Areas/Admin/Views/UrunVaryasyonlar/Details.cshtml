@@ -1,0 +1,92 @@
+﻿@model Tasarim.Core.Entities.UrunVaryasyon
+
+@{
+    ViewData["Title"] = "";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0 text-dark fw-bold">
+                            <i class="fa-solid fa-circle-info text-info me-2"></i>Stok ve Beden Detayları
+                        </h3>
+                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
+                            Kayıt ID: @Model.ID
+                        </span>
+                    </div>
+                    <hr class="text-muted mb-4" />
+
+                    <div class="row g-5">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3"><i class="fa-solid fa-box-open me-2"></i>Ana Ürün Bilgisi</h5>
+
+                            <div class="bg-light p-4 rounded-3 border h-100">
+                                <h5 class="fw-bold text-dark mb-2">@Html.DisplayFor(model => model.Urun.Baslik)</h5>
+                                <div class="text-muted mb-0">
+                                    <i class="fa-solid fa-barcode me-2"></i>Ürün Kodu: <strong class="text-dark">@Html.DisplayFor(model => model.Urun.UrunKod)</strong>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.Urun.AnaResim))
+                                {
+                                    <div class="mt-3 text-center">
+                                        <img src="@Model.Urun.AnaResim" alt="Ürün Görseli" class="img-fluid rounded-3 shadow-sm border" style="max-height: 120px; object-fit: contain;" onerror="this.style.display='none';" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="text-info mb-3"><i class="fa-solid fa-layer-group me-2"></i>Varyasyon Detayları</h5>
+
+                            <ul class="list-group list-group-flush shadow-sm rounded-3 border">
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-ruler me-2"></i>@Html.DisplayNameFor(model => model.Beden)</span>
+                                    <span class="badge bg-dark bg-opacity-10 text-dark border px-3 py-2 fs-6">@Html.DisplayFor(model => model.Beden)</span>
+                                </li>
+
+                                <li class="list-group-item px-4 py-4 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-bold"><i class="fa-solid fa-boxes-stacked me-2"></i>Güncel Stok</span>
+
+                                    @if (Model.StokAdedi > 10)
+                                    {
+                                        <span class="badge rounded-pill bg-success px-4 py-2 shadow-sm fs-5">
+                                            @Model.StokAdedi Adet
+                                        </span>
+                                    }
+                                    else if (Model.StokAdedi > 0)
+                                    {
+                                        <span class="badge rounded-pill bg-warning text-dark px-4 py-2 shadow-sm fs-5">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i> @Model.StokAdedi Adet
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-danger px-4 py-2 shadow-sm fs-5">
+                                            <i class="fa-solid fa-xmark me-1"></i> Tükendi (0)
+                                        </span>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-5" />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Listeye Dön
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@Model?.ID" class="btn btn-primary px-5 rounded-pill shadow-sm fw-bold">
+                            <i class="fa-solid fa-pen me-2"></i>Stoğu Düzenle
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

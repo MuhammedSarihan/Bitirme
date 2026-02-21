@@ -1,0 +1,93 @@
+﻿@model Tasarim.Core.Entities.Urun
+
+@{
+    ViewData["Title"] = "";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="alert alert-danger shadow-sm rounded-4 mb-4 border-0 border-start border-danger border-5" role="alert">
+                <h5 class="alert-heading fw-bold mb-2 text-danger">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Dikkat! Bu İşlem Geri Alınamaz
+                </h5>
+                <p class="mb-0 text-dark">"<strong>@Model.Baslik</strong>" isimli ürünü, <strong class="text-danger">sunucudaki resmiyle ve bağlı olan tüm stoklarıyla (bedenleriyle) birlikte</strong> kalıcı olarak silmek üzeresiniz. Lütfen onaylayın.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0 text-dark fw-bold">
+                            <i class="fa-solid fa-trash-can text-danger me-2"></i>Ürünü Sil
+                        </h3>
+                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
+                            Ürün ID: @Model.ID
+                        </span>
+                    </div>
+                    <hr class="text-muted mb-4" />
+
+                    <div class="row g-5">
+                        <div class="col-md-7">
+                            <h5 class="text-danger mb-3"><i class="fa-solid fa-box-open me-2"></i>Silinecek Ürün Bilgileri</h5>
+
+                            <ul class="list-group list-group-flush shadow-sm rounded-3 border mb-4 opacity-75">
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-heading me-2"></i>Ürün Adı</span>
+                                    <span class="fw-bold text-dark text-decoration-line-through">@Html.DisplayFor(model => model.Baslik)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-barcode me-2"></i>Ürün Kodu / Model</span>
+                                    <span class="text-dark">@Model.UrunKod / @Model.ModelKodu</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-palette me-2"></i>Renk</span>
+                                    <span class="text-dark fw-medium">@(string.IsNullOrEmpty(Model.Renk) ? "-" : Model.Renk)</span>
+                                </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-sitemap me-2"></i>Kategori</span>
+                                    <span class="text-dark">@Html.DisplayFor(model => model.Kategori.KategoriAd)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-5 d-flex flex-column align-items-center justify-content-center bg-light rounded-3 p-4 border border-dashed">
+                            <span class="text-secondary fw-semibold mb-3">Kaybedilecek Görsel</span>
+
+                            @if (!string.IsNullOrEmpty(Model.AnaResim))
+                            {
+                                <div class="bg-white p-3 rounded-3 shadow-sm w-100 text-center">
+                                    <img src="/img/@Model.AnaResim" alt="@Model.Baslik" class="img-fluid opacity-50" style="max-height: 200px; object-fit: contain; filter: grayscale(100%);" onerror="this.style.display='none';" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-5 w-100 bg-white rounded-3 shadow-sm opacity-50">
+                                    <i class="fa-regular fa-image fs-1 mb-3 text-secondary opacity-25" style="font-size: 3rem !important;"></i>
+                                    <p class="small mb-0 fst-italic">Zaten Görsel Yok</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-5" />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Vazgeç
+                        </a>
+
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="ID" />
+                            <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm fw-bold">
+                                <i class="fa-solid fa-trash-can me-2"></i>Ürünü Kalıcı Olarak Sil
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
