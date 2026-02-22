@@ -14,7 +14,7 @@ namespace Tasarim.Core.Entities
         public string Aciklama { get; set; }
 
         [Display(Name = "Kampanya Görseli")]
-        public string KampanyaResmi { get; set; }
+        public string? KampanyaResmi { get; set; }
 
         [Display(Name = "Aktif mi?")]
         public bool KampanyaAktifMi { get; set; }

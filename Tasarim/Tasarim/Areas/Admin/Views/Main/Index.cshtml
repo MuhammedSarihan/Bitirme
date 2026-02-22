@@ -1,5 +1,154 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<div class="container-fluid px-4 pt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-light">Mağaza Özeti</h2>
+            <p class="text-muted small">Luvia Lukka için bugünün verileri analizi.</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="card p-4 mb-4">
+                <div class="stat-label">Günlük Satış</div>
+                <div class="h3 mb-0 mt-2 fw-bold">₺42.850</div>
+                <div class="text-success small mt-2"><i class="fas fa-arrow-up"></i> %12.4</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card p-4 mb-4">
+                <div class="stat-label">Bekleyen Siparişler</div>
+                <div class="h3 mb-0 mt-2 fw-bold">14</div>
+                <div class="text-gold small mt-2">Yüksek Öncelikli</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card p-4 mb-4">
+                <div class="stat-label">Ortalama Sepet Tutarı</div>
+                <div class="h3 mb-0 mt-2 fw-bold">₺8.200</div>
+                <div class="text-muted small mt-2">Premium Segment</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card p-4 mb-4">
+                <div class="stat-label">Aktif Kampanyalar</div>
+                <div class="h3 mb-0 mt-2 fw-bold">3</div>
+                <div class="text-muted small mt-2">Kış Koleksiyonu</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3">
+                    <i class="fas fa-shopping-bag me-1"></i>
+                    <strong>Son VIP Siparişler</strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Müşteri</th>
+                                <th>Ürün Seviyesi</th>
+                                <th>Tutar</th>
+                                <th>Durum</th>
+                                <th class="text-end pe-4">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fw-bold">Ahmet Yılmaz</div>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-dark">Haute Couture</span></td>
+                                <td>₺24.500</td>
+                                <td><span class="text-warning">● Hazırlanıyor</span></td>
+                                <td class="text-end pe-4"><a href="#" class="btn btn-sm btn-outline-dark">Detay</a></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fw-bold">Selvihan Demir</div>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-secondary">Limited Edition</span></td>
+                                <td>₺12.200</td>
+                                <td><span class="text-success">● Kargolandı</span></td>
+                                <td class="text-end pe-4"><a href="#" class="btn btn-sm btn-outline-dark">Detay</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card mb-4 border-start border-4 border-warning">
+                <div class="card-body">
+                    <h6 class="stat-label mb-3">Kritik Stok Uyarıları</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small">İpek Saten Elbise (S)</span>
+                        <span class="badge bg-danger">Son 2</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small">Kaşmir Kaban (M)</span>
+                        <span class="badge bg-danger">Son 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-4">
+                <h6 class="stat-label mb-3">En Çok Satanlar (Bu Ay)</h6>
+                <div class="progress mb-3" style="height: 5px;">
+                    <div class="progress-bar bg-dark" style="width: 70%"></div>
+                </div>
+                <p class="small text-muted mb-0">Aksesuar & Takı segmenti %70 ile lider.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: 0.3s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+    .text-gold {
+        color: #d4af37 !important;
+    }
+    /* Marka rengi */
+    .stat-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+    }
+
+    .table thead th {
+        border-top: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+
+    .btn-dark-luxury {
+        background: #001a33;
+        color: white;
+        border-radius: 0;
+        padding: 10px 25px;
+        font-size: 0.8rem;
+    }
+</style>
