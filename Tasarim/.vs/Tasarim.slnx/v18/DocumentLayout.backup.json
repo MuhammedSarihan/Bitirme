@@ -3,8 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\areas\\admin\\views\\sliderlar\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|solutionrelative:tasarim\\areas\\admin\\views\\sliderlar\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|solutionrelative:tasarim\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\views\\shared\\_urunview.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|solutionrelative:tasarim\\views\\shared\\_urunview.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|solutionrelative:tasarim\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\views\\shared\\_footer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|solutionrelative:tasarim\\views\\shared\\_footer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\views\\shared\\_header.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|solutionrelative:tasarim\\views\\shared\\_header.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7582DF75-244C-1561-C74E-6A783D8F1F13}|Tasarim\\Tasarim.csproj|c:\\users\\90546\\desktop\\bitirme\\bitirme\\tasarim\\tasarim\\areas\\admin\\views\\shared\\_solmenu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -22,7 +38,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "_SolMenu.cshtml",
               "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Areas\\Admin\\Views\\Shared\\_SolMenu.cshtml",
               "RelativeDocumentMoniker": "Tasarim\\Areas\\Admin\\Views\\Shared\\_SolMenu.cshtml",
@@ -31,19 +47,72 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-02-19T14:26:41.804Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Areas\\Admin\\Views\\Sliderlar\\Index.cshtml",
-              "RelativeDocumentMoniker": "Tasarim\\Areas\\Admin\\Views\\Sliderlar\\Index.cshtml",
-              "ToolTip": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Areas\\Admin\\Views\\Sliderlar\\Index.cshtml*",
-              "RelativeToolTip": "Tasarim\\Areas\\Admin\\Views\\Sliderlar\\Index.cshtml*",
-              "ViewState": "AgIAAGQAAAAAAAAAAAAiwHgAAAAMAAAAAAAAAA==",
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Tasarim\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Tasarim\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-23T09:54:00.053Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "_UrunView.cshtml",
+              "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Shared\\_UrunView.cshtml",
+              "RelativeDocumentMoniker": "Tasarim\\Views\\Shared\\_UrunView.cshtml",
+              "ToolTip": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Shared\\_UrunView.cshtml",
+              "RelativeToolTip": "Tasarim\\Views\\Shared\\_UrunView.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-23T07:41:37.626Z",
+              "WhenOpened": "2026-02-23T09:36:55.843Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Tasarim\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Tasarim\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-02-23T09:32:36.28Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "_Footer.cshtml",
+              "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Shared\\_Footer.cshtml",
+              "RelativeDocumentMoniker": "Tasarim\\Views\\Shared\\_Footer.cshtml",
+              "ToolTip": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Shared\\_Footer.cshtml",
+              "RelativeToolTip": "Tasarim\\Views\\Shared\\_Footer.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-02-23T09:17:08.532Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "_Header.cshtml",
+              "DocumentMoniker": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Shared\\_Header.cshtml",
+              "RelativeDocumentMoniker": "Tasarim\\Views\\Shared\\_Header.cshtml",
+              "ToolTip": "C:\\Users\\90546\\Desktop\\Bitirme\\Bitirme\\Tasarim\\Tasarim\\Views\\Shared\\_Header.cshtml",
+              "RelativeToolTip": "Tasarim\\Views\\Shared\\_Header.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-02-23T08:46:04.531Z",
               "EditorCaption": ""
             },
             {

@@ -1,0 +1,104 @@
+﻿
+
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    int i = 0;
+    int j = 0;
+}
+
+<style>
+    /* 1. Görsel Boyutları */
+    .custom-slider-img {
+        width: 100%;
+        height: 350px; /* Mobilde çok yer kaplamaması için ideal yükseklik */
+        object-fit: cover;
+        object-position: top center; /* Görsel kesilirse mankenin kafası/üst kısmı odakta kalır */
+    }
+
+    /* Masaüstü ekranlara geçildiğinde görsel boyutu büyür */
+    @@media (min-width: 768px) {
+        .custom-slider-img {
+            height: 600px; /* Ekranı boğmayan, çok şık bir banner yüksekliği */
+        }
+    }
+
+    /* 2. Yazı Alanı (Ürünü Kapatmayan Yapı) */
+    .slider-caption-custom {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        /* Sadece yazının arkasını karartan zarif bir gölge geçişi. Ürünün üstü tamamen aydınlık kalır! */
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+        padding: 4rem 1rem 1.5rem 1rem;
+        text-align: center;
+    }
+
+    /* 3. Mobil Uyumlu Tipografi */
+    .slider-title {
+        font-size: 1.5rem; /* Mobilde başlık boyutu */
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .slider-desc {
+        font-size: 0.9rem; /* Mobilde açıklama boyutu */
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 1rem;
+    }
+
+    /* Masaüstünde yazılar biraz daha büyür */
+    @@media (min-width: 768px) {
+        .slider-caption-custom {
+            padding-bottom: 2.5rem;
+        }
+
+        .slider-title {
+            font-size: 2.5rem;
+        }
+
+        .slider-desc {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<div id="anaSayfaSlider" class="carousel slide carousel-fade mb-5 shadow-sm" data-bs-ride="carousel">
+
+    <div class="carousel-indicators mb-1">
+        @foreach (var item in Model)
+        {
+            <button type="button" data-bs-target="#anaSayfaSlider" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+            i++;
+        }
+    </div>
+
+    <div class="carousel-inner">
+        @foreach (var item in Model)
+        {
+            <div class="carousel-item @(j == 0 ? "active" : "")" data-bs-interval="4000">
+                <img src="/img/@item.SliderResim" class="custom-slider-img" alt="@item.Baslik">
+
+                <div class="slider-caption-custom">
+                    @if (!string.IsNullOrEmpty(item.Link))
+                    {
+                        <a href="@item.Link" class="btn btn-outline-light btn-sm px-4 py-2 rounded-0 text-uppercase fw-semibold" style="letter-spacing: 1px;">
+                            İncele
+                        </a>
+                    }
+                </div>
+            </div>
+            j++;
+        }
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#anaSayfaSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Önceki</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#anaSayfaSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Sonraki</span>
+    </button>
+</div>

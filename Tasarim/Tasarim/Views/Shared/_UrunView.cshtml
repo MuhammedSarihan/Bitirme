@@ -1,0 +1,24 @@
+﻿@using Tasarim.Core.Entities
+@model Urun
+
+<div class="col mb-5">
+    <div class="card h-100 shadow-sm border-0">
+        <img class="card-img-top p-3"
+             src="~/img/@Model.AnaResim"
+             alt="@Model.Baslik"
+             style="height: 250px; object-fit: contain; width: 100%;">
+
+        <div class="card-body p-4">
+            <div class="text-center">
+                <h5 class="fw-bolder">@Model.Baslik</h5>
+                <span class=" fw-bold">@Model.Fiyat.ToString("c")</span>
+            </div>
+        </div>
+
+        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+            <div class="text-center">
+                <a class="btn btn-outline-dark mt-auto w-100" href="/Urunler/Details/@Model.ID">Detaylı İncele</a>
+            </div>
+        </div>
+    </div>
+</div>

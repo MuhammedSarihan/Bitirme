@@ -1,14 +1,31 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using Tasarim.Data;
 using Tasarim.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Tasarim.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly DatabaseContext _context;
+
+        public HomeController(DatabaseContext context)
         {
-            return View();
+            _context = context;
+        }
+
+        public async Task<IActionResult> IndexAsync()
+        {
+            // Sliderları SıraNo'ya göre küçükten büyüğe sıralayarak çekiyoruz (senkron olarak)
+
+            var model = new HomePageViewModel()
+            {
+                sliderListesi = await _context.Sliders.OrderBy(s => s.SiraNo).ToListAsync(),
+                Urunler = await _context.Urunler.ToListAsync()
+            };
+
+            return View(model);
         }
 
         public IActionResult Privacy()
