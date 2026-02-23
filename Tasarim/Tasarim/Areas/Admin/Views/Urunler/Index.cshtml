@@ -14,11 +14,21 @@
             </h3>
             <p class="text-muted small mt-1 mb-0">Mağazanızdaki tüm ana ürünleri (renk ve model bazlı) buradan yönetebilirsiniz.</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i class="fa-solid fa-plus me-1"></i> Yeni Ürün Ekle
-        </a>
-    </div>
 
+        <div class="d-flex gap-3 align-items-center">
+
+            <div class="input-group shadow-sm rounded-pill overflow-hidden" style="min-width: 300px; border: 1px solid #dee2e6;">
+                <span class="input-group-text bg-white border-0 text-muted ps-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="hizliArama" class="form-control border-0 shadow-none" placeholder="Ürün adı, kod veya renk ara...">
+            </div>
+
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
+                <i class="fa-solid fa-plus me-1"></i> Yeni Ürün Ekle
+            </a>
+        </div>
+    </div>
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             <div class="table-responsive">
@@ -153,5 +163,28 @@
                 box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
             }
     </style>
-}
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const aramaKutusu = document.getElementById('hizliArama');
+
+            aramaKutusu.addEventListener('keyup', function () {
+                let filtre = this.value.toLowerCase(); // Yazılanı küçük harfe çevir
+                // Tablodaki tüm satırları al (thead hariç)
+                let satirlar = document.querySelectorAll('#urunlerTablosu tbody tr');
+
+                satirlar.forEach(function (satir) {
+                    // Satırın içindeki tüm metni al
+                    let satirMetni = satir.textContent.toLowerCase();
+
+                    // Eğer aranan kelime satırda varsa göster, yoksa gizle
+                    if (satirMetni.includes(filtre)) {
+                        satir.style.display = '';
+                    } else {
+                        satir.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}

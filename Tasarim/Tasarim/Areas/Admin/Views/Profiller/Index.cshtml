@@ -6,18 +6,30 @@
 
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0 text-dark fw-bold">
-            <i class="fa-solid fa-users-gear text-primary me-2"></i>Müşteri Profilleri
-        </h3>
-        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i class="fa-solid fa-user-plus me-1"></i> Yeni Profil
-        </a>
-    </div>
+        <div>
+            <h3 class="mb-0 text-dark fw-bold">
+                <i class="fa-solid fa-users-gear text-primary me-2"></i>Müşteri Profilleri
+            </h3>
+        </div>
 
+        <div class="d-flex gap-3 align-items-center">
+
+            <div class="input-group shadow-sm rounded-pill overflow-hidden" style="min-width: 300px; border: 1px solid #dee2e6;">
+                <span class="input-group-text bg-white border-0 text-muted ps-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="musteriArama" class="form-control border-0 shadow-none" placeholder="İsim, e-posta veya semt ara...">
+            </div>
+
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
+                <i class="fa-solid fa-user-plus me-1"></i> Yeni Profil
+            </a>
+        </div>
+    </div>
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="musterilerTablosu">
                     <thead class="table-light">
                         <tr>
                             <th class="text-secondary fw-semibold py-3 ps-4">Müşteri Bilgisi</th>
@@ -79,3 +91,25 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const aramaKutusu = document.getElementById('musteriArama');
+            
+            aramaKutusu.addEventListener('keyup', function () {
+                let filtre = this.value.toLowerCase();
+                // Tabloya id="musterilerTablosu" eklediğinden emin ol
+                let satirlar = document.querySelectorAll('#musterilerTablosu tbody tr'); 
+
+                satirlar.forEach(function (satir) {
+                    let satirMetni = satir.textContent.toLowerCase();
+                    if (satirMetni.includes(filtre)) {
+                        satir.style.display = '';
+                    } else {
+                        satir.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -10,11 +10,22 @@
             <h3 class="mb-0 text-dark fw-bold">
                 <i class="fa-solid fa-bullhorn text-primary me-2"></i>Kampanya Yönetimi
             </h3>
-            <p class="text-muted small mt-1 mb-0">Mağazanızdaki tüm kampanya ve duyuruları buradan yönetebilirsiniz.</p>
+            <p class="text-muted small mt-1 mb-0">Mağazanızdaki tüm kampanya ve duyuruları buradan yönetebilir ve hızlıca arayabilirsiniz.</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i class="fa-solid fa-plus me-1"></i> Yeni Oluştur
-        </a>
+
+        <div class="d-flex gap-3 align-items-center">
+
+            <div class="input-group shadow-sm rounded-pill overflow-hidden" style="min-width: 300px; border: 1px solid #dee2e6;">
+                <span class="input-group-text bg-white border-0 text-muted ps-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="kampanyaArama" class="form-control border-0 shadow-none" placeholder="Kampanya veya açıklama ara...">
+            </div>
+
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
+                <i class="fa-solid fa-plus me-1"></i> Yeni Oluştur
+            </a>
+        </div>
     </div>
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
@@ -120,4 +131,25 @@
                 box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
             }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const aramaKutusu = document.getElementById('kampanyaArama');
+            
+            aramaKutusu.addEventListener('keyup', function () {
+                let filtre = this.value.toLowerCase();
+                // HTML'deki tablo ID'si ile eşleşmeli
+                let satirlar = document.querySelectorAll('#kampanyalarTablosu tbody tr'); 
+
+                satirlar.forEach(function (satir) {
+                    let satirMetni = satir.textContent.toLowerCase();
+                    if (satirMetni.includes(filtre)) {
+                        satir.style.display = '';
+                    } else {
+                        satir.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 }
