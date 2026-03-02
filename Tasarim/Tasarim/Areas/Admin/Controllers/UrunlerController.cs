@@ -20,7 +20,7 @@ namespace Tasarim.Areas.Admin.Controllers
         // GET: Admin/Urunler
         public async Task<IActionResult> Index()
         {
-            var databaseContext = _context.Urunler.Include(u => u.Kategori).Include(u => u.Marka);
+            var databaseContext = _context.Urunler.Where(p=>p.AktifMi).Include(u => u.Kategori).Include(u => u.Marka);
             return View(await databaseContext.ToListAsync());
         }
 

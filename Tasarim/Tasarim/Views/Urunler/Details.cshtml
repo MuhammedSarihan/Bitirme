@@ -1,0 +1,311 @@
+﻿@model Urun
+
+@{
+    ViewData["Title"] = Model.Baslik;
+    var digerRenkler = ViewBag.AyniGrupUrunler as List<Tasarim.Core.Entities.Urun>;
+}
+
+<div class="container my-5 pt-4">
+    <div class="row g-5">
+
+        <div class="col-lg-6">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="card border border-light shadow-sm mb-3 p-2 text-center position-relative">
+                    @if (!string.IsNullOrEmpty(Model.AnaResim))
+                    {
+                        <img src="/img/@Model.AnaResim" id="mainProductImage" class="img-fluid fade-in-image rounded" alt="@Model.Baslik" style="max-height: 750px; object-fit: contain; width: 100%;">
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center" style="height: 650px; background: #f8f9fa;">
+                            <i class="fa-regular fa-image text-muted opacity-25" style="font-size: 5rem;"></i>
+                        </div>
+                    }
+
+                    @if (Model.Fiyat > 20000)
+                    {
+                        <span class="badge bg-dark text-gold position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 font-playfair shadow">Premium</span>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 overflow-auto custom-scrollbar pb-2">
+                    @if (!string.IsNullOrEmpty(Model.AnaResim))
+                    {
+                        <div class="thumb-wrapper active" onclick="changeProductImage('/img/@Model.AnaResim', this)">
+                            <img src="/img/@Model.AnaResim" alt="Ana Görsel">
+                        </div>
+                    }
+
+                    @if (Model.Resimler != null && Model.Resimler.Any())
+                    {
+                        foreach (var resim in Model.Resimler.OrderBy(r => r.SiraNo))
+                        {
+                            <div class="thumb-wrapper" onclick="changeProductImage('/img/@resim.ResimYolu', this)">
+                                <img src="/img/@resim.ResimYolu" alt="Detay">
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="text-center mt-2">
+                    <small class="text-muted"><i class="fa-solid fa-magnifying-glass-plus me-1"></i>Resimler arasında geçiş yapmak için tıklayın.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none hover-gold">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none hover-gold">@(Model.Kategori?.KategoriAd ?? "Kategori")</a></li>
+                    <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">@Model.Baslik</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-5 font-playfair fw-bold mb-2">@Model.Baslik</h1>
+
+            <div class="d-flex flex-wrap gap-4 text-muted mb-4 small bg-light p-3 rounded border">
+                <span><i class="fa-solid fa-barcode me-1"></i>Kod: <strong class="text-dark">@Model.UrunKod</strong></span>
+                <span><i class="fa-solid fa-palette me-1"></i>Renk: <strong class="text-dark">@(string.IsNullOrEmpty(Model.Renk) ? "Belirtilmemiş" : Model.Renk)</strong></span>
+                <span><i class="fa-solid fa-copyright me-1"></i>Marka: <strong class="text-dark">@(Model.Marka?.MarkaAd ?? "-")</strong></span>
+            </div>
+
+            <h2 class="fs-1 fw-bold text-gold mb-4">@Model.Fiyat.ToString("C2")</h2>
+
+            <div class="mb-4">
+                <p class="mb-2 text-dark fw-semibold">Ürün Açıklaması</p>
+                <p class="text-muted lh-lg font-sm">
+                    @(string.IsNullOrEmpty(Model.Aciklama) ? "Bu zarif tasarım, özel günlerinizde şıklığınızı tamamlamak için özenle üretilmiştir." : Model.Aciklama)
+                </p>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="mb-4">
+                <p class="mb-2 text-dark fw-semibold">Diğer Renk Seçenekleri</p>
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="border border-dark p-1 rounded-circle" title="@Model.Renk (Seçili)">
+                        <img src="/img/@Model.AnaResim" class="rounded-circle" style="width: 55px; height: 55px; object-fit: cover;">
+                    </div>
+
+                    @if (digerRenkler != null && digerRenkler.Any())
+                    {
+                        foreach (var benzer in digerRenkler)
+                        {
+                            <a href="/Urunler/Details/@benzer.ID" class="border p-1 rounded-circle opacity-50 hover-opacity-100 transition-300" title="@benzer.Renk">
+                                <img src="/img/@benzer.AnaResim" class="rounded-circle" style="width: 55px; height: 55px; object-fit: cover;">
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="mb-0 text-dark fw-semibold">Beden Seçimi</p>
+                    <a href="#" class="text-muted small text-decoration-underline hover-gold"><i class="fa-solid fa-ruler-combined me-1"></i>Beden Tablosu</a>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    @if (Model.Varyasyonlar != null && Model.Varyasyonlar.Any())
+                    {
+                        foreach (var varyasyon in Model.Varyasyonlar.OrderBy(v => v.Beden))
+                        {
+                            bool stokYok = varyasyon.StokAdedi <= 0;
+                            <input type="radio" class="btn-check" name="bedenSecim" id="beden_@varyasyon.ID" autocomplete="off" @(stokYok ? "disabled" : "")>
+                            <label class="btn btn-outline-dark rounded-0 px-4 py-2 fw-semibold @(stokYok ? "opacity-50 text-decoration-line-through bg-light" : "")" for="beden_@varyasyon.ID">
+                                @varyasyon.Beden
+                            </label>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning py-2 small rounded-0 w-100">Stok bilgisi bulunmuyor.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-grid gap-3">
+                <button class="btn btn-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
+                    <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
+                </button>
+                <button class="btn btn-outline-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300">
+                    <i class="fa-regular fa-heart me-2"></i> Favorilere Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5 border-top">
+        <div class="col-lg-8 mx-auto">
+            <h3 class="font-playfair fw-bold mb-4 text-center">Müşteri Yorumları</h3>
+
+            <div class="card border-0 bg-light p-4 mb-5 rounded-0">
+                <h5 class="fw-bold mb-3 fs-6">Bu ürünü değerlendirin</h5>
+                <form>
+                    <div class="mb-3">
+                        <div class="text-gold fs-5 mb-2">
+                            <i class="fa-regular fa-star cursor-pointer"></i>
+                            <i class="fa-regular fa-star cursor-pointer"></i>
+                            <i class="fa-regular fa-star cursor-pointer"></i>
+                            <i class="fa-regular fa-star cursor-pointer"></i>
+                            <i class="fa-regular fa-star cursor-pointer"></i>
+                        </div>
+                        <textarea class="form-control rounded-0 border-secondary" rows="3" placeholder="Ürün hakkında ne düşünüyorsunuz?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-dark rounded-0 px-4">Yorum Yap</button>
+                </form>
+            </div>
+
+            <div class="comments-list">
+
+                <div class="comment-item mb-4 pb-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>AY</strong>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Ayşe Yılmaz</h6>
+                                <small class="text-muted">12 Mart 2026</small>
+                            </div>
+                        </div>
+                        <div class="text-gold small">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0 mt-2">Bu yorum sadece görünüm içindir. En yakın zamanda kullanıma açılacaktır. Luvia Lukka!</p>
+                </div>
+
+                <div class="comment-item mb-4 pb-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <strong>ZK</strong>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Zeynep K.</h6>
+                                <small class="text-muted">5 Mart 2026</small>
+                            </div>
+                        </div>
+                        <div class="text-gold small">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0 mt-2">Duruşu çok asil, rengi fotoğraftakinden bir tık daha canlı. Sadece boyu bana biraz uzun geldiği için terziye vereceğim.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .text-gold {
+            color: #D4AF37 !important;
+        }
+
+        .hover-gold:hover {
+            color: #D4AF37 !important;
+            transition: 0.3s;
+        }
+
+        .hover-gold-bg:hover {
+            background-color: #D4AF37 !important;
+            color: #fff !important;
+            transition: 0.3s;
+        }
+
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .letter-spacing-1 {
+            letter-spacing: 1px;
+        }
+
+        .transition-300 {
+            transition: 0.3s ease;
+        }
+
+        .hover-opacity-100:hover {
+            opacity: 1 !important;
+            transform: scale(1.1);
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        /* Galeri Özellikleri (Tam Boy Resim İçin Güncellendi) */
+        .thumb-wrapper {
+            width: 70px;
+            height: 90px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: 0.3s;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+            .thumb-wrapper img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .thumb-wrapper:hover {
+                opacity: 1;
+            }
+
+            .thumb-wrapper.active {
+                opacity: 1;
+                border-color: #0B132B;
+            }
+
+        /* Beden Seçici CSS */
+        .btn-outline-dark:hover {
+            background-color: #0B132B;
+            color: #fff;
+        }
+
+        .btn-check:checked + .btn-outline-dark {
+            background-color: #0B132B;
+            color: #D4AF37;
+            border-color: #0B132B;
+        }
+
+        /* Animasyon */
+        .fade-in-image {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0.8;
+                transform: scale(0.99);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+
+    <script>
+        function changeProductImage(src, element) {
+            const mainImg = document.getElementById('mainProductImage');
+            mainImg.src = src;
+
+            mainImg.classList.remove('fade-in-image');
+            void mainImg.offsetWidth;
+            mainImg.classList.add('fade-in-image');
+
+            document.querySelectorAll('.thumb-wrapper').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+        }
+    </script>
+}
