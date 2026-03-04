@@ -28,6 +28,11 @@ namespace Tasarim.Controllers
             return View(model);
         }
 
+        public IActionResult ContactUs()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();
