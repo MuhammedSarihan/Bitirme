@@ -1,5 +1,9 @@
 
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using Tasarim.Data;
+using Tasarim.Service.Abstract;
+using Tasarim.Service.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +11,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<DatabaseContext>();
+builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(x =>
+{
+    x.LoginPath = "/Hesap/SignIn";
+    x.AccessDeniedPath = "/AccessDanied";
+    x.Cookie.Name = "Hesap";
+    x.Cookie.MaxAge = TimeSpan.FromDays(7);
+    x.Cookie.IsEssential = true;
+});
+builder.Services.AddAuthorization(x =>
+{
+    x.AddPolicy("AdminPolicy", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+    x.AddPolicy("KullaniciPolicy", policy => policy.RequireClaim(ClaimTypes.Role, "Admin", "Musteri"));
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
