@@ -16,7 +16,7 @@ builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(x =>
 {
     x.LoginPath = "/Hesap/SignIn";
-    x.AccessDeniedPath = "/AccessDanied";
+    x.AccessDeniedPath = "/AccessDenied";
     x.Cookie.Name = "Hesap";
     x.Cookie.MaxAge = TimeSpan.FromDays(7);
     x.Cookie.IsEssential = true;

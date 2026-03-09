@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 
 namespace Tasarim.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    [Area("Admin"), Authorize(Policy = "AdminPolicy")]
     public class KullanicilarController : Controller
     {
         private readonly DatabaseContext _context;

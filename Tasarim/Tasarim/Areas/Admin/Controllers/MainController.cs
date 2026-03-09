@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Tasarim.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    [Area("Admin"), Authorize(Policy = "AdminPolicy")]
     public class MainController : Controller
     {
         public IActionResult Index()

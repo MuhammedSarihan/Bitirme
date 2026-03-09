@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using odevVb.Utils;
 using Tasarim.Core.Entities;
@@ -6,7 +7,7 @@ using Tasarim.Data;
 
 namespace Tasarim.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    [Area("Admin"), Authorize(Policy = "AdminPolicy")]
     public class KampanyalarController : Controller
     {
         private readonly DatabaseContext _context;

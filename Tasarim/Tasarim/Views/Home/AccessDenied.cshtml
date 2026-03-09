@@ -1,0 +1,143 @@
+﻿@{
+    ViewData["Title"] = "Erişim Engellendi!";
+}
+<style>
+    /* Bu sayfaya özel stiller */
+    .forbidden-container {
+        min-height: 70vh; /* Sayfanın ortasında durması için */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .error-card {
+        background: #fff;
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+        border-top: 6px solid #dc3545; /* Kırmızı üst çizgi */
+        transition: transform 0.3s ease;
+    }
+
+        .error-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .lock-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: #fde8e8; /* Açık kırmızı arka plan */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem auto;
+    }
+
+    .lock-icon {
+        width: 50px;
+        height: 50px;
+        color: #dc3545;
+        animation: shake 2s infinite; /* Kilit sallanma animasyonu */
+    }
+
+    h1 {
+        font-weight: 800;
+        color: #2d3436;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: #636e72;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-custom-primary {
+        background-color: #2d3436;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+        .btn-custom-primary:hover {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+    .btn-custom-outline {
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        padding: 10px 25px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s;
+        margin-left: 10px;
+    }
+
+        .btn-custom-outline:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+    /* Basit bir sallanma animasyonu */
+
+
+    {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(5deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    75% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+
+    }
+</style>
+
+<div class="container forbidden-container">
+    <div class="error-card">
+        <div class="lock-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" class="lock-icon" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+            </svg>
+        </div>
+
+        <h1>Erişim Reddedildi</h1>
+        <p>
+            Üzgünüz, bu alana erişim yetkiniz bulunmamaktadır.<br>
+            Yönetici haklarına sahip olduğunuzu düşünüyorsanız, lütfen yetkili bir hesapla tekrar giriş yapın.
+        </p>
+
+        <div class="d-flex justify-content-center">
+            <a href="/" class="btn-custom-primary">
+                <i class="bi bi-house-door"></i> Anasayfa
+            </a>
+
+            <a href="/Hesap/SignOut" class="btn-custom-outline">
+                Farklı Giriş Yap
+            </a>
+        </div>
+
+        <div class="mt-4">
+            <small class="text-muted">Hata Kodu: 403 Forbidden</small>
+        </div>
+    </div>
+</div>
