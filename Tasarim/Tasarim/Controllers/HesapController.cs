@@ -19,11 +19,28 @@ namespace Tasarim.Controllers
             _profilService = profilService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            // Giriş yapmamışsa doğrudan Login sayfasına at
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return RedirectToAction("SignIn");
+            }
 
+            // Giriş yapan kullanıcının ID'sini Claim'den al
+            int kullaniciId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            // Profil tablosundan bu kullanıcıya ait bilgileri çek
+            var profil = await _profilService.GetAsync(p => p.Kullanici.ID == kullaniciId);
+
+            if (profil == null)
+            {
+                // Eğer profil bulunamazsa (hata durumu) çıkış yaptır
+                return RedirectToAction("SignOut");
+            }
+
+            return View(profil); // Modeli sayfaya gönder
+        }
         public IActionResult SignIn()
         {
             return View();
@@ -125,7 +142,53 @@ namespace Tasarim.Controllers
 
             return View(model);
         }
+        [HttpGet]
+        public async Task<IActionResult> ProfilDuzenle()
+        {
+            // 1. Giriş kontrolü
+            if (!User.Identity!.IsAuthenticated) return RedirectToAction("SignIn");
 
+            // 2. Kullanıcıyı bul ve mevcut bilgilerini forma gönder
+            int kullaniciId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var profil = await _profilService.GetAsync(p => p.Kullanici.ID == kullaniciId);
+
+            if (profil == null) return RedirectToAction("SignOut");
+
+            return View(profil);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProfilDuzenle(Profil guncelModel)
+        {
+            if (!User.Identity!.IsAuthenticated) return RedirectToAction("SignIn");
+
+            int kullaniciId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var mevcutProfil = await _profilService.GetAsync(p => p.Kullanici.ID == kullaniciId);
+
+            // ÇÖZÜM BURADA: Formdan "Kullanici" tablosu (şifre vb.) gelmeyeceği için 
+            // sistemin bunu hata olarak görüp işlemi iptal etmesini engelliyoruz.
+            ModelState.Remove("Kullanici");
+
+            if (mevcutProfil != null && ModelState.IsValid)
+            {
+                mevcutProfil.Ad = guncelModel.Ad;
+                mevcutProfil.Soyad = guncelModel.Soyad;
+                mevcutProfil.TelNo = guncelModel.TelNo;
+                mevcutProfil.Mail = guncelModel.Mail;
+                mevcutProfil.Adres = guncelModel.Adres;
+                mevcutProfil.Boy = guncelModel.Boy;
+                mevcutProfil.Kilo = guncelModel.Kilo;
+                mevcutProfil.Yas = guncelModel.Yas;
+                mevcutProfil.Cinsiyet = guncelModel.Cinsiyet;
+
+                _profilService.Update(mevcutProfil);
+                await _profilService.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+            }
+
+            return View(guncelModel);
+        }
         public async Task<IActionResult> SignOutAsync()
         {
             await HttpContext.SignOutAsync();

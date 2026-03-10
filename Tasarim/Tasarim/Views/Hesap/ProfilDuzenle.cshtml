@@ -1,0 +1,153 @@
+﻿@model Tasarim.Core.Entities.Profil
+
+@{
+    ViewData["Title"] = "Profilimi Düzenle";
+}
+
+<div class="container py-5 my-4">
+    <div class="row g-5">
+
+        <div class="col-lg-3">
+            <div class="bg-light p-4 border-0 rounded-0 h-100">
+                <h5 class="font-playfair fw-bold mb-4 text-dark border-bottom border-secondary pb-3">Hesabım</h5>
+                <div class="nav flex-column nav-pills" aria-orientation="vertical">
+
+                    <a class="nav-link active rounded-0 bg-dark text-white mb-2 py-3 px-4 fw-bold letter-spacing-1" href="/Hesap/Index">
+                        <i class="fa-solid fa-pen-to-square me-2 text-gold"></i> Bilgileri Güncelle
+                    </a>
+
+                    <a class="nav-link text-dark hover-gold mb-2 py-3 px-4 transition-300" href="/Siparisler">
+                        <i class="fa-solid fa-box-open me-2 text-muted"></i> Siparişlerim
+                    </a>
+
+                    <a class="nav-link text-dark hover-gold mb-2 py-3 px-4 transition-300" href="/Favoriler">
+                        <i class="fa-regular fa-heart me-2 text-muted"></i> Favorilerim
+                    </a>
+
+                    <a class="nav-link text-danger mt-4 py-3 px-4 border-top border-secondary pt-4 fw-bold transition-300" href="/Hesap/SignOut">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Çıkış Yap
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="mb-4 border-bottom border-secondary pb-3">
+                <h3 class="font-playfair fw-bold text-dark mb-1">Profilimi Düzenle</h3>
+                <p class="text-muted small mb-0">Bilgilerinizi güncelledikten sonra 'Kaydet' butonuna basmayı unutmayın.</p>
+            </div>
+
+            <form asp-action="ProfilDuzenle" method="post" class="card border border-secondary rounded-0 bg-transparent">
+                <div class="card-body p-4 p-md-5">
+
+                    <h6 class="text-gold fw-bold text-uppercase letter-spacing-1 mb-4">İletişim Bilgileri</h6>
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Adınız</label>
+                            <input asp-for="Ad" class="form-control rounded-0 p-3 border-secondary bg-transparent" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Soyadınız</label>
+                            <input asp-for="Soyad" class="form-control rounded-0 p-3 border-secondary bg-transparent" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Telefon Numaranız</label>
+                            <input asp-for="TelNo" class="form-control rounded-0 p-3 border-secondary bg-transparent" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">E-Posta Adresiniz</label>
+                            <input asp-for="Mail" type="email" class="form-control rounded-0 p-3 border-secondary bg-transparent" required />
+                        </div>
+                    </div>
+
+                    <h6 class="text-gold fw-bold text-uppercase letter-spacing-1 mb-4">Fiziksel Ölçüler</h6>
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-3 col-6">
+                            <label class="form-label small fw-bold text-muted">Boy (cm)</label>
+                            <input asp-for="Boy" type="number" class="form-control rounded-0 p-3 border-secondary bg-transparent" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="form-label small fw-bold text-muted">Kilo (kg)</label>
+                            <input asp-for="Kilo" type="number" class="form-control rounded-0 p-3 border-secondary bg-transparent" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="form-label small fw-bold text-muted">Yaş</label>
+                            <input asp-for="Yas" type="number" class="form-control rounded-0 p-3 border-secondary bg-transparent" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="form-label small fw-bold text-muted">Cinsiyet</label>
+                            <select asp-for="Cinsiyet" class="form-select rounded-0 p-3 border-secondary bg-transparent">
+                                <option value="Kadın">Kadın</option>
+                                <option value="Erkek">Erkek</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="text-gold fw-bold text-uppercase letter-spacing-1 mb-4">Teslimat Adresi</h6>
+                    <div class="mb-5">
+                        <textarea asp-for="Adres" class="form-control rounded-0 p-3 border-secondary bg-transparent" rows="4" required></textarea>
+                    </div>
+
+                    <hr class="border-secondary mb-4">
+
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="/Hesap/Index" class="btn btn-outline-dark rounded-0 px-4 py-3 text-uppercase fw-bold letter-spacing-1 transition-300">
+                            İptal Et
+                        </a>
+                        <button type="submit" class="btn btn-dark rounded-0 px-5 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
+                            <i class="fa-solid fa-check me-2"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .text-gold {
+            color: #D4AF37 !important;
+        }
+
+        .hover-gold:hover {
+            color: #D4AF37 !important;
+            transition: 0.3s;
+        }
+
+        .hover-gold-bg:hover {
+            background-color: #D4AF37 !important;
+            color: #fff !important;
+            transition: 0.3s;
+        }
+
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .letter-spacing-1 {
+            letter-spacing: 1px;
+        }
+
+        .transition-300 {
+            transition: 0.3s ease;
+        }
+
+        /* Input Focus Stilleri */
+        .form-control:focus, .form-select:focus {
+            border-color: #0B132B;
+            box-shadow: none;
+            background-color: #fff !important;
+        }
+
+        /* Sol Menü Hover Efekti */
+        .nav-pills .nav-link:not(.active):hover {
+            background-color: #f8f9fa;
+            padding-left: 2rem !important;
+        }
+    </style>
+}

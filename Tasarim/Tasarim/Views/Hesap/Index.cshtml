@@ -1,6 +1,130 @@
-﻿@{
+﻿@model Tasarim.Core.Entities.Profil
+
+@{
     ViewData["Title"] = "Hesabım";
 }
-<h1>
-    Hesabım
-</h1>
+
+<div class="container py-5 my-4">
+    <div class="row g-5">
+
+        <div class="col-lg-3">
+            <div class="bg-light p-4 border-0 rounded-0 h-100">
+                <h5 class="font-playfair fw-bold mb-4 text-dark border-bottom border-secondary pb-3">Hesabım</h5>
+                <div class="nav flex-column nav-pills" aria-orientation="vertical">
+
+                    <a class="nav-link active rounded-0 bg-dark text-white mb-2 py-3 px-4 fw-bold letter-spacing-1" href="/Hesap/Index">
+                        <i class="fa-regular fa-user me-2 text-gold"></i> Profil Bilgilerim
+                    </a>
+
+                    <a class="nav-link text-dark hover-gold mb-2 py-3 px-4 transition-300" href="/Siparisler">
+                        <i class="fa-solid fa-box-open me-2 text-muted"></i> Siparişlerim
+                    </a>
+
+                    <a class="nav-link text-dark hover-gold mb-2 py-3 px-4 transition-300" href="/Favoriler">
+                        <i class="fa-regular fa-heart me-2 text-muted"></i> Favorilerim
+                    </a>
+
+                    <a class="nav-link text-danger mt-4 py-3 px-4 border-top border-secondary pt-4 fw-bold transition-300" href="/Hesap/SignOut">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Çıkış Yap
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-end mb-4 border-bottom border-secondary pb-3">
+                <div class="mb-3 mb-sm-0">
+                    <h3 class="font-playfair fw-bold text-dark mb-1">Profil Bilgilerim</h3>
+                    <p class="text-muted small mb-0">Kişisel bilgilerinizi, ölçülerinizi ve teslimat adresinizi buradan yönetebilirsiniz.</p>
+                </div>
+                <a href="/Hesap/ProfilDuzenle" class="btn btn-outline-dark rounded-0 px-4 py-2 text-uppercase fw-bold letter-spacing-1 transition-300 hover-gold-bg">
+                    <i class="fa-solid fa-pen-to-square me-2"></i> Düzenle
+                </a>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <div class="card border border-secondary rounded-0 h-100 bg-transparent">
+                        <div class="card-body p-4 p-md-5">
+                            <h6 class="text-gold fw-bold text-uppercase letter-spacing-1 mb-4">İletişim Bilgileri</h6>
+
+                            <div class="mb-4">
+                                <span class="text-muted small d-block mb-1">Ad Soyad</span>
+                                <strong class="text-dark fs-5">@Model.Ad @Model.Soyad</strong>
+                            </div>
+                            <div class="mb-4">
+                                <span class="text-muted small d-block mb-1">E-Posta Adresi</span>
+                                <strong class="text-dark">@Model.Mail</strong>
+                            </div>
+                            <div>
+                                <span class="text-muted small d-block mb-1">Telefon Numarası</span>
+                                <strong class="text-dark">@Model.TelNo</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border border-secondary rounded-0 h-100 bg-transparent">
+                        <div class="card-body p-4 p-md-5">
+                            <h6 class="text-gold fw-bold text-uppercase letter-spacing-1 mb-4">Fiziksel Ölçüler</h6>
+
+                            <div class="row g-4">
+                                <div class="col-6">
+                                    <span class="text-muted small d-block mb-1">Boy</span>
+                                    <strong class="text-dark fs-5">@Model.Boy <span class="fs-6 text-muted fw-normal">cm</span></strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted small d-block mb-1">Kilo</span>
+                                    <strong class="text-dark fs-5">@Model.Kilo <span class="fs-6 text-muted fw-normal">kg</span></strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted small d-block mb-1">Yaş</span>
+                                    <strong class="text-dark">@Model.Yas</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted small d-block mb-1">Cinsiyet</span>
+                                    <strong class="text-dark">@Model.Cinsiyet</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card border border-secondary rounded-0 bg-transparent">
+                        <div class="card-body p-4 p-md-5">
+                            <h6 class="text-gold fw-bold text-uppercase letter-spacing-1 mb-3">Kayıtlı Teslimat Adresi</h6>
+                            <p class="text-dark mb-0 lh-lg" style="font-size: 1.1rem;">
+                                <i class="fa-solid fa-location-dot text-gold me-2"></i>
+                                @Model.Adres
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold:hover { color: #D4AF37 !important; transition: 0.3s; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: #fff !important; border-color: #D4AF37 !important; transition: 0.3s; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .transition-300 { transition: 0.3s ease; }
+
+        /* Sol Menü Hover Efekti */
+        .nav-pills .nav-link:not(.active):hover {
+            background-color: #f8f9fa;
+            padding-left: 2rem !important; /* Üzerine gelince metin hafif sağa kayar */
+        }
+    </style>
+}
