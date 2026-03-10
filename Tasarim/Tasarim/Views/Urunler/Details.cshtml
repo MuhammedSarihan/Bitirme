@@ -124,15 +124,41 @@
                     }
                 </div>
             </div>
-
             <div class="d-grid gap-3">
                 <button class="btn btn-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
                     <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
                 </button>
-                <button class="btn btn-outline-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300">
-                    <i class="fa-regular fa-heart me-2"></i> Favorilere Ekle
-                </button>
+
+                @if (ViewBag.FavorideMi != null && ViewBag.FavorideMi == true)
+                {
+                    <form asp-action="Remove" asp-controller="Favoriler" method="post" class="m-0 p-0">
+                        <input type="hidden" name="UrunID" value="@Model.ID" />
+                        <button class="btn btn-light border w-100 btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300" type="submit" title="Favorilerden Çıkar">
+                            <i class="fa-solid fa-heart text-danger me-2"></i> Favorilerde
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="Add" asp-controller="Favoriler" method="post" class="m-0 p-0">
+                        <input type="hidden" name="UrunID" value="@Model.ID" />
+                        <button class="btn btn-outline-dark w-100 btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300" type="submit">
+                            <i class="fa-regular fa-heart me-2"></i> Favorilere Ekle
+                        </button>
+                    </form>
+                }
             </div>
+            @* <div class="d-grid gap-3">
+                <button class="btn btn-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
+                    <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
+                </button>
+                <form asp-action="Add" asp-controller="Favoriler">
+                    <input type="hidden" name="UrunID" value="@Model.ID" />
+                    <button class="btn btn-outline-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300 w-100" type="submit">
+                        <i class="fa-regular fa-heart me-2"></i> Favorilere Ekle
+                    </button>
+                </form>
+            </div> *@
         </div>
     </div>
 

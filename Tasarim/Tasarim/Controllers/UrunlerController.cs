@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Tasarim.Core.Entities;
 using Tasarim.Data;
+using Tasarim.ExtensionMethods;
 
 namespace Tasarim.Controllers
 {
@@ -50,7 +53,24 @@ namespace Tasarim.Controllers
                 // Sayfada göstermek için ViewBag ile gönderiyoruz
                 ViewBag.AyniGrupUrunler = digerRenkler;
             }
+            // --- ÜRÜN FAVORİLERDE EKLİ Mİ KONTROLÜ ---
+            bool favorideMi = false;
 
+            if (User.Identity!.IsAuthenticated)
+            {
+                // Giriş yapmışsa veritabanından bak
+                int kullaniciId = int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)!);
+                favorideMi = _context.Favoriler.Any(f => f.UrunID == id && f.KullaniciID == kullaniciId);
+            }
+            else
+            {
+                // Ziyaretçiyse Session'dan bak
+                var favorilerSession = HttpContext.Session.GetJson<List<Urun>>("GetFavoriler") ?? new List<Urun>();
+                favorideMi = favorilerSession.Any(u => u.ID == id);
+            }
+
+            // Bu bilgiyi butonu değiştirmek için View'a gönderiyoruz
+            ViewBag.FavorideMi = favorideMi;
             return View(urun);
         }
     }

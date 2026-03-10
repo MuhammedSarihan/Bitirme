@@ -21,6 +21,9 @@
                     </li> *@
                     @await Component.InvokeAsync("Kategoriler")
                     <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Favoriler" asp-action="">Favoriler</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-dark" asp-controller="Home" asp-action="ContactUs">İletişim</a>
                     </li>
                 </ul>
@@ -33,7 +36,7 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="/Hesap">Profilim</a></li>
-                                <li><a class="dropdown-item" href="/Item">Ürünlerim</a></li>
+                                <li><a class="dropdown-item" href="/#">Siparişlerim</a></li>
                                 <li><a class="dropdown-item" href="/Hesap/SignOut">Çıkış Yap</a></li>
                             </ul>
                         </div>
