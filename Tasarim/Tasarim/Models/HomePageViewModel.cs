@@ -6,5 +6,7 @@ namespace Tasarim.Models
     {
         public List<Urun>? Urunler { get; set; }
         public List<Slider>? sliderListesi { get; set; }
+        public List<Kampanya>? Kampanyalar { get; set; }
+
     }
 }

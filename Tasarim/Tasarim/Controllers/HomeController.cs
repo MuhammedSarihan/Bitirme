@@ -22,7 +22,8 @@ namespace Tasarim.Controllers
             var model = new HomePageViewModel()
             {
                 sliderListesi = await _context.Sliders.OrderBy(s => s.SiraNo).ToListAsync(),
-                Urunler = await _context.Urunler.Where(p=> p.AktifMi).ToListAsync()
+                Urunler = await _context.Urunler.Where(p=> p.AktifMi).ToListAsync(),
+                Kampanyalar = await _context.Kampanyalar.Where(k => k.KampanyaAktifMi).ToListAsync(),
             };
 
             return View(model);
