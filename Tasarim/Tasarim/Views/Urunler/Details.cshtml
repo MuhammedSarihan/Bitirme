@@ -70,7 +70,15 @@
                 <span><i class="fa-solid fa-copyright me-1"></i>Marka: <strong class="text-dark">@(Model.Marka?.MarkaAd ?? "-")</strong></span>
             </div>
 
-            <h2 class="fs-1 fw-bold text-gold mb-4">@Model.Fiyat.ToString("C2")</h2>
+            @if (ViewBag.IndirimliFiyat < Model.Fiyat)
+            {
+                <del>@Model.Fiyat ₺</del>
+                <h2 class="fs-1 fw-bold text-gold mb-4">@ViewBag.IndirimliFiyat.ToString("c") ₺</h2>
+            }
+            else
+            {
+                <h2 class="fs-1 fw-bold text-gold mb-4">@Model.Fiyat.ToString("c")</h2>
+            }
 
             <div class="mb-4">
                 <p class="mb-2 text-dark fw-semibold">Ürün Açıklaması</p>

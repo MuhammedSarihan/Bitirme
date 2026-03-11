@@ -3,56 +3,6 @@
     ViewData["Title"] = Model.KampanyaAd + " - Kampanya Detayları";
 }
 
-<div class="container my-5 pt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            
-            <div class="text-center mb-5 pb-2">
-                <h2 class="font-playfair fw-bold text-dark display-5">Kampanya Detayları</h2>
-                <div style="width: 60px; height: 2px; background-color: #D4AF37; margin: 0 auto;" class="my-4"></div>
-            </div>
-
-            <div class="row g-5 mb-5">
-                <div class="col-md-7 d-flex flex-column justify-content-center">
-                    <h3 class="font-playfair fw-bold text-dark mb-4">@Html.DisplayFor(model => model.KampanyaAd)</h3>
-                    
-                    <div class="mb-4">
-                        @if (Model.KampanyaAktifMi)
-                        {
-                            <span class="badge rounded-0 bg-dark text-white px-4 py-2 fs-6 letter-spacing-1 text-uppercase fw-normal">Aktif Kampanya</span>
-                        }
-                        else
-                        {
-                            <span class="badge rounded-0 bg-secondary text-white px-4 py-2 fs-6 letter-spacing-1 text-uppercase fw-normal">Süresi Dolmuş</span>
-                        }
-                    </div>
-
-                    <div class="p-4 border rounded-0 bg-light bg-opacity-50 mt-2">
-                        <h6 class="fw-bold text-dark mb-3 text-uppercase letter-spacing-1"><i class="fa-solid fa-align-left text-gold me-2"></i>Açıklama</h6>
-                        <p class="mb-0 text-muted lh-lg">
-                            @(string.IsNullOrEmpty(Model.Aciklama) ? "Bu kampanya için henüz bir açıklama girilmemiş." : Model.Aciklama)
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-md-5">
-                    <div class="sticky-top" style="top: 80px;">
-                        <div class="bg-white p-2 rounded-0 border kampanya-image-wrapper d-flex align-items-center justify-content-center" style="min-height: 400px;">
-                            @if (!string.IsNullOrEmpty(Model.KampanyaResmi))
-                            {
-                                <img src="/img/@Model.KampanyaResmi" id="mainImage" alt="@Model.KampanyaAd" class="img-fluid rounded-0 active-fade" style="max-height: 380px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                            }
-                            else
-                            {
-                                <div class="text-center text-muted py-5">
-                                    <i class="fa-regular fa-image fs-1 mb-3 opacity-25" style="font-size: 3rem !important;"></i>
-                                    <p class="small mb-0 fst-italic letter-spacing-1">Görsel Eklenmemiş</p>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="mt-5 pt-5 border-top">
                 <div class="text-center mb-5 pb-2">
@@ -73,9 +23,32 @@
                                          alt="@item.Urun.Baslik"
                                          style="height: 280px; object-fit: contain; width: 100%;">
 
-                                    <div class="card-body p-3 text-center d-flex flex-column justify-content-end">
+<div class="card-body p-3 text-center d-flex flex-column justify-content-end">
                                         <h6 class="fw-bold text-dark text-truncate mb-2 font-playfair" style="font-size: 1.1rem;">@item.Urun.Baslik</h6>
-                                        <span class="text-muted fw-bold mb-3">@item.Urun.Fiyat.ToString("c")</span>
+
+                                        @{
+                                            // ViewBag'den indirimli fiyatlar sözlüğünü çekiyoruz
+                                            var fiyatSozlugu = ViewBag.IndirimliFiyatlar as Dictionary<int, decimal>;
+                                            decimal indirimliFiyat = item.Urun.Fiyat;
+
+                                            // Bu ürünün ID'si sözlükte varsa indirimli fiyatını al
+                                            if (fiyatSozlugu != null && fiyatSozlugu.ContainsKey(item.Urun.ID))
+                                            {
+                                                indirimliFiyat = fiyatSozlugu[item.Urun.ID];
+                                            }
+                                        }
+
+                                        <div class="mb-3">
+                                            @if (indirimliFiyat < item.Urun.Fiyat)
+                                            {
+                                                <del class="text-muted small me-2">@item.Urun.Fiyat.ToString("c")</del>
+                                                <span class="text-gold fw-bold fs-5">@indirimliFiyat.ToString("c")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fw-bold">@item.Urun.Fiyat.ToString("c")</span>
+                                            }
+                                        </div>
                                     </div>
 
                                     <div class="card-footer p-0 border-top-0 bg-transparent">

@@ -40,6 +40,19 @@
                                         <span class="badge rounded-pill bg-danger px-4 py-2 fs-6 shadow-sm"> Aktif Değil </span>
                                     }
                                 </li>
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-secondary"><i class="fa-solid fa-tags me-2"></i>İndirim Tipi</span>
+                                    <span class="fw-semibold text-dark fs-6">
+                                        @((int)Model.IndirimTipi == 1 ? "Yüzdelik İndirim (%)" : "Sabit Tutar İndirimi (₺)")
+                                    </span>
+                                </li>
+
+                                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-secondary"><i class="fa-solid fa-coins me-2"></i>İndirim Miktarı</span>
+                                    <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm">
+                                        @((int)Model.IndirimTipi == 1 ? "%" + Model.IndirimTutari.ToString("0.##") : Model.IndirimTutari.ToString("c"))
+                                    </span>
+                                </li>
                             </ul>
 
                             <div class="bg-light p-4 rounded-3 border">

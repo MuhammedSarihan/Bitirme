@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 using Tasarim.ExtensionMethods;
+using System.Linq;
 
 namespace Tasarim.Controllers
 {
@@ -17,8 +18,38 @@ namespace Tasarim.Controllers
         }
         public async Task<IActionResult> Index(string q="")
         {
-            var databaseContext = _context.Urunler.Where(p=>p.AktifMi && p.Baslik.Contains(q)|| p.Aciklama.Contains(q) || p.ModelKodu.Contains(q)).Include(u => u.Kategori).Include(u => u.Marka);
-            return View(await databaseContext.ToListAsync());
+            var databaseContext = _context.Urunler.Where(p=>p.AktifMi && p.Baslik.Contains(q)|| p.Aciklama.Contains(q) || p.ModelKodu.Contains(q))
+                .Include(u => u.Kategori)
+                .Include(u => u.Marka)
+                .Include(u => u.KampanyaUrunleri)
+                    .ThenInclude(ku => ku.Kampanya);
+            var urunlerListesi = await databaseContext.ToListAsync();
+
+            var indirimliFiyatlar = new Dictionary<int, decimal>();
+            foreach (var urun in urunlerListesi)
+            {
+                var aktifKampanyalar = urun.KampanyaUrunleri
+                    .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
+                    .Select(ku => ku.Kampanya);
+
+                if (aktifKampanyalar.Any())
+                {
+                    // İndirim Tipi 1: Yüzde, 2: Sabit (Veritabanınızdaki int karşılığına göre güncelleyebilirsiniz)
+                    decimal enDusukFiyat = aktifKampanyalar.Min(k => (int)k.IndirimTipi == 1
+                        ? urun.Fiyat - (urun.Fiyat * k.IndirimTutari / 100m)
+                        : urun.Fiyat - k.IndirimTutari);
+
+                    indirimliFiyatlar.Add(urun.ID, enDusukFiyat);
+                }
+                else
+                {
+                    // Kampanya yoksa orijinal fiyatı ekle
+                    indirimliFiyatlar.Add(urun.ID, urun.Fiyat);
+                }
+            }
+            ViewBag.IndirimliFiyatlar = indirimliFiyatlar;
+
+            return View(urunlerListesi);
         }
         // URL: /Urunler/Details/1
         public async Task<IActionResult> Details(int? id)
@@ -34,6 +65,8 @@ namespace Tasarim.Controllers
                 .Include(u => u.Marka)
                 .Include(u => u.Resimler)
                 .Include(u => u.Varyasyonlar)
+                .Include(u => u.KampanyaUrunleri)
+                    .ThenInclude(ku => ku.Kampanya)  
                 .FirstOrDefaultAsync(u => u.ID == id);
 
             if (urun == null || !urun.AktifMi)
@@ -41,6 +74,21 @@ namespace Tasarim.Controllers
                 // Ürün yoksa veya admin panelinden "Pasif" yapılmışsa müşteri göremez
                 return RedirectToAction("Index", "Home");
             }
+
+            decimal gecerliFiyat = urun.Fiyat;
+            var aktifKampanyalar = urun.KampanyaUrunleri
+                .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
+                .Select(ku => ku.Kampanya);
+
+            if (aktifKampanyalar.Any())
+            {
+                gecerliFiyat = aktifKampanyalar.Min(k => (int)k.IndirimTipi == 1
+                    ? urun.Fiyat - (urun.Fiyat * k.IndirimTutari / 100m)
+                    : urun.Fiyat - k.IndirimTutari);
+            }
+            // Bu bilgiyi View'da fiyat alanında kullanmak için gönderiyoruz
+            ViewBag.IndirimliFiyat = gecerliFiyat;
+
 
             // 2. AYNI GRUP (FARKLI RENK) ÜRÜNLERİ BULMA
             // Eğer ürünün bir "Model Kodu" varsa (Örn: BEY3122), o koda sahip DİĞER ürünleri bul

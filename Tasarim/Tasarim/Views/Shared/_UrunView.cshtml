@@ -11,7 +11,26 @@
         <div class="card-body p-4">
             <div class="text-center">
                 <h5 class="fw-bolder text-truncate">@Model.Baslik</h5>
-                <span class=" fw-bold">@Model.Fiyat.ToString("c")</span>
+
+                    @{
+                        // ViewBag'den gelen veriyi güvenli bir şekilde alıp Model'e (mevcut ürüne) göre fiyatı belirliyoruz
+                        var fiyatSozlugu = ViewBag.IndirimliFiyatlar as Dictionary<int, decimal>;
+                        decimal indirimliFiyat = Model.Fiyat;
+                    
+                        if (fiyatSozlugu != null && fiyatSozlugu.ContainsKey(Model.ID))
+                        {
+                            indirimliFiyat = fiyatSozlugu[Model.ID];
+                        }
+                    }
+                    @if (indirimliFiyat < Model.Fiyat)
+                    {
+                        <del class="text-muted">@Model.Fiyat.ToString("c")</del>
+                        <span class="fw-bold text-danger ms-2">@indirimliFiyat.ToString("c")</span>
+                    }
+                    else
+                    {
+                        <span class="fw-bold">@Model.Fiyat.ToString("c")</span>
+                    }
             </div>
         </div>
 
