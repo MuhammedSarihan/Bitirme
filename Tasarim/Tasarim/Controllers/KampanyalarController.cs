@@ -25,18 +25,24 @@ namespace Tasarim.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
+            // 1. ID hiç gönderilmediyse hata dön
             if (id == null)
             {
                 return NotFound();
             }
 
+            // 2. ÖNCE KAMPANYAYI BUL: Böyle bir kampanya gerçekten var mı?
             var kampanya = await _context.Kampanyalar
-                .FirstOrDefaultAsync(m => m.ID == id);
+                    .Include(k => k.KampanyaUrunleri)     // Önce köprü tablosunu dahil et
+                        .ThenInclude(ku => ku.Urun)       // Sonra o köprü üzerinden Ürünlere ulaş
+                    .FirstOrDefaultAsync(m => m.ID == id);
+
             if (kampanya == null)
             {
-                return NotFound();
+                return NotFound(); // Kampanya yoksa ürün aramaya gerek kalmadan işlemi bitir
             }
 
+            // Ürün listesini View'a model olarak gönderiyoruz
             return View(kampanya);
         }
     }

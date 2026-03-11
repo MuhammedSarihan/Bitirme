@@ -18,5 +18,8 @@ namespace Tasarim.Core.Entities
 
         [Display(Name = "Aktif mi?")]
         public bool KampanyaAktifMi { get; set; }
+
+        public ICollection<KampanyaUrunleri>? KampanyaUrunleri { get; set; }
+
     }
 }

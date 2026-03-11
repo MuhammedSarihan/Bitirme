@@ -47,6 +47,9 @@ namespace Tasarim.Core.Entities
         public ICollection<SepetItem>? SepetItems { get; set; }
         public ICollection<SiparisDetay>? SiparisDetaylari { get; set; }
 
+        //Kampanyaya Eklenen Ürünler için
+        public ICollection<KampanyaUrunleri>? KampanyaUrunleri { get; set; }
+
         public LLSonuc LLSonuc { get; set; } // 1-1 İlişki
     }
 }

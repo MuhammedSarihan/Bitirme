@@ -24,6 +24,8 @@ namespace Tasarim.Data
         public DbSet<UrunVaryasyon> UrunVaryasyonlari { get; set; }
         public DbSet<Slider> Sliders { get; set; }
         public DbSet<Kampanya> Kampanyalar { get; set; }
+        public DbSet<KampanyaUrunleri> KampanyaUrunleri { get; set; }
+
 
         public DbSet<Yorum> Yorumlar { get; set; }
         public DbSet<YorumAnaliz> YorumAnalizleri { get; set; }
@@ -31,7 +33,7 @@ namespace Tasarim.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {// Kendi SQL Server'ınıza göre düzenleyebilirsiniz -> @"Server=PC_ADINIZ;
             //Muhammed: DESKTOP-MUUA55B - Şevval: DESKTOP-BRRDK1D - Rafiga:  DESKTOP-2K6EHV2        
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-MUUA55B; Database=dbTasarim; Trusted_Connection=True; TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer(@"Server=DESKTOP-BRRDK1D; Database=dbTasarim; Trusted_Connection=True; TrustServerCertificate=True;");
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -62,8 +64,24 @@ namespace Tasarim.Data
                 .WithOne(l => l.Urun)
                 .HasForeignKey<LLSonuc>(l => l.UrunID);
 
+            //KampanyaUrunleri ara tablosu için composite key tanımlaması (UrunID + KampanyaID)
+            modelBuilder.Entity<KampanyaUrunleri>()
+                        .HasKey(cp => new { cp.UrunID, cp.KampanyaID});
 
-            // 5. Para Alanları İçin Hassasiyet Ayarı
+            // 5. Ürün - KampanyaUrunleri (1:N ilişki)
+            modelBuilder.Entity<KampanyaUrunleri>()
+                .HasOne(cp => cp.Urun)
+                .WithMany(p => p.KampanyaUrunleri)
+                .HasForeignKey(cp => cp.UrunID);
+
+            // 6. Kampanya - KampanyaUrunleri (1:N ilişki)
+            modelBuilder.Entity<KampanyaUrunleri>()
+                .HasOne(cp => cp.Kampanya)
+                .WithMany(c => c.KampanyaUrunleri)
+                .HasForeignKey(cp => cp.KampanyaID);
+
+
+            // 7. Para Alanları İçin Hassasiyet Ayarı
             // SQL'de "decimal(18,2)" olarak tutulmasını sağlar.
             modelBuilder.Entity<Urun>().Property(u => u.Fiyat).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Siparis>().Property(s => s.ToplamTutar).HasColumnType("decimal(18,2)");

@@ -1,0 +1,103 @@
+﻿@using Tasarim.Areas.Admin.Models
+@model List<KampanyaUrunViewModel>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-0 text-dark fw-bold">
+                <i class="fa-solid fa-clipboard-list text-primary me-2"></i>@ViewBag.KampanyaAd - Ürün Yönetimi
+            </h3>
+            <p class="text-muted small mt-1 mb-0">Bu kampanyaya dahil etmek istediğiniz ürünleri seçin veya mevcut ürünleri çıkarın.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            
+            <div class="mb-4">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden" style="max-width: 400px; border: 1px solid #dee2e6;">
+                    <span class="input-group-text bg-white border-0 text-muted ps-3">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-0 shadow-none" placeholder="Ürün koduna göre ara..." autocomplete="off">
+                </div>
+            </div>
+
+            <form asp-action="UrunAta" method="post">
+                <input type="hidden" name="kampanyaId" value="@ViewBag.KampanyaID" />
+
+                <div class="row g-3" id="productList">
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-4 col-lg-3 product-item">
+                            <label class="d-block h-100 w-100" style="cursor: pointer;">
+                                <div class="border rounded-4 p-3 bg-light bg-opacity-25 h-100 d-flex align-items-center checkbox-card-hover shadow-sm">
+                                    <input class="form-check-input flex-shrink-0 m-0 me-3 fs-5 shadow-none"
+                                           type="checkbox"
+                                           name="secilenUrunler"
+                                           value="@item.UrunID"
+                                    @(item.SeciliMi ? "checked" : "")>
+                                    
+                                    <span class="fw-bold text-dark mb-0 product-code">
+                                        @item.UrunKod
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-5 pt-4 border-top d-flex justify-content-end gap-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-medium">
+                        İptal
+                    </a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-medium">
+                        <i class="fa-solid fa-check me-1"></i> Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Frontend Arama (Filtreleme) Mantığı
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let items = document.querySelectorAll('.product-item');
+
+            items.forEach(function(item) {
+                let text = item.querySelector('.product-code').textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Arama Kutusu Odaklanma Temizliği */
+        #searchInput:focus {
+            box-shadow: none;
+        }
+
+        /* Checkbox Kart Efekti */
+        .checkbox-card-hover {
+            transition: all 0.2s ease-in-out;
+            border-color: #dee2e6 !important;
+        }
+
+            .checkbox-card-hover:hover {
+                border-color: #86b7fe !important;
+                background-color: #f8f9fa !important;
+                transform: translateY(-3px);
+                box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important;
+            }
+
+        /* Bootstrap varsayılan checkbox rengi mavi (primary) olduğu için özel renklendirme kaldırıldı.
+                   Sadece boyutu büyütülüp margin/padding ayarlaması Bootstrap sınıflarıyla (fs-5) yapıldı. */
+    </style>
+}

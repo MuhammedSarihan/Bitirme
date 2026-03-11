@@ -2,109 +2,311 @@
 @{
     ViewData["Title"] = "Anasayfa";
 }
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <partial name="_Slider" model="Model.sliderListesi" />
 
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row g-3">
-        <div class="col-md-3"><div class="campaign-banner bg-pink"><h3>Hesaplı Yaz</h3><span>%30'a Varan İndirim</span></div></div>
-        <div class="col-md-3"><div class="campaign-banner bg-blue"><h3>Fırsatları Kaçırma</h3><span>Sezon Sonu İndirimi</span></div></div>
-        <div class="col-md-3"><div class="campaign-banner bg-green"><h3>Zarafetin Işıltısı</h3><span>Abiye Şıklığını Yakala</span></div></div>
-        <div class="col-md-3"><div class="campaign-banner bg-pink"><h3>%60</h3><span>ve üzeri indirim</span></div></div>
+        
+        <div class="col-md-3">
+            <a asp-controller="Urunler" asp-action="Index" class="campaign-banner border rounded-0 bg-light bg-opacity-50 p-4 text-center h-100 d-flex flex-column justify-content-center text-decoration-none">
+                <h5 class="font-playfair fw-bold text-dark mb-2">Hesaplı Yaz</h5>
+                <span class="text-gold small fw-bold text-uppercase letter-spacing-1">%30'a Varan İndirim</span>
+            </a>
+        </div>
+        
+        <div class="col-md-3">
+            <a asp-controller="Urunler" asp-action="Index" class="campaign-banner border rounded-0 bg-light bg-opacity-50 p-4 text-center h-100 d-flex flex-column justify-content-center text-decoration-none">
+                <h5 class="font-playfair fw-bold text-dark mb-2">Fırsatları Kaçırma</h5>
+                <span class="text-gold small fw-bold text-uppercase letter-spacing-1">Sezon Sonu İndirimi</span>
+            </a>
+        </div>
+        
+        <div class="col-md-3">
+            <a asp-controller="Urunler" asp-action="Index" class="campaign-banner border rounded-0 bg-light bg-opacity-50 p-4 text-center h-100 d-flex flex-column justify-content-center text-decoration-none">
+                <h5 class="font-playfair fw-bold text-dark mb-2">Zarafetin Işıltısı</h5>
+                <span class="text-gold small fw-bold text-uppercase letter-spacing-1">Abiye Şıklığını Yakala</span>
+            </a>
+        </div>
+        
+        <div class="col-md-3">
+            <a asp-controller="Urunler" asp-action="Index" class="campaign-banner border rounded-0 bg-light bg-opacity-50 p-4 text-center h-100 d-flex flex-column justify-content-center text-decoration-none">
+                <h5 class="font-playfair fw-bold text-dark mb-2">%60</h5>
+                <span class="text-gold small fw-bold text-uppercase letter-spacing-1">ve üzeri indirim</span>
+            </a>
+        </div>
+
     </div>
 </div>
 
-<div class="container my-5">
-    <div class="d-flex justify-content-between mb-2">
-        <h4 class="fw-bold">Sana Özel Ürünler</h4>
-        <a href="#" class="text-decoration-none text-dark">Tümünü Gör ></a>
+@*Sana Özel Ürünler Kaydırması*@
+<div class="container my-5 pt-4">
+    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
+        <div>
+            <h3 class="font-playfair fw-bold text-dark mb-0">Sana Özel Ürünler</h3>
+            <div style="width: 40px; height: 2px; background-color: #D4AF37;" class="mt-2"></div>
+        </div>
+        <a asp-controller="Urunler" asp-action="Index" class="text-decoration-none text-muted hover-gold small fw-bold text-uppercase letter-spacing-1 mb-1">Tümünü Gör ></a>
     </div>
 
-    <div class="swiper product-swiper">
+    <div class="swiper product-swiper position-relative">
         <div class="swiper-wrapper">
             @foreach (var item in Model.Urunler)
             {
-                <div class="swiper-slide">
+                <div class="swiper-slide h-auto">
                     <partial name="_UrunView" model="item" />
                 </div>
             }
         </div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next rounded-0 border"></div>
+        <div class="swiper-button-prev rounded-0 border"></div>
     </div>
 </div>
-<div class="my-5">
-    <h1 class="text-center">Kampanyalarımız</h1>
+@*Kategoriler Bölümü*@
+<div class="container my-5 pt-4">
+    <div class="mb-4">
+        <h4 class="font-playfair fw-bold text-dark mb-0">Kategorilerdeki İndirimleri Keşfet</h4>
+    </div>
 
-        <div class="row gx-4 gx-lg-5 row-cols-2 justify-content-center">
-            @foreach (var item in Model.Kampanyalar)
+    <div class="swiper category-swiper position-relative">
+        <div class="swiper-wrapper py-3">
+            @if (Model.Kategoriler != null)
             {
-                <partial name="_KampanyaView" model="item" />
+                @foreach (var kategori in Model.Kategoriler)
+                {
+                    <div class="swiper-slide text-center">
+                        <a href="/Kategoriler/Index/@kategori.ID" class="text-decoration-none">
+                            <div class="category-box position-relative mb-2 rounded-3 overflow-hidden d-flex align-items-center justify-content-center mx-auto">
+                                
+                                <div class="category-circle-bg"></div>
+                                
+                                <img src="~/img/@kategori.KategoriResmi" alt="@kategori.KategoriAd" class="category-image position-relative z-1" />
+                                
+                                <div class="discount-badge position-absolute rounded-circle bg-danger text-white fw-bold d-flex align-items-center justify-content-center shadow-sm">
+                                    %
+                                </div>
+                            </div>
+                            <span class="font-playfair text-dark fw-bold small category-text">@kategori.KategoriAd</span>
+                        </a>
+                    </div>
+                }
             }
         </div>
-
+        <div class="swiper-button-next category-swiper-next rounded-circle border shadow-sm"></div>
+        <div class="swiper-button-prev category-swiper-prev rounded-circle border shadow-sm"></div>
+    </div>
 </div>
-<style>
-    .campaign-banner {
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-        color: #fff;
-        font-weight: bold;
-        transition: transform 0.3s;
-    }
+@*Kampanyalar İkişer İkişer gösteriliyor*@
+<div class="container my-5 pt-5">
+    <div class="text-center mb-5 pb-2">
+        <h2 class="font-playfair fw-bold text-dark display-5">Kampanyalarımız</h2>
+        <div style="width: 60px; height: 2px; background-color: #D4AF37; margin: 0 auto;" class="my-4"></div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 justify-content-center g-4">
+        @foreach (var item in Model.Kampanyalar)
+        {
+            <div class="col kampanya-card-wrapper mb-4">
+                <div class="border rounded-0 p-2 h-100 bg-white shadow-sm kampanya-frame-container">
+                    <partial name="_KampanyaView" model="item" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".product-swiper", {
+        loop: true, 
+        slidesPerView: 4,
+        spaceBetween: 20,
+        navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+        },
+        breakpoints: {
+        320: { slidesPerView: 1, spaceBetween: 10 },
+        768: { slidesPerView: 3 },
+        1024: { slidesPerView: 4 }
+        }
+        });
+        var categorySwiper = new Swiper(".category-swiper", {
+        loop: false, // Kategoriler genellikle sonsuz dönmez, o yüzden false
+        slidesPerView: 6, // Masaüstünde 6 tane
+        spaceBetween: 15,
+        navigation: {
+        nextEl: ".category-swiper-next",
+        prevEl: ".category-swiper-prev",
+        },
+        breakpoints: {
+        // Ekran küçüldükçe kaç tane gösterileceğini ayarlıyoruz (Responsive)
+        320: { slidesPerView: 2, spaceBetween: 10 },
+        576: { slidesPerView: 3, spaceBetween: 15 },
+        768: { slidesPerView: 4, spaceBetween: 15 },
+        992: { slidesPerView: 5, spaceBetween: 15 },
+        1200: { slidesPerView: 6, spaceBetween: 20 }
+        }
+        });
+    </script>
+    
+    <style>
+        .text-gold {
+        color: #D4AF37 !important;
+        }
+
+        .hover-gold:hover {
+        color: #D4AF37 !important;
+        transition: 0.3s;
+        }
+
+        .font-playfair {
+        font-family: 'Playfair Display', serif;
+        }
+
+        .letter-spacing-1 {
+        letter-spacing: 1px;
+        }
+
+        .campaign-banner {
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        }
 
         .campaign-banner:hover {
-            transform: scale(1.05);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border-color: #D4AF37 !important;
         }
 
-    .bg-pink {
-        background-color: #fce4ec;
-        color: #d81b60;
-    }
+        .product-swiper {
+        padding: 10px 0 30px 0;
+        }
 
-    .bg-green {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-    }
-
-    .bg-blue {
-        background-color: #e3f2fd;
-        color: #1565c0;
-    }
-
-    .product-swiper {
-        padding: 20px 0;
-    }
-
-    .swiper-button-next, .swiper-button-prev {
-        background: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
+        .swiper-button-next, .swiper-button-prev {
+        background: #fff;
+        width: 45px;
+        height: 45px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        z-index: 10;
+        }
 
         .swiper-button-next:after, .swiper-button-prev:after {
-            font-size: 18px;
-            color: #f27a1a;
+        font-size: 16px;
+        color: #000;
+        font-weight: bold;
+        transition: color 0.3s;
         }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-    var swiper = new Swiper(".product-swiper", {
-        slidesPerView: 4, // Masaüstünde yan yana 4 ürün gösterir
-        spaceBetween: 20, // Ürünler arası boşluk
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-        // Ekran küçüldüğünde ürün sayısını otomatik ayarlar
-        breakpoints: {
-            320: { slidesPerView: 1 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 }
+        
+        .swiper-button-next:hover:after, .swiper-button-prev:hover:after {
+        color: #D4AF37;
         }
-    });
 
-</script>
+        .kampanya-frame-container {
+        transition: all 0.4s ease-in-out;
+        cursor: pointer;
+        }
+
+        .kampanya-card-wrapper:hover .kampanya-frame-container {
+        border-color: #D4AF37 !important; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; 
+        transform: translateY(-5px); 
+        }
+        
+        .kampanya-frame-container img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        }
+        /* Kategori Kutusu Genel Ayarları */
+        .category-box {
+            width: 100%;
+            aspect-ratio: 1 / 1; /* Kare formunda kalmasını sağlar */
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .category-box:hover {
+            transform: scale(1.05); /* Üzerine gelince hafif büyür */
+        }
+
+        /* İçteki Daire Gölgeliği */
+        .category-circle-bg {
+            position: absolute;
+            width: 75%;
+            height: 75%;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        /* Resim Ayarları */
+        .category-image {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        /* Yüzde İkonu */
+        .discount-badge {
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+        /* Metin Rengi Vurgusu */
+        .category-text {
+            transition: color 0.3s;
+        }
+        a:hover .category-text {
+            color: #D4AF37 !important; /* Altın rengi vurgu */
+        }
+
+        /* --- OTOMATİK RENKLENDİRME (Sırasıyla 6 Farklı Renk Kombinasyonu) --- */
+        
+        /* 1. Mavi Tonları */
+        .category-swiper .swiper-slide:nth-child(6n+1) .category-box { background-color: #e6f0ff; }
+        .category-swiper .swiper-slide:nth-child(6n+1) .category-circle-bg { background-color: #7baaf7; }
+
+        /* 2. Mor Tonları */
+        .category-swiper .swiper-slide:nth-child(6n+2) .category-box { background-color: #f3e8ff; }
+        .category-swiper .swiper-slide:nth-child(6n+2) .category-circle-bg { background-color: #c48bf5; }
+
+        /* 3. Mavi/Gri Tonları */
+        .category-swiper .swiper-slide:nth-child(6n+3) .category-box { background-color: #e8f0fe; }
+        .category-swiper .swiper-slide:nth-child(6n+3) .category-circle-bg { background-color: #8ab4f8; }
+
+        /* 4. Turuncu Tonları */
+        .category-swiper .swiper-slide:nth-child(6n+4) .category-box { background-color: #ffece0; }
+        .category-swiper .swiper-slide:nth-child(6n+4) .category-circle-bg { background-color: #fc9d62; }
+
+        /* 5. Yeşil Tonları */
+        .category-swiper .swiper-slide:nth-child(6n+5) .category-box { background-color: #e6f6ec; }
+        .category-swiper .swiper-slide:nth-child(6n+5) .category-circle-bg { background-color: #61c280; }
+
+        /* 6. Sarı Tonları */
+        .category-swiper .swiper-slide:nth-child(6n+6) .category-box { background-color: #fff4cc; }
+        .category-swiper .swiper-slide:nth-child(6n+6) .category-circle-bg { background-color: #ffd04f; }
+
+        /* Butonları Yuvarlak ve Daha Küçük Yapma */
+        .category-swiper-next, .category-swiper-prev {
+            width: 35px;
+            height: 35px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .category-swiper-next:after, .category-swiper-prev:after {
+            font-size: 14px;
+            color: #000;
+        }
+    </style>
+}

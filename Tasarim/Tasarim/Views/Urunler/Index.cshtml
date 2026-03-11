@@ -1,15 +1,22 @@
-﻿@model IEnumerable<Urun>
+﻿@model IEnumerable<Tasarim.Core.Entities.Urun>
 @{
-    ViewData["Title"] = "Anasayfa";
+    ViewData["Title"] = "";
 }
 
 <div class="my-5">
-    <h1 class="text-center">Sana Özel Ürümlerimiz</h1>
+    <h1 class="font-playfair text-center mb-4">Ürünlerimiz</h1>
+    
     <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-        @foreach (var item in Model)
+        @if (Model != null && Model.Any())
         {
-            <partial name="_UrunView" model="item" />
+            @foreach (var item in Model)
+            {
+                <partial name="_UrunView" model="item" />
+            }
         }
-
+        else
+        {
+            <div class="alert alert-warning text-center">Henüz gösterilecek ürün bulunmuyor.</div>
+        }
     </div>
 </div>

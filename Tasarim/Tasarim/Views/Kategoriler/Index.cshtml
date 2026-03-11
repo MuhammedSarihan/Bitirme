@@ -1,15 +1,24 @@
-﻿@model Kategori
-
+﻿@model Tasarim.Core.Entities.Kategori
 @{
-    ViewData["Title"] = Model.KategoriAd;
+    ViewData["Title"] = "Kategori Ürünleri";
 }
-<div class="my-5">
-    <h1 class="text-center">@Model.KategoriAd Ürünlerimiz </h1>
-    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-        @foreach (var item in Model.Urunler)
-        {
-            <partial name="_UrunView" model="item" />
-        }
 
+<div class="my-5">
+    <h1 class="font-playfair text-center mb-4">Bu Kategorideki Ürünlerimiz</h1>
+    
+    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+        @* Burada Model'in kendisini değil, Model'in içindeki Ürünler listesini kontrol etmeliyiz *@
+        @if (Model.Urunler != null && Model.Urunler.Any())
+        {
+            @* Döngüyü de kategorilerde değil, o kategorinin ürünlerinde döndürüyoruz *@
+            @foreach (var item in Model.Urunler)
+            {
+                <partial name="_UrunView" model="item" />
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning text-center">Bu kategoride henüz gösterilecek ürün bulunmuyor.</div>
+        }
     </div>
 </div>
