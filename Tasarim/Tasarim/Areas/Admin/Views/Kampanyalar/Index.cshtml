@@ -37,6 +37,7 @@
                             <th class="text-secondary fw-semibold">Kampanya Adı</th>
                             <th class="text-secondary fw-semibold">Açıklama</th>
                             <th class="text-secondary fw-semibold">Durum</th>
+                            <th class="text-secondary fw-semibold">Kampanya Ürünleri</th>
                             <th class="text-secondary fw-semibold" style="width: 150px;">İşlemler</th>
                         </tr>
                     </thead>
@@ -79,7 +80,11 @@
                                         <span class="badge rounded-pill bg-danger bg-opacity-75 px-3 shadow-sm">Pasif</span>
                                     }
                                 </td>
-
+                                <td>
+                                    <a asp-action="UrunAta" asp-route-id="@item.ID" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Ürünleri Yönet">
+                                        <i class="fa-solid fa-toggle-on me-1"></i> Ürünleri Yönet
+                                    </a>
+                                </td>
                                 <td class="text-end pe-4">
                                     <div class="d-inline-flex gap-1">
                                         <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-primary " title="Düzenle">

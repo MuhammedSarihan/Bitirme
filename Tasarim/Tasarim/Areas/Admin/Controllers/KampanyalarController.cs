@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using odevVb.Utils;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
+using Tasarim.Areas.Admin.Models;
 
 namespace Tasarim.Areas.Admin.Controllers
 {
@@ -23,7 +24,7 @@ namespace Tasarim.Areas.Admin.Controllers
             return View(await _context.Kampanyalar.ToListAsync());
         }
 
-        // GET: Admin/Kampanyalar/Details/5
+        // GET: Admin/Kampanyalar/Details/
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -158,6 +159,66 @@ namespace Tasarim.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        //Kampanyaya Ürünler Atama İşlemi
+        public async Task<IActionResult> UrunAta(int id)
+        {
+            // Kampanyayı ve içindeki mevcut ürünleri bul
+            var kampanya = await _context.Kampanyalar
+                .Include(k => k.KampanyaUrunleri)
+                .FirstOrDefaultAsync(k => k.ID == id);
+
+            if (kampanya == null) return NotFound();
+
+            // Sistemdeki TÜM ürünleri getir
+            var butunUrunler = await _context.Urunler.ToListAsync();
+
+            // Ekrana göndereceğimiz modeli dolduruyoruz
+            var model = new List<KampanyaUrunViewModel>();
+
+            foreach (var urun in butunUrunler)
+            {
+                model.Add(new KampanyaUrunViewModel
+                {
+                    UrunID = urun.ID,
+                    UrunKod = urun.UrunKod,
+                    // Eğer ürün zaten bu kampanyanın içindeyse, SeciliMi = true olacak
+                    SeciliMi = kampanya.KampanyaUrunleri.Any(ku => ku.UrunID == urun.ID)
+                });
+            }
+
+            ViewBag.KampanyaAd = kampanya.KampanyaAd;
+            ViewBag.KampanyaID = kampanya.ID;
+
+            return View(model);
+        }
+
+        //(POST): Formdan gelen seçili ürünleri veritabanına kaydetme
+        [HttpPost]
+        public async Task<IActionResult> UrunAta(int kampanyaId, List<int> secilenUrunler)
+        {
+            // 1. Önce bu kampanyanın eski ürün kayıtlarını köprü tablosundan tamamen temizle
+            var silinecekEskiUrunler = _context.KampanyaUrunleri.Where(ku => ku.KampanyaID == kampanyaId);
+            _context.KampanyaUrunleri.RemoveRange(silinecekEskiUrunler);
+
+            // 2. Formdan seçilip gelen (Checkbox'ı işaretli) yeni ürünleri köprü tablosuna ekle
+            if (secilenUrunler != null && secilenUrunler.Any())
+            {
+                foreach (var urunId in secilenUrunler)
+                {
+                    _context.KampanyaUrunleri.Add(new KampanyaUrunleri
+                    {
+                        KampanyaID = kampanyaId,
+                        UrunID = urunId
+                    });
+                }
+            }
+
+            // Değişiklikleri veritabanına yansıt
+            await _context.SaveChangesAsync();
+
+            // İşlem bitince listeye geri dön
+            return RedirectToAction("Index");
+        }
         private bool KampanyaExists(int id)
         {
             return _context.Kampanyalar.Any(e => e.ID == id);
