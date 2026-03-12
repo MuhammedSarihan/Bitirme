@@ -43,8 +43,6 @@ namespace Tasarim.Controllers
             {
                 return NotFound(); // Kampanya yoksa ürün aramaya gerek kalmadan işlemi bitir
             }
-            var indirimliFiyatlar = new Dictionary<int, decimal>();
-
             if (kampanya.KampanyaUrunleri != null)
             {
                 foreach (var kampanyaUrunu in kampanya.KampanyaUrunleri)
@@ -55,29 +53,8 @@ namespace Tasarim.Controllers
                     var aktifKampanyalar = urun.KampanyaUrunleri
                         .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
                         .Select(ku => ku.Kampanya);
-
-                    if (aktifKampanyalar.Any())
-                    {
-                        decimal enDusukFiyat = aktifKampanyalar.Min(k => (int)k.IndirimTipi == 1
-                            ? urun.Fiyat - (urun.Fiyat * k.IndirimTutari / 100m)
-                            : urun.Fiyat - k.IndirimTutari);
-
-                        // Aynı ürün birden fazla kez gelirse sözlüğün hata vermesini engellemek için kontrol
-                        if (!indirimliFiyatlar.ContainsKey(urun.ID))
-                        {
-                            indirimliFiyatlar.Add(urun.ID, enDusukFiyat);
-                        }
-                    }
-                    else
-                    {
-                        if (!indirimliFiyatlar.ContainsKey(urun.ID))
-                        {
-                            indirimliFiyatlar.Add(urun.ID, urun.Fiyat);
-                        }
-                    }
                 }
             }
-            ViewBag.IndirimliFiyatlar = indirimliFiyatlar;
             // Ürün listesini View'a model olarak gönderiyoruz
             return View(kampanya);
         }

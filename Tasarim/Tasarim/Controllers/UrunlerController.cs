@@ -25,29 +25,14 @@ namespace Tasarim.Controllers
                     .ThenInclude(ku => ku.Kampanya);
             var urunlerListesi = await databaseContext.ToListAsync();
 
-            var indirimliFiyatlar = new Dictionary<int, decimal>();
+           
             foreach (var urun in urunlerListesi)
             {
                 var aktifKampanyalar = urun.KampanyaUrunleri
                     .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
                     .Select(ku => ku.Kampanya);
-
-                if (aktifKampanyalar.Any())
-                {
-                    // İndirim Tipi 1: Yüzde, 2: Sabit (Veritabanınızdaki int karşılığına göre güncelleyebilirsiniz)
-                    decimal enDusukFiyat = aktifKampanyalar.Min(k => (int)k.IndirimTipi == 1
-                        ? urun.Fiyat - (urun.Fiyat * k.IndirimTutari / 100m)
-                        : urun.Fiyat - k.IndirimTutari);
-
-                    indirimliFiyatlar.Add(urun.ID, enDusukFiyat);
-                }
-                else
-                {
-                    // Kampanya yoksa orijinal fiyatı ekle
-                    indirimliFiyatlar.Add(urun.ID, urun.Fiyat);
-                }
             }
-            ViewBag.IndirimliFiyatlar = indirimliFiyatlar;
+
 
             return View(urunlerListesi);
         }
@@ -74,21 +59,9 @@ namespace Tasarim.Controllers
                 // Ürün yoksa veya admin panelinden "Pasif" yapılmışsa müşteri göremez
                 return RedirectToAction("Index", "Home");
             }
-
-            decimal gecerliFiyat = urun.Fiyat;
-            var aktifKampanyalar = urun.KampanyaUrunleri
-                .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
-                .Select(ku => ku.Kampanya);
-
-            if (aktifKampanyalar.Any())
-            {
-                gecerliFiyat = aktifKampanyalar.Min(k => (int)k.IndirimTipi == 1
-                    ? urun.Fiyat - (urun.Fiyat * k.IndirimTutari / 100m)
-                    : urun.Fiyat - k.IndirimTutari);
-            }
-            // Bu bilgiyi View'da fiyat alanında kullanmak için gönderiyoruz
-            ViewBag.IndirimliFiyat = gecerliFiyat;
-
+            //var aktifKampanyalar = urun.KampanyaUrunleri
+            //    .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
+            //    .Select(ku => ku.Kampanya);
 
             // 2. AYNI GRUP (FARKLI RENK) ÜRÜNLERİ BULMA
             // Eğer ürünün bir "Model Kodu" varsa (Örn: BEY3122), o koda sahip DİĞER ürünleri bul

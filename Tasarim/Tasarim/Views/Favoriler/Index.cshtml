@@ -59,7 +59,15 @@
                             <h5 class="card-title font-playfair fw-bold mb-2">
                                 <a href="/Urunler/Details/@urun.ID" class="text-dark text-decoration-none hover-gold">@urun.Baslik</a>
                             </h5>
-                            <p class="text-gold fw-bold fs-5 mb-3">@urun.Fiyat.ToString("C2")</p>
+                            @if (urun.Fiyat > urun.KampanyaliFiyat)
+                            {
+                                <span class="text-muted text-decoration-line-through me-2 fs-5 opacity-75">@urun.Fiyat.ToString("C2")</span>
+                                <span class="text-danger fs-3">@urun.KampanyaliFiyat.ToString("C2")</span>
+                            }
+                            else
+                            {
+                                <span class="text-gold fs-3">@urun.Fiyat.ToString("C2")</span>
+                            }
                         </div>
 
                         <div class="card-footer bg-transparent border-0 px-0 pt-0">

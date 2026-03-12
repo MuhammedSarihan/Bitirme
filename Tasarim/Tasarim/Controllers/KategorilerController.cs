@@ -18,6 +18,8 @@ namespace Tasarim.Controllers
 
             var kategori = await _context.Kategoriler
                 .Include(k => k.Urunler)
+                .ThenInclude(u => u.KampanyaUrunleri)
+                    .ThenInclude(ku => ku.Kampanya)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             if (kategori == null) return NotFound();

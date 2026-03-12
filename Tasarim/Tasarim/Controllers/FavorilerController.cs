@@ -27,6 +27,8 @@ namespace Tasarim.Controllers
 
                 var favorilerDb = await _context.Favoriler
                     .Include(f => f.Urun) // Ürünün resim ve fiyat bilgilerini çekiyoruz
+                    .ThenInclude(u => u.KampanyaUrunleri)
+                    .ThenInclude(ku => ku.Kampanya)
                     .Where(f => f.KullaniciID == kullaniciId)
                     .ToListAsync();
 

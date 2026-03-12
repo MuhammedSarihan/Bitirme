@@ -70,16 +70,15 @@
                 <span><i class="fa-solid fa-copyright me-1"></i>Marka: <strong class="text-dark">@(Model.Marka?.MarkaAd ?? "-")</strong></span>
             </div>
 
-            @if (ViewBag.IndirimliFiyat < Model.Fiyat)
+            @if (Model.Fiyat > Model.KampanyaliFiyat)
             {
-                <del>@Model.Fiyat ₺</del>
-                <h2 class="fs-1 fw-bold text-gold mb-4">@ViewBag.IndirimliFiyat.ToString("c") ₺</h2>
+                <span class="text-muted text-decoration-line-through me-2 fs-5 opacity-75">@Model.Fiyat.ToString("C2")</span>
+                <span class="text-danger fw-bold fs-3">@Model.KampanyaliFiyat.ToString("C2")</span>
             }
             else
             {
-                <h2 class="fs-1 fw-bold text-gold mb-4">@Model.Fiyat.ToString("c")</h2>
+                <span class="text-gold fw-bold fs-3">@Model.Fiyat.ToString("C2")</span>
             }
-
             <div class="mb-4">
                 <p class="mb-2 text-dark fw-semibold">Ürün Açıklaması</p>
                 <p class="text-muted lh-lg font-sm">
@@ -156,17 +155,6 @@
                     </form>
                 }
             </div>
-            @* <div class="d-grid gap-3">
-                <button class="btn btn-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
-                    <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
-                </button>
-                <form asp-action="Add" asp-controller="Favoriler">
-                    <input type="hidden" name="UrunID" value="@Model.ID" />
-                    <button class="btn btn-outline-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300 w-100" type="submit">
-                        <i class="fa-regular fa-heart me-2"></i> Favorilere Ekle
-                    </button>
-                </form>
-            </div> *@
         </div>
     </div>
 
