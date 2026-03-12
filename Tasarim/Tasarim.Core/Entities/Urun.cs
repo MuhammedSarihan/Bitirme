@@ -9,7 +9,7 @@ namespace Tasarim.Core.Entities
         public int ID { get; set; }
 
         [Display(Name = "Ürün Kodu")]
-        public string UrunKod { get; set; }
+        public string? UrunKod { get; set; }
         [Display(Name = "Model / Grup Kodu")]
         public string? ModelKodu { get; set; }
 

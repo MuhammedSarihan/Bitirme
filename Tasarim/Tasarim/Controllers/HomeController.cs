@@ -64,5 +64,18 @@ namespace Tasarim.Controllers
         {
             return View();
         }
+        [HttpPost]
+        public IActionResult MesajGonder(Tasarim.Core.Entities.İletisim model)
+        {
+            if (model != null)
+            {
+                _context.İletisimler.Add(model);
+                _context.SaveChanges();
+
+                TempData["Success"] = "Mesajınız başarıyla iletildi!";
+            }
+
+            return RedirectToAction("ContactUs");
+        }
     }
 }

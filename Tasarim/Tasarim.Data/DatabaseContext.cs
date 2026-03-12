@@ -25,8 +25,7 @@ namespace Tasarim.Data
         public DbSet<Slider> Sliders { get; set; }
         public DbSet<Kampanya> Kampanyalar { get; set; }
         public DbSet<KampanyaUrunleri> KampanyaUrunleri { get; set; }
-
-
+        public DbSet<İletisim> İletisimler { get; set; }
         public DbSet<Yorum> Yorumlar { get; set; }
         public DbSet<YorumAnaliz> YorumAnalizleri { get; set; }
         public DbSet<LLSonuc> LLSonuclari { get; set; }

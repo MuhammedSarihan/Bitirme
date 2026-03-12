@@ -1,0 +1,128 @@
+﻿@model IEnumerable<Tasarim.Core.Entities.İletisim>
+
+@{
+    ViewData["Title"] = "";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-0 text-dark fw-bold">
+                <i class="fa-solid fa-envelope-open text-primary me-2"></i>Bildirimler
+            </h3>
+            <p class="text-muted small mt-1 mb-0">Mağazanız hakkındaki şikayet ve önerileri bu sayfada görüntüleyebilirsiniz.</p>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-heade d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="fas fa-envelope-open-text me-2"></i> Müşteri Mesaj Yönetimi</h5>
+            <span class="badge bg-warning text-dark">Toplam @Model.Count() Mesaj</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="mesajlarTablosu">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-secondary fw-semibold py-3 ps-4" style="width: 100px;">Durum</th>
+                            <th class="text-secondary fw-semibold">Tarih</th>
+                            <th class="text-secondary fw-semibold">Gönderen</th>
+                            <th class="text-secondary fw-semibold">Konu</th>
+                            <th class="text-secondary fw-semibold">Mesaj Özeti</th>
+                            <th class="text-secondary fw-semibold text-end pe-4" style="width: 150px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.OkunduMu ? "opacity-75" : "fw-bold")">
+                                <td class="ps-4">
+                                    @if (item.OkunduMu)
+                                    {
+                                        <span class="badge rounded-pill bg-light text-secondary border px-3">Okundu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3 pulse">Yeni!</span>
+                                    }
+                                </td>
+                                <td class="small text-muted">@item.MesajTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>
+                                    <div class="text-dark">@item.AdSoyad</div>
+                                    <small class="text-muted" style="font-size: 0.75rem;">@item.Email</small>
+                                </td>
+                                <td><span class="text-primary small">#</span> @item.Konu</td>
+                                <td style="max-width: 200px;" class="text-truncate text-secondary">
+                                    @item.Mesaj
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex gap-1">
+                                        @* OKUNDU YAP BUTONU *@
+                                        @if (!item.OkunduMu)
+                                        {
+                                            <a asp-controller="İletisim" asp-action="OkunduYap" asp-route-id="@item.Id"
+                                                   class="btn btn-sm btn-outline-success" title="Okundu Olarak İşaretle">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        }
+
+                                        @* DETAY GÖR (Alert ile mesajı açar) *@
+                                        <button class="btn btn-sm btn-outline-info"
+                                                title="Mesajın Tamamını Gör"
+                                                data-mesaj="@item.Mesaj"
+                                                onclick="mesajGoster(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        @* SİL BUTONU *@
+                                        <a asp-controller="İletisim" asp-action="Sil" asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-outline-danger"
+                                               onclick="return confirm('Bu mesajı kalıcı olarak silmek istediğinize emin misiniz?')"
+                                               title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Görüntülenecek mesaj bulunamadı.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .pulse {
+        animation: pulse-red 2s infinite;
+    }
+
+    @@keyframes pulse-red {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function mesajGoster(buton) {
+        // Butona tıkladığımızda sakladığımız veriyi alıyoruz
+        const mesaj = buton.getAttribute('data-mesaj');
+        
+        Swal.fire({
+            title: 'Mesaj Detayı',
+            text: mesaj,
+            icon: 'info',
+            iconColor: '#D4AF37',
+            confirmButtonText: 'Kapat',
+            confirmButtonColor: '#D4AF37' // Buton rengi
+        });
+    }
+</script>
