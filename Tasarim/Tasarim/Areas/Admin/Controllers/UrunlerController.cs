@@ -35,6 +35,8 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Include(u => u.Marka)
                 .Include(u => u.Varyasyonlar)
                 .Include(u => u.Resimler) // DETAYDA GALERİYİ GÖRMEK İÇİN EKLENDİ
+                .Include(u => u.Yorumlar)        
+        .ThenInclude(y => y.Profil)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             if (urun == null) return NotFound();
@@ -126,7 +128,23 @@ namespace Tasarim.Areas.Admin.Controllers
             ViewData["MarkaID"] = new SelectList(_context.Markalar, "ID", "MarkaAd", urun.MarkaID);
             return View(urun);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        // Eğer rol yapın varsa buraya [Authorize(Roles = "Admin")] eklemeyi unutma!
+        public async Task<IActionResult> AdminYorumSil(int YorumID, int UrunID)
+        {
+            // Yorumu doğrudan ID'sine göre bul
+            var silinecekYorum = await _context.Set<Yorum>().FindAsync(YorumID);
 
+            if (silinecekYorum != null)
+            {
+                _context.Set<Yorum>().Remove(silinecekYorum);
+                await _context.SaveChangesAsync();
+            }
+
+            // Başarıyla sildikten sonra ürünün admin detay sayfasına geri dön
+            return RedirectToAction("Details", new { id = UrunID });
+        }
         // POST: Admin/Urunler/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]

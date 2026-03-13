@@ -1,5 +1,4 @@
-﻿
-@model Tasarim.Core.Entities.Urun
+﻿@model Tasarim.Core.Entities.Urun
 
 @{
     ViewData["Title"] = Model.Baslik + " - Ürün Detayları";
@@ -10,6 +9,7 @@
         <div class="col-lg-10">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-5">
+
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3 class="mb-0 text-dark fw-bold">
                             <i class="fa-solid fa-circle-info text-info me-2"></i>Ürün Detayları
@@ -169,6 +169,65 @@
                         {
                             <div class="alert alert-warning shadow-sm rounded-3 border-0 border-start border-warning border-4">
                                 <i class="fa-solid fa-circle-exclamation me-2"></i>Bu ürüne ait henüz beden veya stok girilmemiş.
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-5 pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="text-primary mb-0 fw-bold">
+                                <i class="fa-solid fa-comments me-2"></i>Müşteri Yorumları Yönetimi
+                            </h4>
+                            <span class="badge bg-primary rounded-pill">@(Model.Yorumlar?.Count ?? 0) Yorum</span>
+                        </div>
+
+                        @if (Model.Yorumlar != null && Model.Yorumlar.Any())
+                        {
+                            <div class="list-group shadow-sm rounded-3">
+                                @foreach (var yorum in Model.Yorumlar.OrderByDescending(y => y.Tarih))
+                                {
+                                    <div class="list-group-item list-group-item-action p-4 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <h6 class="fw-bold text-dark mb-0">@(yorum.Profil?.Ad ?? "Bilinmeyen") @(yorum.Profil?.Soyad ?? "Kullanıcı")</h6>
+                                                    <span class="text-muted small">• @yorum.Tarih.ToString("dd.MM.yyyy HH:mm")</span>
+                                                </div>
+
+                                                <div class="text-warning small mb-2">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= yorum.Puan)
+                                                        {
+                                                            <i class="fa-solid fa-star"></i>
+                                                        }
+                                                        else
+                                                        {
+
+                                                            <i class="fa-regular fa-star text-muted opacity-25"></i>
+                                                        }
+                                                    }
+                                                </div>
+
+                                                <p class="mb-0 text-secondary">@yorum.YorumIcerik</p>
+                                            </div>
+
+                                            <form asp-action="AdminYorumSil" asp-controller="Urunler" method="post" class="m-0 p-0" onsubmit="return confirm('UYARI: Bu müşteri yorumunu kalıcı olarak silmek istediğinize emin misiniz?');">
+                                                <input type="hidden" name="YorumID" value="@yorum.ID" />
+                                                <input type="hidden" name="UrunID" value="@Model.ID" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm">
+                                                    <i class="fa-solid fa-trash-can me-1"></i> Sil
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info shadow-sm rounded-3 border-0 border-start border-info border-4">
+                                <i class="fa-solid fa-info-circle me-2"></i>Bu ürüne henüz müşteri yorumu yapılmamış.
                             </div>
                         }
                     </div>

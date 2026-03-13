@@ -12,13 +12,12 @@ namespace Tasarim.Core.Entities
 
         [Display(Name = "Yorum")]
         public string YorumIcerik { get; set; }
-
-        public int KullaniciID { get; set; }
-        public Kullanici Kullanici { get; set; }
-
+        public DateTime Tarih { get; set; } = DateTime.Now;
+        public int ProfilID { get; set; }
+        public Profil Profil { get; set; }
         public int UrunID { get; set; }
         public Urun Urun { get; set; }
 
-        public YorumAnaliz YorumAnaliz { get; set; }
+        public YorumAnaliz? YorumAnaliz { get; set; }
     }
 }

@@ -1,5 +1,6 @@
-﻿@model Urun
-
+﻿@using Tasarim.Core.Entities
+@model Urun
+@using System.Security.Claims
 @{
     ViewData["Title"] = Model.Baslik;
     var digerRenkler = ViewBag.AyniGrupUrunler as List<Tasarim.Core.Entities.Urun>;
@@ -79,7 +80,8 @@
             {
                 <span class="text-gold fw-bold fs-3">@Model.Fiyat.ToString("C2")</span>
             }
-            <div class="mb-4">
+
+            <div class="mb-4 mt-3">
                 <p class="mb-2 text-dark fw-semibold">Ürün Açıklaması</p>
                 <p class="text-muted lh-lg font-sm">
                     @(string.IsNullOrEmpty(Model.Aciklama) ? "Bu zarif tasarım, özel günlerinizde şıklığınızı tamamlamak için özenle üretilmiştir." : Model.Aciklama)
@@ -131,6 +133,7 @@
                     }
                 </div>
             </div>
+
             <div class="d-grid gap-3">
                 <button class="btn btn-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
                     <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
@@ -164,59 +167,98 @@
 
             <div class="card border-0 bg-light p-4 mb-5 rounded-0">
                 <h5 class="fw-bold mb-3 fs-6">Bu ürünü değerlendirin</h5>
-                <form>
-                    <div class="mb-3">
-                        <div class="text-gold fs-5 mb-2">
-                            <i class="fa-regular fa-star cursor-pointer"></i>
-                            <i class="fa-regular fa-star cursor-pointer"></i>
-                            <i class="fa-regular fa-star cursor-pointer"></i>
-                            <i class="fa-regular fa-star cursor-pointer"></i>
-                            <i class="fa-regular fa-star cursor-pointer"></i>
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <form asp-action="YorumEkle" asp-controller="Urunler" method="post">
+                        <input type="hidden" name="UrunID" value="@Model.ID" />
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Puanınız</label>
+                            <select name="Puan" class="form-select rounded-0 border-secondary bg-transparent mb-3" required>
+                                <option value="5">⭐⭐⭐⭐⭐ (5) Mükemmel</option>
+                                <option value="4">⭐⭐⭐⭐ (4) Çok İyi</option>
+                                <option value="3">⭐⭐⭐ (3) Ortalama</option>
+                                <option value="2">⭐⭐ (2) Kötü</option>
+                                <option value="1">⭐ (1) Çok Kötü</option>
+                            </select>
+
+                            <label class="form-label small fw-bold text-muted">Yorumunuz</label>
+                            <textarea name="YorumIcerik" class="form-control rounded-0 border-secondary bg-transparent" rows="3" placeholder="Ürün hakkında ne düşünüyorsunuz?" required></textarea>
                         </div>
-                        <textarea class="form-control rounded-0 border-secondary" rows="3" placeholder="Ürün hakkında ne düşünüyorsunuz?"></textarea>
+                        <button type="submit" class="btn btn-dark rounded-0 px-4 hover-gold-bg transition-300 border-0">Yorum Yap</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="fa-solid fa-lock text-muted fs-2 mb-3 opacity-50"></i>
+                        <p class="text-muted small mb-3">Değerlendirme yapabilmek için lütfen giriş yapın.</p>
+                        <a href="/Hesap/SignIn" class="btn btn-outline-dark rounded-0 px-4 py-2 text-uppercase fw-bold letter-spacing-1 transition-300">Giriş Yap</a>
                     </div>
-                    <button type="submit" class="btn btn-dark rounded-0 px-4">Yorum Yap</button>
-                </form>
+                }
             </div>
 
             <div class="comments-list">
+                @if (Model.Yorumlar != null && Model.Yorumlar.Any())
+                {
+                    foreach (var yorum in Model.Yorumlar.OrderByDescending(y => y.ID))
+                    {
+                        var adBasHarf = !string.IsNullOrEmpty(yorum.Profil?.Ad) ? yorum.Profil.Ad.Substring(0, 1).ToUpper() : "M";
+                        var soyadBasHarf = !string.IsNullOrEmpty(yorum.Profil?.Soyad) ? yorum.Profil.Soyad.Substring(0, 1).ToUpper() : "Ü";
 
-                <div class="comment-item mb-4 pb-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <strong>AY</strong>
+                        var mevcutKullaniciId = User.Identity!.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+                        bool benimYorumumMu = mevcutKullaniciId != null && yorum.Profil?.KullaniciID.ToString() == mevcutKullaniciId;
+
+                        <div class="comment-item mb-4 pb-4 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <strong>@adBasHarf@soyadBasHarf</strong>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">@(yorum.Profil?.Ad ?? "Gizli") @(soyadBasHarf)***</h6>
+                                        <small class="text-muted">@yorum.Tarih.ToString("dd MMMM yyyy")</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="text-gold small">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= yorum.Puan)
+                                            {
+                                                <i class="fa-solid fa-star"></i>
+                                            }
+                                            else
+                                            {
+
+                                                <i class="fa-regular fa-star text-muted opacity-50"></i>
+                                            }
+                                        }
+                                    </div>
+
+                                    @if (benimYorumumMu)
+                                    {
+                                        <form asp-action="YorumSil" asp-controller="Urunler" method="post" class="m-0 p-0" onsubmit="return confirm('Bu değerlendirmenizi silmek istediğinize emin misiniz?');">
+                                            <input type="hidden" name="YorumID" value="@yorum.ID" />
+                                            <input type="hidden" name="UrunID" value="@Model.ID" />
+                                            <button type="submit" class="btn btn-sm text-danger p-0 border-0 bg-transparent" title="Yorumu Sil">
+                                                <i class="fa-regular fa-trash-can fs-6 hover-opacity-100 opacity-75 transition-300"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Ayşe Yılmaz</h6>
-                                <small class="text-muted">12 Mart 2026</small>
-                            </div>
+                            <p class="text-muted mb-0 mt-2">@yorum.YorumIcerik</p>
                         </div>
-                        <div class="text-gold small">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <p class="text-muted fst-italic mb-0">Bu ürün için henüz bir değerlendirme yapılmamış. İlk yorumu siz yapın!</p>
                     </div>
-                    <p class="text-muted mb-0 mt-2">Bu yorum sadece görünüm içindir. En yakın zamanda kullanıma açılacaktır. Luvia Lukka!</p>
-                </div>
-
-                <div class="comment-item mb-4 pb-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <strong>ZK</strong>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Zeynep K.</h6>
-                                <small class="text-muted">5 Mart 2026</small>
-                            </div>
-                        </div>
-                        <div class="text-gold small">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
-                        </div>
-                    </div>
-                    <p class="text-muted mb-0 mt-2">Duruşu çok asil, rengi fotoğraftakinden bir tık daha canlı. Sadece boyu bana biraz uzun geldiği için terziye vereceğim.</p>
-                </div>
-
+                }
             </div>
         </div>
     </div>
@@ -260,7 +302,7 @@
             cursor: pointer;
         }
 
-        /* Galeri Özellikleri (Tam Boy Resim İçin Güncellendi) */
+        /* Galeri Özellikleri */
         .thumb-wrapper {
             width: 70px;
             height: 90px;
@@ -321,11 +363,9 @@
         function changeProductImage(src, element) {
             const mainImg = document.getElementById('mainProductImage');
             mainImg.src = src;
-
             mainImg.classList.remove('fade-in-image');
             void mainImg.offsetWidth;
             mainImg.classList.add('fade-in-image');
-
             document.querySelectorAll('.thumb-wrapper').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
         }
