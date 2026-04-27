@@ -1,14 +1,33 @@
 
+using LlmService;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using Tasarim.Data;
 using Tasarim.Service.Abstract;
 using Tasarim.Service.Concrete;
+using Tasarim.Service.Concrete.LLM;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// HttpClient'ı sisteme tanıtıyoruz (Ollama ve Groq'taki _http kullanımı için)
+builder.Services.AddHttpClient();
+
+// Hangi LLM'i kullanmak istiyorsan onun başındaki yorum satırını kaldır. 
+
+//YEREL
+//builder.Services.AddScoped<ILlmProvider, OllamaLlmProvider>();
+
+//GROQ API
+builder.Services.AddScoped<ILlmProvider, GroqLlmProvider>();
+
+// LLM Yöneticilerini sisteme kaydediyoruz
+builder.Services.AddScoped<YorumAnalizYoneticisi>();
+builder.Services.AddScoped<KumelemeYoneticisi>();
+
+
+
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = ".Site.Session";
@@ -58,6 +77,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();
