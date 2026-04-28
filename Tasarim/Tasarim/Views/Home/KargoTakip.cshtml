@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Kargo Takip";
+}
+
+<div class="container my-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+
+            <div class="card border-0 shadow-lg rounded-0">
+                <div class="card-header bg-dark text-white text-center py-4 border-0">
+                    <h4 class="font-playfair fw-bold mb-0 letter-spacing-1">
+                        <i class="fa-solid fa-truck-fast me-2 text-gold"></i>Kargom Nerede?
+                    </h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5 bg-white border border-top-0 border-light">
+                    <p class="text-muted small text-center mb-4">
+                        Siparişinize ait kargo firmasını seçip, size SMS veya e-posta ile iletilen takip numarasını giriniz.
+                    </p>
+
+                    <form id="kargoForm" onsubmit="kargoSorgula(event)">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark small">Kargo Firması</label>
+                            <select id="firmaSecim" class="form-select form-select-lg rounded-0 border-secondary" required>
+                                <option value="" disabled selected>Firma Seçiniz...</option>
+                                <option value="yurtici">Yurtiçi Kargo</option>
+                                <option value="surat">Sürat Kargo</option>
+                                <option value="ptt">PTT Kargo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark small">Takip Numarası</label>
+                            <input type="text" id="takipNo" class="form-control form-control-lg rounded-0 border-secondary font-monospace" placeholder="Örn: 12434343543543" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 btn-lg rounded-0 text-uppercase fw-bold letter-spacing-1 hover-gold-bg transition-300">
+                            Sorgula <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function kargoSorgula(e) {
+            e.preventDefault();
+            var firma = document.getElementById('firmaSecim').value;
+            var takipNo = document.getElementById('takipNo').value.trim();
+
+            if (!firma || !takipNo) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Eksik Bilgi',
+                    text: 'Lütfen kargo firmasını ve takip numarasını eksiksiz giriniz.',
+                    confirmButtonColor: '#0B132B',
+                    customClass: { title: 'font-playfair fw-bold', confirmButton: 'rounded-0 px-4' }
+                });
+                return;
+            }
+
+            var yonlendirmeUrl = "";
+
+            // Bulduğun linkleri birebir sisteme tanımladık
+            switch (firma) {
+                case "yurtici":
+                    yonlendirmeUrl = "https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=" + takipNo;
+                    break;
+                case "surat":
+                    yonlendirmeUrl = "https://www.suratkargo.com.tr/KargoTakip/?kargotakipno=" + takipNo;
+                    break;
+                case "ptt":
+                    yonlendirmeUrl = "https://www.ptt.gov.tr/?kargotakipno=" + takipNo;
+                    break;
+            }
+
+            if (yonlendirmeUrl !== "") {
+                window.open(yonlendirmeUrl, '_blank');
+            }
+        }
+    </script>
+}

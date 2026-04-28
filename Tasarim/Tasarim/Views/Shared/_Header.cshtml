@@ -32,19 +32,22 @@
                         </button>
                     </form>
 
-                    <a href="/Favoriler" class="text-dark fs-5 hover-gold transition-300 position-relative" title="Favorilerim">
-                        <i class="fa-regular fa-heart"></i>
+                    <a href="/Home/KargoTakip" class="text-dark text-decoration-none d-flex align-items-center gap-2 hover-gold transition-300">
+                        <i class="fa-solid fa-truck-fast fs-5"></i>
+                        <span class="fw-semibold small d-none d-xl-inline">Kargom Nerede</span>
                     </a>
 
                     <div class="dropdown">
-                        <a class="text-dark fs-5 hover-gold transition-300" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Hesabım">
+                        <a class="text-dark text-decoration-none d-flex align-items-center gap-2 hover-gold transition-300 cursor-pointer" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Hesap İşlemleri">
                             @if (Context.User.Identity!.IsAuthenticated)
                             {
-                                <i class="fa-solid fa-user-check text-success" title="Giriş Yapıldı"></i>
+                                <i class="fa-solid fa-user-check text-success fs-5"></i>
+                                <span class="fw-semibold small d-none d-xl-inline">Hesabım</span>
                             }
                             else
                             {
-                                <i class="fa-regular fa-user"></i>
+                                <i class="fa-regular fa-user fs-5"></i>
+                                <span class="fw-semibold small d-none d-xl-inline">Üye Girişi</span>
                             }
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-3" style="min-width: 200px;">
@@ -64,6 +67,11 @@
                             }
                         </ul>
                     </div>
+
+                    <a href="/Favoriler" class="text-dark text-decoration-none d-flex align-items-center gap-2 hover-gold transition-300" title="Favorilerim">
+                        <i class="fa-regular fa-heart fs-5"></i>
+                        <span class="fw-semibold small d-none d-xl-inline">Favorilerim</span>
+                    </a>
 
                     @await Component.InvokeAsync("SepetOzet")
 
