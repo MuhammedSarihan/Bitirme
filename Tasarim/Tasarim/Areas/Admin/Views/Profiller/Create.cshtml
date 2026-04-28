@@ -18,7 +18,10 @@
                     <hr class="text-muted mb-4" />
 
                     <form asp-action="Create">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="All" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
+                        }
 
                         <div class="row g-5">
                             <div class="col-md-6">
@@ -26,25 +29,35 @@
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
-                                        <label asp-for="Ad" class="form-label fw-semibold text-secondary">Ad</label>
+                                        <label asp-for="Ad" class="form-label fw-semibold text-secondary">Ad <span class="text-danger fw-bold">*</span></label>
                                         <div class="input-group shadow-sm">
                                             <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
-                                            <input asp-for="Ad" class="form-control border-start-0 ps-0" placeholder="Müşteri Adı" />
+                                            <input asp-for="Ad" class="form-control border-start-0 ps-0" placeholder="Müşteri Adı"
+                                                   required
+                                                   oninvalid="this.setCustomValidity('Lütfen müşterinin adını giriniz.')"
+                                                   oninput="this.setCustomValidity('')" />
                                         </div>
                                         <span asp-validation-for="Ad" class="text-danger small"></span>
                                     </div>
+
                                     <div class="col-md-6">
-                                        <label asp-for="Soyad" class="form-label fw-semibold text-secondary">Soyad</label>
-                                        <input asp-for="Soyad" class="form-control shadow-sm" placeholder="Müşteri Soyadı" />
+                                        <label asp-for="Soyad" class="form-label fw-semibold text-secondary">Soyad <span class="text-danger fw-bold">*</span></label>
+                                        <input asp-for="Soyad" class="form-control shadow-sm" placeholder="Müşteri Soyadı"
+                                               required
+                                               oninvalid="this.setCustomValidity('Lütfen müşterinin soyadını giriniz.')"
+                                               oninput="this.setCustomValidity('')" />
                                         <span asp-validation-for="Soyad" class="text-danger small"></span>
                                     </div>
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label asp-for="Mail" class="form-label fw-semibold text-secondary">E-Posta Adresi</label>
+                                    <label asp-for="Mail" class="form-label fw-semibold text-secondary">E-Posta Adresi <span class="text-danger fw-bold">*</span></label>
                                     <div class="input-group shadow-sm">
                                         <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
-                                        <input asp-for="Mail" type="email" class="form-control border-start-0 ps-0" placeholder="ornek@mail.com" />
+                                        <input asp-for="Mail" type="email" class="form-control border-start-0 ps-0" placeholder="ornek@mail.com"
+                                               required
+                                               oninvalid="this.setCustomValidity('Lütfen müşterinin geçerli bir e-posta adresini giriniz.')"
+                                               oninput="this.setCustomValidity('')" />
                                     </div>
                                     <span asp-validation-for="Mail" class="text-danger small"></span>
                                 </div>
@@ -102,14 +115,33 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-3 p-3 bg-light rounded-3 border">
-                                    <label asp-for="KullaniciID" class="form-label fw-bold text-dark"><i class="fa-solid fa-user-lock me-2 text-primary"></i>Bağlı Kullanıcı Hesabı</label>
-                                    <select asp-for="KullaniciID" class="form-select shadow-sm" asp-items="ViewBag.KullaniciID">
-                                        <option value="">-- Kullanıcı Hesabı Seçin --</option>
-                                    </select>
-                                    <span asp-validation-for="KullaniciID" class="text-danger small"></span>
-                                    <div class="form-text mt-2 text-muted">
-                                        Sisteme eklenecek müşterinin kayıtlı olduğu giriş hesabını seçin.
+                                <div class="form-group mb-3 p-4 bg-light rounded-3 border">
+                                    <h6 class="text-dark fw-bold mb-3 border-bottom pb-2">
+                                        <i class="fa-solid fa-user-shield me-2 text-primary"></i>Sistem Giriş Bilgileri
+                                    </h6>
+
+                                    <div class="alert alert-info py-2 small mb-4 border-0 border-start border-info border-4">
+                                        <i class="fa-solid fa-circle-info me-1"></i> Müşterinin sisteme giriş yapabilmesi için benzersiz bir kullanıcı adı ve geçici şifre belirleyin.
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label asp-for="Kullanici.KullaniciAd" class="form-label fw-semibold text-secondary">Kullanıcı Adı</label>
+                                            <div class="input-group shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-at text-muted"></i></span>
+                                                <input asp-for="Kullanici.KullaniciAd" class="form-control border-start-0 ps-0" placeholder="Örn: musteri123" required />
+                                            </div>
+                                            <span asp-validation-for="Kullanici.KullaniciAd" class="text-danger small"></span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label asp-for="Kullanici.Sifre" class="form-label fw-semibold text-secondary">Geçici Şifre</label>
+                                            <div class="input-group shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-key text-muted"></i></span>
+                                                <input asp-for="Kullanici.Sifre" type="password" class="form-control border-start-0 ps-0" placeholder="Şifre belirleyin" required />
+                                            </div>
+                                            <span asp-validation-for="Kullanici.Sifre" class="text-danger small"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tasarim.Data;
 
@@ -11,9 +12,11 @@ using Tasarim.Data;
 namespace Tasarim.Data.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260313175119_YorumProfilGuncellemesi")]
+    partial class YorumProfilGuncellemesi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,10 +452,7 @@ namespace Tasarim.Data.Migrations
                     b.Property<int>("SepetID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UrunID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UrunVaryasyonID")
+                    b.Property<int>("UrunID")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -460,8 +460,6 @@ namespace Tasarim.Data.Migrations
                     b.HasIndex("SepetID");
 
                     b.HasIndex("UrunID");
-
-                    b.HasIndex("UrunVaryasyonID");
 
                     b.ToTable("SepetItems");
                 });
@@ -903,19 +901,15 @@ namespace Tasarim.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Tasarim.Core.Entities.Urun", null)
+                    b.HasOne("Tasarim.Core.Entities.Urun", "Urun")
                         .WithMany("SepetItems")
-                        .HasForeignKey("UrunID");
-
-                    b.HasOne("Tasarim.Core.Entities.UrunVaryasyon", "UrunVaryasyon")
-                        .WithMany()
-                        .HasForeignKey("UrunVaryasyonID")
+                        .HasForeignKey("UrunID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Sepet");
 
-                    b.Navigation("UrunVaryasyon");
+                    b.Navigation("Urun");
                 });
 
             modelBuilder.Entity("Tasarim.Core.Entities.Siparis", b =>

@@ -12,7 +12,7 @@ namespace Tasarim.Core.Entities
         public int SepetID { get; set; }
         public Sepet Sepet { get; set; }
 
-        public int UrunID { get; set; }
-        public Urun? Urun { get; set; }
+        public int UrunVaryasyonID { get; set; }
+        public UrunVaryasyon UrunVaryasyon { get; set; }
     }
 }

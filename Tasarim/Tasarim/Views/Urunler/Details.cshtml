@@ -109,36 +109,39 @@
                 </div>
             </div>
 
-            <div class="mb-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <p class="mb-0 text-dark fw-semibold">Beden Seçimi</p>
-                    <a href="#" class="text-muted small text-decoration-underline hover-gold"><i class="fa-solid fa-ruler-combined me-1"></i>Beden Tablosu</a>
-                </div>
-
-                <div class="d-flex flex-wrap gap-2">
-                    @if (Model.Varyasyonlar != null && Model.Varyasyonlar.Any())
-                    {
-                        foreach (var varyasyon in Model.Varyasyonlar.OrderBy(v => v.Beden))
+            <form asp-controller="Sepet" asp-action="Ekle" method="post" class="mb-3">
+                <div class="mb-4">
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        @if (Model.Varyasyonlar != null && Model.Varyasyonlar.Any())
                         {
-                            bool stokYok = varyasyon.StokAdedi <= 0;
-                            <input type="radio" class="btn-check" name="bedenSecim" id="beden_@varyasyon.ID" autocomplete="off" @(stokYok ? "disabled" : "")>
-                            <label class="btn btn-outline-dark rounded-0 px-4 py-2 fw-semibold @(stokYok ? "opacity-50 text-decoration-line-through bg-light" : "")" for="beden_@varyasyon.ID">
-                                @varyasyon.Beden
-                            </label>
+                            foreach (var varyasyon in Model.Varyasyonlar.OrderBy(v => v.Beden))
+                            {
+                                bool stokYok = varyasyon.StokAdedi <= 0;
+                                <input type="radio" class="btn-check beden-radio" name="UrunVaryasyonID" value="@varyasyon.ID" id="beden_@varyasyon.ID" data-stok="@varyasyon.StokAdedi" autocomplete="off" @(stokYok ? "disabled" : "required")>
+                                <label class="btn btn-outline-dark rounded-0 px-4 py-2 fw-semibold @(stokYok ? "opacity-50 text-decoration-line-through bg-light" : "")" for="beden_@varyasyon.ID">
+                                    @varyasyon.Beden
+                                </label>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <div class="alert alert-warning py-2 small rounded-0 w-100">Stok bilgisi bulunmuyor.</div>
-                    }
-                </div>
-            </div>
+                        else
+                        {
+                            <div class="alert alert-warning py-2 small rounded-0 w-100">Stok bilgisi bulunmuyor.</div>
+                        }
+                    </div>
 
-            <div class="d-grid gap-3">
-                <button class="btn btn-dark btn-lg rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0">
+                    <div class="mb-4">
+                        <p class="mb-2 text-dark fw-semibold">Adet <span id="stokUyari" class="text-danger small ms-2" style="display:none;">(Maksimum stok limitine ulaştınız)</span></p>
+                        <div class="input-group" style="width: 120px;">
+                            <input type="number" name="miktar" id="miktarInput" class="form-control rounded-0 border-dark text-center fw-bold" value="1" min="1" max="1" disabled required />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-dark btn-lg w-100 rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0 shadow-sm">
                     <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
                 </button>
-
+            </form>
+            <div class="d-grid gap-3">
                 @if (ViewBag.FavorideMi != null && ViewBag.FavorideMi == true)
                 {
                     <form asp-action="Remove" asp-controller="Favoriler" method="post" class="m-0 p-0">
@@ -369,5 +372,46 @@
             document.querySelectorAll('.thumb-wrapper').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
         }
+                        document.addEventListener('DOMContentLoaded', function () {
+            const bedenRadios = document.querySelectorAll('.beden-radio');
+            const miktarInput = document.getElementById('miktarInput');
+            const stokUyari = document.getElementById('stokUyari');
+
+            // Hafızada tutacağımız aktif stok sınırı
+            let aktifMaxStok = 1;
+
+            // 1. KURAL: Adet kutusuna sadece BİR KERE dinleyici ekliyoruz.
+            // Kullanıcı elle yazarsa veya oklara basarsa çalışır.
+            miktarInput.addEventListener('input', function() {
+                let girilenDeger = parseInt(this.value) || 1;
+
+                if (girilenDeger > aktifMaxStok) {
+                    this.value = aktifMaxStok; // Değeri hemen yasal sınıra geri çek
+
+                    // Uyarıyı göster ve 3 saniye sonra gizle
+                    stokUyari.style.display = 'inline';
+                    setTimeout(() => stokUyari.style.display = 'none', 3000);
+                }
+            });
+
+            // 2. KURAL: Bedenler arası geçiş yapıldığında
+            bedenRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Seçilen yeni bedenin stoğunu hafızaya al
+                    aktifMaxStok = parseInt(this.getAttribute('data-stok'));
+
+                    // Adet kutusunun kilidini aç ve HTML sınırını güncelle
+                    miktarInput.disabled = false;
+                    miktarInput.max = aktifMaxStok;
+
+                    // Eğer müşteri 44 bedende 10 seçmişse ve 42 bedene (stok: 15) geçerse, 10 kalır sorun yok.
+                    // Ama 42 bedende 15 seçmişse ve 44 bedene (stok: 10) dönerse, kutudaki 15'i zorla 10'a düşür!
+                    if (parseInt(miktarInput.value) > aktifMaxStok) {
+                        miktarInput.value = aktifMaxStok;
+                    }
+                });
+            });
+        });
     </script>
+
 }

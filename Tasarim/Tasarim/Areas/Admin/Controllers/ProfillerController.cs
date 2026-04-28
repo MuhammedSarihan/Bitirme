@@ -50,24 +50,72 @@ namespace Tasarim.Areas.Admin.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Profil profil)
+        {
+            // Model doğrulamadan "Kullanici" nesnesini çıkarıyoruz ki eksik alan yüzünden hata vermesin
+            ModelState.Remove("Kullanici.ID");
+            ModelState.Remove("KullaniciID");
+
+            if (ModelState.IsValid)
+            {
+                // GÜVENLİK DOKUNUŞU: Bu kullanıcı adı daha önce alınmış mı kontrol edelim!
+                bool kullaniciVarMi = await _context.Kullanicilar
+                    .AnyAsync(k => k.KullaniciAd == profil.Kullanici.KullaniciAd);
+                if (kullaniciVarMi)
+                {
+                    // string.Empty sayesinde hatayı direkt View'daki "All" ayarlı Kırmızı Alert kutusuna yolluyoruz.
+                    ModelState.AddModelError(string.Empty, $"⚠️ DİKKAT: '{profil.Kullanici.KullaniciAd}' kullanıcı adı sistemde zaten kayıtlı. Lütfen farklı bir kullanıcı adı belirleyin.");
+                    return View(profil); // Sayfayı başa sarmadan hatalı haliyle geri döndür.
+                }
+
+                // 1. Yeni Kullanıcıyı Hazırlıyoruz (Artık formdan gelen Kullanıcı Adını alıyoruz)
+                Kullanici yeniKullanici = new Kullanici
+                {
+                    KullaniciAd = profil.Kullanici.KullaniciAd,
+                    Sifre = profil.Kullanici.Sifre,
+                    // Eğer istersen Profil'deki maili Kullanıcı tablosuna da kopyalayabilirsin:
+                    // Mail = profil.Mail 
+                };
+
+                // 2. Kullanıcıyı Veritabanına Kaydediyoruz
+                _context.Kullanicilar.Add(yeniKullanici);
+                await _context.SaveChangesAsync();
+
+                // 3. Oluşan Kullanıcının ID'sini Profil'e Bağlıyoruz
+                profil.KullaniciID = yeniKullanici.ID;
+                profil.Kullanici = null; // EF Core hata vermesin diye temizliyoruz
+
+                // 4. Şimdi Profili Veritabanına Kaydediyoruz
+                _context.Profiller.Add(profil);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(profil);
+        }
+
+
         // POST: Admin/Profiller/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Ad,Soyad,Mail,TelNo,Adres,Cinsiyet,Yas,Boy,Kilo,KullaniciID")] Profil profil)
-        {
-            // Formdan gelmeyen, sadece veritabanı ilişkisi için olan objeyi doğrulamadan çıkarıyoruz.
-            ModelState.Remove("Kullanici");
-            if (ModelState.IsValid)
-            {
-                _context.Add(profil);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["KullaniciID"] = new SelectList(_context.Kullanicilar, "ID", "KullaniciAd", profil.KullaniciID);
-            return View(profil);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("ID,Ad,Soyad,Mail,TelNo,Adres,Cinsiyet,Yas,Boy,Kilo,KullaniciID")] Profil profil)
+        //{
+        //    // Formdan gelmeyen, sadece veritabanı ilişkisi için olan objeyi doğrulamadan çıkarıyoruz.
+        //    ModelState.Remove("Kullanici");
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(profil);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["KullaniciID"] = new SelectList(_context.Kullanicilar, "ID", "KullaniciAd", profil.KullaniciID);
+        //    return View(profil);
+        //}
 
         // GET: Admin/Profiller/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -77,7 +125,9 @@ namespace Tasarim.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var profil = await _context.Profiller.FindAsync(id);
+            var profil = await _context.Profiller
+         .Include(p => p.Kullanici)
+         .FirstOrDefaultAsync(p => p.ID == id);
             if (profil == null)
             {
                 return NotFound();
@@ -147,10 +197,17 @@ namespace Tasarim.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var profil = await _context.Profiller.FindAsync(id);
+            var profil = await _context.Profiller
+        .Include(p => p.Kullanici)
+        .FirstOrDefaultAsync(p => p.ID == id);
+            var silinecekKullanici = profil.Kullanici;
             if (profil != null)
             {
                 _context.Profiller.Remove(profil);
+                if (silinecekKullanici != null)
+                {
+                    _context.Kullanicilar.Remove(silinecekKullanici);
+                }
             }
 
             await _context.SaveChangesAsync();

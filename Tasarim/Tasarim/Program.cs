@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using Tasarim.Data;
 using Tasarim.Service.Abstract;
+using Tasarim.Service.Concrate;
 using Tasarim.Service.Concrete;
 using Tasarim.Service.Concrete.LLM;
 
@@ -25,7 +26,8 @@ builder.Services.AddScoped<ILlmProvider, GroqLlmProvider>();
 // LLM Yöneticilerini sisteme kaydediyoruz
 builder.Services.AddScoped<YorumAnalizYoneticisi>();
 builder.Services.AddScoped<KumelemeYoneticisi>();
-
+// sepet
+builder.Services.AddScoped<ISepetService, SepetService>();
 
 
 builder.Services.AddSession(options =>
