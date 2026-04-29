@@ -5,8 +5,6 @@ namespace Tasarim.Core.LLMmodel
     public class YorumVerisi
     {
         public string BirlesikYorum { get; set; } = string.Empty;
-        public string HamArtilar { get; set; } = string.Empty;
-        public string HamEksiler { get; set; } = string.Empty;
         public int UrunID { get; set; }
         public int ToplamYorumSayisi { get; set; }
     }

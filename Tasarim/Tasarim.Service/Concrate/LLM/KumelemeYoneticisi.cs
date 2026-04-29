@@ -1,6 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
+using System.Threading;
+using System.Threading.Tasks;
 using Tasarim.Core.Entities;
 using Tasarim.Core.LLMmodel;
 using Tasarim.Data;
@@ -10,6 +17,12 @@ namespace Tasarim.Service.Concrete.LLM
     public class KumelemeYoneticisi
     {
         private readonly DatabaseContext _context;
+
+        // TÜRKÇE KARAKTER DESTEĞİ İÇİN JSON AYARLARI:
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+        };
 
         public KumelemeYoneticisi(DatabaseContext context)
         {
@@ -22,7 +35,6 @@ namespace Tasarim.Service.Concrete.LLM
                 .AsNoTracking()
                 .ToDictionaryAsync(l => l.UrunID, l => l.ToplamYorum, ct);
 
-            //YorumAnalizleri tablosundan güncel verileri çek
             var tumYorumGruplari = await _context.YorumAnalizleri
                 .Include(ya => ya.Yorum)
                 .GroupBy(ya => ya.Yorum.UrunID)
@@ -36,6 +48,8 @@ namespace Tasarim.Service.Concrete.LLM
                 .ToListAsync(ct);
 
             var islenecekVeriListesi = new List<YorumVerisi>();
+            var islenecekUrunIdleri = new List<int>();
+            var hamVeriler = new Dictionary<int, (List<string> Artilar, List<string> Eksiler)>();
 
             foreach (var grup in tumYorumGruplari)
             {
@@ -48,16 +62,16 @@ namespace Tasarim.Service.Concrete.LLM
                     {
                         UrunID = grup.UrunID,
                         BirlesikYorum = string.Join(" ", grup.Artilar) + " " + string.Join(" ", grup.Eksiler),
-                        HamArtilar = string.Join("|", grup.Artilar),
-                        HamEksiler = string.Join("|", grup.Eksiler),
                         ToplamYorumSayisi = grup.GuncelYorumSayisi
                     });
+
+                    islenecekUrunIdleri.Add(grup.UrunID);
+                    hamVeriler.Add(grup.UrunID, (grup.Artilar, grup.Eksiler));
                 }
             }
 
             if (!islenecekVeriListesi.Any()) return;
 
-            //ML.NET İşlemleri (Dinamik Küme Sayısı)
             var mlContext = new MLContext(seed: 42);
             var veriView = mlContext.Data.LoadFromEnumerable(islenecekVeriListesi);
 
@@ -67,28 +81,36 @@ namespace Tasarim.Service.Concrete.LLM
                 .Append(mlContext.Clustering.Trainers.KMeans("Features", numberOfClusters: dinamikKumeSayisi));
 
             var model = pipeline.Fit(veriView);
-            var predEngine = mlContext.Model.CreatePredictionEngine<YorumVerisi, KumeTahmini>(model);
 
-            // Veritabanını Güncelleme
-            foreach (var veri in islenecekVeriListesi)
+            var transformedData = model.Transform(veriView);
+            var predictions = mlContext.Data.CreateEnumerable<KumeTahmini>(transformedData, reuseRowObject: false).ToList();
+
+            var guncellenecekKayitlar = await _context.LLSonuclari
+                .Where(l => islenecekUrunIdleri.Contains(l.UrunID))
+                .ToDictionaryAsync(l => l.UrunID, ct);
+
+            for (int i = 0; i < islenecekVeriListesi.Count; i++)
             {
-                var prediction = predEngine.Predict(veri);
+                var veri = islenecekVeriListesi[i];
+                var prediction = predictions[i];
 
                 string duygu = prediction.SelectedClusterId switch
                 {
                     1 => "Pozitif",
                     2 => "Negatif",
-                    3 => "Nötr", // 3 gelirse direkt Nötr yaz
+                    _ => "Nötr",
                 };
 
-                var mevcutKayit = await _context.LLSonuclari.FirstOrDefaultAsync(l => l.UrunID == veri.UrunID, ct);
+                var hamVeri = hamVeriler[veri.UrunID];
+                string jsonTopArtilar = GetTop5Phrases(hamVeri.Artilar);
+                string jsonTopEksiler = GetTop5Phrases(hamVeri.Eksiler);
 
-                if (mevcutKayit != null)
+                if (guncellenecekKayitlar.TryGetValue(veri.UrunID, out var mevcutKayit))
                 {
                     mevcutKayit.DuyguDagilim = duygu;
                     mevcutKayit.ToplamYorum = veri.ToplamYorumSayisi;
-                    mevcutKayit.TopArtilar = GetTop5Phrases(veri.HamArtilar);
-                    mevcutKayit.TopEksiler = GetTop5Phrases(veri.HamEksiler);
+                    mevcutKayit.TopArtilar = jsonTopArtilar;
+                    mevcutKayit.TopEksiler = jsonTopEksiler;
                     mevcutKayit.SonGuncelleme = DateTime.Now;
                     _context.LLSonuclari.Update(mevcutKayit);
                 }
@@ -99,8 +121,8 @@ namespace Tasarim.Service.Concrete.LLM
                         UrunID = veri.UrunID,
                         DuyguDagilim = duygu,
                         ToplamYorum = veri.ToplamYorumSayisi,
-                        TopArtilar = GetTop5Phrases(veri.HamArtilar),
-                        TopEksiler = GetTop5Phrases(veri.HamEksiler),
+                        TopArtilar = jsonTopArtilar,
+                        TopEksiler = jsonTopEksiler,
                         SonGuncelleme = DateTime.Now
                     };
                     await _context.LLSonuclari.AddAsync(yeni, ct);
@@ -109,19 +131,28 @@ namespace Tasarim.Service.Concrete.LLM
 
             await _context.SaveChangesAsync(ct);
         }
-        private string GetTop5Phrases(string text)
+
+        private string GetTop5Phrases(List<string> phrasesList)
         {
-            if (string.IsNullOrWhiteSpace(text)) return "-";
+            if (phrasesList == null || !phrasesList.Any()) return "[]";
 
-            var phrases = text.Split(new[] { '|', ',', '.' }, StringSplitOptions.RemoveEmptyEntries)
-                              .Select(p => p.Trim())
-                              .Where(p => p.Length > 3)
-                              .GroupBy(p => p, StringComparer.OrdinalIgnoreCase)
-                              .OrderByDescending(g => g.Count())
-                              .Take(5)
-                              .Select(g => g.Key);
+            // Türkçe karakter için CultureInfo tanımı (Örn: I-ı, İ-i uyumu)
+            var turkishCulture = new System.Globalization.CultureInfo("tr-TR");
 
-            return phrases.Any() ? string.Join(", ", phrases) : "-";
+            var topPhrases = phrasesList
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .Select(p => p.Replace("[", "").Replace("]", "").Replace("\"", "").Trim())
+                .SelectMany(p => p.Split(new[] { '|', ',', '.' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(p => p.Trim())
+                .Where(p => p.Length > 3)
+                .GroupBy(p => p, StringComparer.Create(turkishCulture, true)) //Tanrı Türk'ü korusun
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => g.Key)
+                .ToList();
+
+            // Tanımladığımız _jsonOptions'ı kullanarak çeviri yapıyoruz
+            return topPhrases.Any() ? JsonSerializer.Serialize(topPhrases, _jsonOptions) : "[]";
         }
     }
 }
