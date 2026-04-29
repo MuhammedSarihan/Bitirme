@@ -1,14 +1,52 @@
 ﻿@model IEnumerable<Tasarim.Core.Entities.Kampanya>
-
 @{
+    ViewData["Title"] = "Kampanyalar";
+    var aktifKampanyalar = Model?.Where(k => k.KampanyaAktifMi).ToList();
 }
 
-<div class="my-5">
-    <h1 class="text-center">Kampanyalarımız</h1>
-    <div class="row gx-4 gx-lg-5 row-cols-2 justify-content-center">
-        @foreach (var item in Model)
+<div class="container my-5 pt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-6 font-playfair fw-bold mb-2">Ayrıcalıklı Kampanyalar</h1>
+        <div class="mx-auto bg-dark" style="height: 2px; width: 60px;"></div>
+    </div>
+
+    <div class="row g-5">
+        @if (aktifKampanyalar != null && aktifKampanyalar.Any())
         {
-            <partial name="_KampanyalarView" model="item" />
+            @foreach (var item in aktifKampanyalar)
+            {
+                <div class="col-12 campaign-wrapper">
+                    <partial name="_KampanyalarView" model="item" />
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">Şu an aktif bir kampanya bulunmamaktadır.</p>
+            </div>
         }
     </div>
 </div>
+
+<style>
+    .font-playfair {
+        font-family: 'Playfair Display', serif;
+    }
+
+    /* Masaüstünde bir resim sağda bir resim solda (Zebra Düzeni) */
+    @@media (min-width: 992px) {
+        .campaign-wrapper:nth-child(even) .campaign-row {
+            flex-direction: row-reverse;
+        }
+    }
+
+    .campaign-card {
+        transition: transform 0.3s ease;
+        border: none !important;
+    }
+
+        .campaign-card:hover {
+            transform: translateY(-5px);
+        }
+</style>

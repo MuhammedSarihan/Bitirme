@@ -1,20 +1,48 @@
-﻿@model IEnumerable<Kategori>
+﻿@model IEnumerable<Tasarim.Core.Entities.Kategori>
 
-@{
-    foreach(var anaKategori in Model.Where(c=> c.UstKategoriID==null && c.AktifMi && c.UstteGoster))
+<ul class="navbar-nav gap-2 gap-lg-4 text-uppercase small fw-bold letter-spacing-1 py-2 py-lg-0">
+
+    <li class="nav-item d-lg-none border-bottom mb-2 pb-2">
+        <a class="nav-link text-dark" href="/">Anasayfa</a>
+    </li>
+
+    @if (Model != null)
     {
-        <div class="dropdown">
-            <a class="btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                @anaKategori.KategoriAd
-            </a>
+        // 1. Senin orijinal filtren: Sadece üst kategorileri, aktif olanları ve üstte gösterilecekleri al
+        foreach (var anaKategori in Model.Where(c => c.UstKategoriID == null && c.AktifMi && c.UstteGoster))
+        {
+            // 2. Bu ana kategoriye ait alt kategorileri senin mantığınla buluyoruz
+            var altKategoriler = Model.Where(c => c.UstKategoriID == anaKategori.ID && c.AktifMi).ToList();
 
-            <ul class="dropdown-menu">
-                @foreach (var altKategori in Model.Where(c => c.UstKategoriID == anaKategori.ID))
-                {
-                    <li><a class="dropdown-item" href="/Kategoriler/Index/@altKategori.ID">@altKategori.KategoriAd</a></li>
-                }    
-            </ul>
-        </div>
+            // EĞER ALT KATEGORİSİ VARSA (Açılır Menü - Dropdown Yap)
+            if (altKategoriler.Any())
+            {
+                <li class="nav-item dropdown hover-dropdown">
+                    <a class="nav-link text-dark py-lg-3 hover-gold transition-300 d-flex align-items-center gap-1" href="/Kategoriler/Index/@anaKategori.ID" id="kat_@anaKategori.ID">
+                        @anaKategori.KategoriAd <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.6rem;"></i>
+                    </a>
+
+                    <ul class="dropdown-menu border-0 shadow-sm rounded-0 m-0 py-2 fade-down" aria-labelledby="kat_@anaKategori.ID">
+                        @foreach (var altKategori in altKategoriler)
+                        {
+                            <li>
+                                <a class="dropdown-item py-2 text-capitalize small hover-gold transition-300" href="/Kategoriler/Index/@altKategori.ID">
+                                    @altKategori.KategoriAd
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+            // EĞER ALT KATEGORİSİ YOKSA (Düz Tıklanabilir Link Yap)
+            else
+            {
+                <li class="nav-item">
+                    <a class="nav-link text-dark py-lg-3 hover-gold transition-300" href="/Kategoriler/Index/@anaKategori.ID">
+                        @anaKategori.KategoriAd
+                    </a>
+                </li>
+            }
+        }
     }
-
-}
+</ul>

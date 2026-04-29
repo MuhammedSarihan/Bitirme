@@ -1,0 +1,42 @@
+﻿@model Tasarim.Core.Entities.Kampanya
+
+<div class="card shadow-sm rounded-0 bg-white overflow-hidden campaign-card">
+    <div class="row g-0 campaign-row align-items-stretch" style="min-height: 450px;">
+
+        <div class="col-lg-6 position-relative p-0" style="min-height: 450px;">
+            <a asp-controller="Kampanyalar" asp-action="Detay" asp-route-id="@Model.ID" class="d-block w-100 h-100">
+                <img src="/img/@Model.KampanyaResmi"
+                     class="w-100 h-100 object-fit-cover d-block"
+                     style="position: absolute; top:0; left:0; min-height: 450px;"
+                     alt="@Model.KampanyaAd"
+                     onerror="this.src='/img/placeholder.jpg';">
+            </a>
+        </div>
+
+        <div class="col-lg-6 d-flex flex-column justify-content-center p-4 p-lg-5 bg-light">
+            <div class="mb-3">
+                <span class="badge bg-dark text-white rounded-0 px-3 py-2 text-uppercase">
+                    @if (Model.IndirimTutari > 0)
+                    {
+                        @(Model.IndirimTipi == Tasarim.Core.Entities.IndirimTipi.Yuzde ? "%" + Model.IndirimTutari.ToString("0") : Model.IndirimTutari.ToString("N0") + " TL")
+                        <text> İndirim</text>
+                    }
+                    else
+                    {
+                        <text>Özel Fırsat</text>
+                    }
+                </span>
+            </div>
+
+            <h2 class="font-playfair fw-bold text-dark mb-3">@Model.KampanyaAd</h2>
+            <p class="text-muted mb-4" style="font-size: 1.1rem; line-height: 1.7;">@Model.Aciklama</p>
+
+            <div class="mt-auto">
+                <a asp-controller="Kampanyalar" asp-action="Details" asp-route-id="@Model.ID"
+                   class="btn btn-outline-dark rounded-0 px-4 py-2 fw-bold text-uppercase d-inline-flex align-items-center gap-2">
+                    Ürünleri İncele <i class="fa-solid fa-arrow-right-long"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

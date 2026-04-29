@@ -1,83 +1,78 @@
-﻿<header class="sticky-top">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm py-3 transition-300">
-        <div class="container">
-            <a class="navbar-brand font-playfair fw-bold fs-3 text-dark letter-spacing-1" asp-area="" asp-controller="Home" asp-action="Index">
+﻿<header class="sticky-top bg-white shadow-sm transition-300">
+
+    <div class="border-bottom py-3">
+        <div class="container d-flex align-items-center justify-content-between gap-3">
+
+            <button class="navbar-toggler border-0 shadow-none d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#altKatmanKategoriler" aria-controls="altKatmanKategoriler" aria-expanded="false" aria-label="Menüyü Aç">
+                <i class="fa-solid fa-bars fs-3"></i>
+            </button>
+
+            <a class="navbar-brand font-playfair fw-bold fs-3 text-dark letter-spacing-1 mb-0" asp-controller="Home" asp-action="Index">
                 LUVIA LUKKA
             </a>
 
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between align-items-center mt-3 mt-lg-0">
-
-                <ul class="navbar-nav mx-auto gap-1 gap-lg-4 text-uppercase small fw-bold letter-spacing-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark hover-gold transition-300" asp-controller="Home" asp-action="Index">Anasayfa</a>
-                    </li>
-
-                    @await Component.InvokeAsync("Kategoriler")
-
-                    <li class="nav-item">
-                        <a class="nav-link text-dark hover-gold transition-300" asp-controller="Home" asp-action="ContactUs">İletişim</a>
-                    </li>
-                </ul>
-
-                <div class="d-flex align-items-center justify-content-center justify-content-lg-end gap-3 gap-lg-4 mt-3 mt-lg-0">
-
-                    <form action="/Urunler/Index" class="position-relative d-none d-md-block" role="search">
-                        <input name="q" type="search" class="form-control rounded-pill pe-5 shadow-sm border-light bg-light font-sm" placeholder="Ürün ara..." aria-label="Search" style="width: 220px;">
-                        <button type="submit" class="btn border-0 position-absolute top-50 end-0 translate-middle-y text-muted hover-gold transition-300">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
-                    </form>
-
-                    <a href="/Home/KargoTakip" class="text-dark text-decoration-none d-flex align-items-center gap-2 hover-gold transition-300">
-                        <i class="fa-solid fa-truck-fast fs-5"></i>
-                        <span class="fw-semibold small d-none d-xl-inline">Kargom Nerede</span>
-                    </a>
-
-                    <div class="dropdown">
-                        <a class="text-dark text-decoration-none d-flex align-items-center gap-2 hover-gold transition-300 cursor-pointer" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Hesap İşlemleri">
-                            @if (Context.User.Identity!.IsAuthenticated)
-                            {
-                                <i class="fa-solid fa-user-check text-success fs-5"></i>
-                                <span class="fw-semibold small d-none d-xl-inline">Hesabım</span>
-                            }
-                            else
-                            {
-                                <i class="fa-regular fa-user fs-5"></i>
-                                <span class="fw-semibold small d-none d-xl-inline">Üye Girişi</span>
-                            }
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-3" style="min-width: 200px;">
-                            @if (Context.User.Identity.IsAuthenticated)
-                            {
-                                <li><h6 class="dropdown-header font-playfair fs-6 fw-bold">Hoş Geldiniz</h6></li>
-                                <li><a class="dropdown-item py-2 small hover-gold transition-300" href="/Hesap"><i class="fa-regular fa-id-badge me-2 text-muted"></i>Profilim</a></li>
-                                <li><a class="dropdown-item py-2 small hover-gold transition-300" href="/#"><i class="fa-solid fa-box-open me-2 text-muted"></i>Siparişlerim</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 small text-danger hover-gold-bg transition-300" href="/Hesap/SignOut"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Çıkış Yap</a></li>
-                            }
-                            else
-                            {
-                                <li><h6 class="dropdown-header font-playfair fs-6 fw-bold">Üye İşlemleri</h6></li>
-                                <li><a class="dropdown-item py-2 small hover-gold transition-300" href="/Hesap/SignIn"><i class="fa-solid fa-right-to-bracket me-2 text-muted"></i>Giriş Yap</a></li>
-                                <li><a class="dropdown-item py-2 small hover-gold transition-300" href="/Hesap/SignUp"><i class="fa-solid fa-user-plus me-2 text-muted"></i>Kayıt Ol</a></li>
-                            }
-                        </ul>
-                    </div>
-
-                    <a href="/Favoriler" class="text-dark text-decoration-none d-flex align-items-center gap-2 hover-gold transition-300" title="Favorilerim">
-                        <i class="fa-regular fa-heart fs-5"></i>
-                        <span class="fw-semibold small d-none d-xl-inline">Favorilerim</span>
-                    </a>
-
-                    @await Component.InvokeAsync("SepetOzet")
-
+            <form action="/Urunler/Index" class="flex-grow-1 mx-lg-5 d-none d-lg-block" role="search" style="max-width: 600px;">
+                <div class="input-group">
+                    <input name="q" type="search" class="form-control rounded-start-pill border-secondary py-2 px-4 bg-light" placeholder="Ürün, kategori veya marka ara..." aria-label="Search">
+                    <button type="submit" class="btn btn-dark rounded-end-pill px-4 hover-gold-bg border-0 transition-300">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
                 </div>
-            </div>
+            </form>
 
+            <div class="d-flex align-items-center gap-3 gap-xl-4">
+
+                <a href="/Home/KargoTakip" class="text-dark text-decoration-none d-flex flex-column align-items-center flex-xl-row gap-xl-2 hover-gold transition-300">
+                    <i class="fa-solid fa-truck-fast fs-5 mb-1 mb-xl-0"></i>
+                    <span class="fw-semibold small d-none d-md-inline">Kargom Nerede</span>
+                </a>
+
+                <a href="/Favoriler" class="text-dark text-decoration-none d-flex flex-column align-items-center flex-xl-row gap-xl-2 hover-gold transition-300">
+                    <div class="position-relative">
+                        <i class="fa-regular fa-heart fs-5 mb-1 mb-xl-0"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-xl-none"></span>
+                    </div>
+                    <span class="fw-semibold small d-none d-md-inline">Favorilerim</span>
+                </a>
+
+                @await Component.InvokeAsync("SepetOzet")
+
+                <div class="dropdown">
+                    <a class="text-dark text-decoration-none d-flex flex-column align-items-center flex-xl-row gap-xl-2 hover-gold transition-300 cursor-pointer" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @if (Context.User.Identity!.IsAuthenticated)
+                        {
+                            <i class="fa-solid fa-user-check text-success fs-5 mb-1 mb-xl-0"></i>
+                            <span class="fw-semibold small d-none d-md-inline">Hesabım</span>
+                        }
+                        else
+                        {
+                            <i class="fa-regular fa-user fs-5 mb-1 mb-xl-0"></i>
+                            <span class="fw-semibold small d-none d-md-inline">Üye Girişi</span>
+                        }
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-0 mt-3">
+                        @if (Context.User.Identity.IsAuthenticated)
+                        {
+                            <li><a class="dropdown-item py-2 small" href="/Hesap">Profilim</a></li>
+                            <li><a class="dropdown-item py-2 small text-danger" href="/Hesap/SignOut">Çıkış Yap</a></li>
+                        }
+                        else
+                        {
+                            <li><a class="dropdown-item py-2 small" href="/Hesap/SignIn">Giriş Yap</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/Hesap/SignUp">Kayıt Ol</a></li>
+                        }
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg bg-white py-0">
+        <div class="container">
+            <div class="collapse navbar-collapse justify-content-center" id="altKatmanKategoriler">
+                @await Component.InvokeAsync("Kategoriler")
+            </div>
         </div>
     </nav>
 </header>

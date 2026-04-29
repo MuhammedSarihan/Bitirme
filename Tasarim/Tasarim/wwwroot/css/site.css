@@ -105,3 +105,38 @@ main, .container {
         color: #fff;
         transform: translateY(-3px);
     }
+
+
+/* Masaüstü ekranlarda (992px ve üzeri) menünün üzerine gelince açılmasını sağlar */
+@media all and (min-width: 992px) {
+    .hover-dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+    /* Üzerine gelince yanındaki küçük okun yukarı dönmesi */
+    .hover-dropdown:hover .fa-chevron-down {
+        transform: rotate(180deg);
+        transition: transform 0.3s ease;
+    }
+}
+
+/* Menü aşağı düşerken zarif bir animasyon efekti */
+.fade-down {
+    animation: fadeDown 0.3s ease-in-out;
+}
+
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

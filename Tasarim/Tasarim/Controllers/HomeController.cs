@@ -48,8 +48,15 @@ namespace Tasarim.Controllers
         {
             return View();
         }
-
-        public IActionResult Privacy()
+        public IActionResult Kvkk()
+        {
+            return View();
+        }
+        public IActionResult TeslimatIade()
+        {
+            return View();
+        }
+        public IActionResult Hakkimizda()
         {
             return View();
         }
