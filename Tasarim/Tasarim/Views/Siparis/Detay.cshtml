@@ -1,0 +1,72 @@
+﻿@model Tasarim.Core.Entities.Siparis
+@{ 
+    ViewData["Title"] = "Sipariş Detayı";
+}
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .print-area { display: block !important; width: 100%; border: none !important; }
+        body { background: white; }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between no-print mb-4">
+        <a asp-action="Index" class="btn btn-outline-dark">← Listeye Dön</a>
+        <button onclick="window.print()" class="btn btn-primary">🖨️ SİPARİŞİ YAZDIR</button>
+    </div>
+
+    <div class="print-area card p-5 shadow-sm border-0">
+        <!-- Fatura Başlık -->
+        <div class="row border-bottom pb-4 mb-4">
+            <div class="col-6">
+                <h2 class="fw-bold">LUVIA LUKKA</h2>
+                <p class="text-muted mb-0">Sipariş Bilgi Formu</p>
+            </div>
+            <div class="col-6 text-end">
+                <h4 class="mb-1">#@Model.SiparisNo</h4>
+                <p class="mb-0">Tarih: @Model.SiparisTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+            </div>
+        </div>
+
+        <!-- Müşteri & Adres Bilgileri -->
+        <div class="row mb-5">
+            <div class="col-6">
+                <h6 class="fw-bold text-uppercase text-muted small">Müşteri Bilgileri</h6>
+                <p class="mb-1"><strong>@Model.Kullanici?.Profil?.Ad @Model.Kullanici?.Profil?.Soyad</strong></p>
+                <p class="mb-1">@Model.Kullanici?.Profil?.TelNo</p>
+                <p class="mb-1">@Model.Kullanici?.Profil?.Mail</p>
+            </div>
+            <div class="col-6 text-end">
+                <h6 class="fw-bold text-uppercase text-muted small">Teslimat Adresi</h6>
+                <p class="mb-0">@Model.TeslimatAdresi</p>
+            </div>
+        </div>
+
+        <!-- Ürün Listesi (Beden/Renk Dahil) -->
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Ürün</th>
+                    <th>Varyasyon (Beden/Renk)</th>
+                    <th class="text-center">Adet</th>
+                    <th class="text-end">Fiyat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.SiparisDetaylari) {
+                    <tr>
+                        <td><strong>@d.Urun.Baslik</strong><br><small>Kod: @d.Urun.UrunKod</small></td>
+                        <td>@(d.UrunVaryasyon?.Beden ?? "-") / @(d.Urun?.Renk ?? "-")</td>
+                        <td class="text-center">@d.Adet</td>
+                        <td class="text-end">@d.BirimFiyat.ToString("N2") TL</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="text-end mt-4">
+            <h4 class="fw-bold">Toplam: @Model.ToplamTutar.ToString("N2") TL</h4>
+        </div>
+    </div>
+</div>

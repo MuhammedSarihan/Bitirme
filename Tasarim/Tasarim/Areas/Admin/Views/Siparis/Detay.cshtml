@@ -1,0 +1,158 @@
+﻿@model Tasarim.Core.Entities.Siparis
+@{ 
+    ViewData["Title"] = "Sipariş Detayı - " + Model.SiparisNo;
+    bool isLocked = Model.SiparisDurumuID == 4 || Model.SiparisDurumuID == 5;
+}
+
+<div class="container-fluid py-4">
+    <!-- Üst Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-dark rounded-0 px-4 text-uppercase letter-spacing-1 small mb-3">
+                <i class="fa-solid fa-arrow-left me-2"></i> Listeye Dön
+            </a>
+            <h3 class="font-playfair fw-bold text-dark mb-0">Sipariş: <span class="text-gold">#@Model.SiparisNo</span></h3>
+        </div>
+        <div class="text-end">
+            <span class="d-block small text-muted text-uppercase letter-spacing-1">Sipariş Tarihi</span>
+            <span class="fw-bold fs-5">@Model.SiparisTarihi.ToString("dd MMMM yyyy - HH:mm")</span>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null) {
+        <div class="alert alert-success rounded-0 border-0 border-start border-4 border-success"><i class="fa-solid fa-check me-2"></i> @TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null) {
+        <div class="alert alert-danger rounded-0 border-0 border-start border-4 border-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["Error"]</div>
+    }
+
+    <div class="row g-4">
+        <!-- SOL SÜTUN (Üstte Müşteri, Altta Ürünler) -->
+        <div class="col-lg-8">
+            
+            <!-- 1. Müşteri Bilgileri (ÜSTTE) -->
+            <div class="card border-dark-subtle rounded-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom border-dark-subtle py-3">
+                    <h6 class="font-playfair fw-bold m-0 text-uppercase"><i class="fa-solid fa-address-card text-gold me-2"></i> Müşteri & Teslimat Bilgileri</h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 border-end border-light">
+                            <h5 class="fw-bold text-dark mb-3">@Model.Kullanici?.Profil?.Ad @Model.Kullanici?.Profil?.Soyad</h5>
+                            <p class="mb-2"><i class="fa-solid fa-phone text-muted me-2"></i> @Model.Kullanici?.Profil?.TelNo</p>
+                            <p class="mb-0"><i class="fa-solid fa-envelope text-muted me-2"></i> @Model.Kullanici?.Profil?.Mail</p>
+                        </div>
+                        <div class="col-md-6 ps-md-4 mt-3 mt-md-0">
+                            <h6 class="fw-bold small text-uppercase text-muted letter-spacing-1 mb-2">Açık Teslimat Adresi</h6>
+                            <p class="mb-0 lh-base text-dark">@Model.TeslimatAdresi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Ürün Listesi (ALTTA VE RESİMLİ) -->
+            <div class="card border-dark-subtle rounded-0 shadow-sm">
+                <div class="card-header bg-white border-bottom border-dark-subtle py-3">
+                    <h6 class="font-playfair fw-bold m-0 text-uppercase"><i class="fa-solid fa-box-open text-gold me-2"></i> Sipariş İçeriği</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 text-uppercase small text-muted letter-spacing-1">Ürün</th>
+                                    <th class="text-uppercase small text-muted letter-spacing-1 text-center">Beden/Renk</th>
+                                    <th class="text-uppercase small text-muted letter-spacing-1 text-center">Adet</th>
+                                    <th class="text-uppercase small text-muted letter-spacing-1 text-end pe-4">Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detay in Model.SiparisDetaylari)
+                                {
+                                    <tr class="border-bottom border-light">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <!-- Küçük Ürün Fotoğrafı -->
+                                                <img src="~/img/@(detay.Urun.AnaResim ?? "placeholder.jpg")" 
+                                                     class="border border-dark-subtle p-1 bg-white me-3" 
+                                                     style="width: 60px; height: 80px; object-fit: cover;" 
+                                                     alt="@detay.Urun.Baslik" />
+                                                
+                                                <div>
+                                                    <div class="fw-bold text-dark fs-6">@detay.Urun.Baslik</div>
+                                                    <div class="small text-muted mt-1">Kod: @detay.Urun.UrunKod</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge border border-dark text-dark rounded-0 px-2 py-1">
+                                                @(detay.UrunVaryasyon?.Beden ?? "-") / @(detay.Urun?.Renk ?? "-")
+                                            </span>
+                                        </td>
+                                        <td class="text-center fw-bold fs-5">@detay.Adet</td>
+                                        <td class="text-end pe-4">
+                                            <strong class="text-dark d-block">@((detay.Adet * detay.BirimFiyat).ToString("N2")) TL</strong>
+                                            <small class="text-muted">(@detay.BirimFiyat.ToString("N2") TL)</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ SÜTUN (Yönetim ve Fiyat) -->
+        <div class="col-lg-4">
+            <div class="card border-dark-subtle rounded-0 shadow-sm bg-dark text-white mb-4">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <span class="text-uppercase letter-spacing-1 small text-white-50">Genel Toplam</span>
+                    <h3 class="font-playfair fw-bold text-gold mb-0">@Model.ToplamTutar.ToString("N2") TL</h3>
+                </div>
+            </div>
+
+            <div class="card border-dark-subtle rounded-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h5 class="font-playfair fw-bold border-bottom border-dark-subtle pb-3 mb-4"><i class="fa-solid fa-sliders text-gold me-2"></i> Yönetim</h5>
+                    
+                    <form asp-action="DurumGuncelle" method="post">
+                        <input type="hidden" name="id" value="@Model.ID" />
+                        
+                        <div class="mb-4">
+                            <label class="form-label small text-uppercase letter-spacing-1 fw-bold text-muted">Sipariş Durumu</label>
+                            <select name="SiparisDurumuID" class="form-select form-select-lg rounded-0 border-dark-subtle fw-bold" asp-items="ViewBag.Durumlar" disabled="@(isLocked ? "disabled" : null)"></select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small text-uppercase letter-spacing-1 fw-bold text-muted">Kargo Takip No</label>
+                            <input type="text" name="KargoNo" class="form-control form-control-lg rounded-0 border-dark-subtle" value="@Model.KargoNo" disabled="@(isLocked ? "disabled" : null)">
+                        </div>
+
+                        @if (!isLocked) {
+                            <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold letter-spacing-1 py-3 hover-gold-bg">Güncelle</button>
+                        } else {
+                            <div class="alert @(Model.SiparisDurumuID == 5 ? "alert-danger" : "alert-success") rounded-0 border-0 text-center mb-0">
+                                <i class="fa-solid @(Model.SiparisDurumuID == 5 ? "fa-ban" : "fa-check") fs-3 mb-2 d-block"></i>
+                                <small class="fw-bold text-uppercase">@(Model.SiparisDurumuID == 5 ? "İptal Edildi" : "Teslim Edildi")<br>Değiştirilemez</small>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+            
+            <a asp-action="FisYazdir" asp-route-id="@Model.ID" target="_blank" class="btn btn-outline-dark w-100 rounded-0 mt-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg py-2">
+                <i class="fa-solid fa-receipt me-2"></i> Çıktı Al
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+    </style>
+}

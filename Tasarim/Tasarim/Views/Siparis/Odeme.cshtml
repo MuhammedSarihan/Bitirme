@@ -1,0 +1,155 @@
+﻿@model Tasarim.Models.OdemeViewModel
+
+@{
+    ViewData["Title"] = "Güvenli Ödeme";
+}
+
+<div class="container my-5 pt-4">
+    
+    <div class="text-center mb-5 pb-2">
+        <h1 class="display-6 font-playfair fw-bold mb-2">Güvenli Ödeme</h1>
+        <div class="mx-auto bg-dark" style="height: 2px; width: 60px;"></div>
+        <p class="text-muted mt-3 small text-uppercase letter-spacing-1">Siparişinizi Tamamlayın</p>
+    </div>
+
+    <form asp-action="Odeme" asp-controller="Siparis" method="post">
+        <div class="row g-5">
+            
+            <!-- SOL TARAF: FORM ALANI -->
+            <div class="col-lg-8">
+                
+                <!-- 1. Teslimat Bilgileri -->
+                <div class="bg-white p-4 p-md-5 border shadow-sm rounded-0 mb-4">
+                    <h4 class="font-playfair fw-bold mb-4 border-bottom pb-3"><i class="fa-solid fa-truck-fast me-2 text-gold"></i> Teslimat Bilgileri</h4>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label asp-for="AdSoyad" class="form-label small text-uppercase fw-bold text-muted">Ad Soyad</label>
+                            <input asp-for="AdSoyad" class="form-control form-control-lg rounded-0 border-dark-subtle" placeholder="Adınız Soyadınız">
+                            <span asp-validation-for="AdSoyad" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Telefon" class="form-label small text-uppercase fw-bold text-muted">Telefon Numaranız</label>
+                            <input asp-for="Telefon" class="form-control form-control-lg rounded-0 border-dark-subtle" placeholder="05XX XXX XX XX">
+                            <span asp-validation-for="Telefon" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="TeslimatAdresi" class="form-label small text-uppercase fw-bold text-muted">Açık Teslimat Adresi</label>
+                            <textarea asp-for="TeslimatAdresi" class="form-control rounded-0 border-dark-subtle" rows="3" placeholder="Mahalle, Sokak, No, Daire, İlçe/İl"></textarea>
+                            <span asp-validation-for="TeslimatAdresi" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Ödeme Bilgileri (Kredi Kartı) -->
+                <div class="bg-white p-4 p-md-5 border shadow-sm rounded-0">
+                    <h4 class="font-playfair fw-bold mb-4 border-bottom pb-3"><i class="fa-regular fa-credit-card me-2 text-gold"></i> Ödeme Bilgileri</h4>
+                    
+                    <!-- Kart Logoları -->
+                    <div class="d-flex gap-2 mb-4">
+                        <i class="fa-brands fa-cc-visa fs-1 text-muted"></i>
+                        <i class="fa-brands fa-cc-mastercard fs-1 text-muted"></i>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label asp-for="KartSahibi" class="form-label small text-uppercase fw-bold text-muted">Kart Üzerindeki İsim</label>
+                            <input asp-for="KartSahibi" class="form-control form-control-lg rounded-0 border-dark-subtle">
+                            <span asp-validation-for="KartSahibi" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="KartNumarasi" class="form-label small text-uppercase fw-bold text-muted">Kart Numarası</label>
+                            <input asp-for="KartNumarasi" class="form-control form-control-lg rounded-0 border-dark-subtle" placeholder="XXXX XXXX XXXX XXXX" maxlength="16">
+                            <span asp-validation-for="KartNumarasi" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label asp-for="SonKullanmaAy" class="form-label small text-uppercase fw-bold text-muted">Ay</label>
+                            <select asp-for="SonKullanmaAy" class="form-select form-select-lg rounded-0 border-dark-subtle">
+                                <option value="">Seçiniz</option>
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i.ToString("00")">@i.ToString("00")</option>
+                                }
+                            </select>
+                            <span asp-validation-for="SonKullanmaAy" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="SonKullanmaYil" class="form-label small text-uppercase fw-bold text-muted">Yıl</label>
+                            <select asp-for="SonKullanmaYil" class="form-select form-select-lg rounded-0 border-dark-subtle">
+                                <option value="">Seçiniz</option>
+                                @for (int i = DateTime.Now.Year; i <= DateTime.Now.Year + 10; i++)
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            </select>
+                            <span asp-validation-for="SonKullanmaYil" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Cvv" class="form-label small text-uppercase fw-bold text-muted">CVV</label>
+                            <input asp-for="Cvv" class="form-control form-control-lg rounded-0 border-dark-subtle" placeholder="XXX" maxlength="3">
+                            <span asp-validation-for="Cvv" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SAĞ TARAF: SİPARİŞ ÖZETİ (Sticky) -->
+            <div class="col-lg-4">
+                <div class="bg-light p-4 border shadow-sm rounded-0 position-sticky" style="top: 100px;">
+                    <h5 class="font-playfair fw-bold mb-4">Sipariş Özeti</h5>
+                    
+                    <ul class="list-group list-group-flush mb-4 bg-transparent">
+                        <!-- İleride buraya sepetteki ürünler foreach ile basılacak -->
+                        <li class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Ara Toplam</span>
+                            <span class="fw-bold">@Model.OdenecekTutar.ToString("N2") TL</span>
+                        </li>
+                        <li class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Kargo Ücreti</span>
+                            <span class="text-success fw-bold">Ücretsiz</span>
+                        </li>
+                        <li class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center border-dark border-2 mt-2 pt-3">
+                            <span class="fw-bold text-uppercase">Genel Toplam</span>
+                            <span class="fw-bold fs-5 text-dark">@Model.OdenecekTutar.ToString("N2") TL</span>
+                        </li>
+                    </ul>
+
+                    <!-- ÖDENECEK TUTARI CONTROLLER'A GÖNDERMEK İÇİN GİZLİ INPUT -->
+                    <input type="hidden" asp-for="OdenecekTutar" />
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-dark btn-lg rounded-0 text-uppercase letter-spacing-1 fw-bold py-3 hover-gold-bg transition-300">
+                            <i class="fa-solid fa-lock me-2"></i> Siparişi Tamamla
+                        </button>
+                    </div>
+                    
+                    <p class="text-center text-muted small mt-3 mb-0">
+                        <i class="fa-solid fa-shield-halved me-1"></i> Kart bilgileriniz 256-bit SSL sertifikası ile korunmaktadır.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <!-- İstemci Tarafı Doğrulama (Hata mesajlarının anında çalışması için) -->
+    <partial name="_ValidationScriptsPartial" />
+    
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+        .transition-300 { transition: all 0.4s ease; }
+        
+        /* Inputlara focus olunca parlaması */
+        .form-control:focus, .form-select:focus {
+            border-color: #D4AF37 !important;
+            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+        }
+    </style>
+}

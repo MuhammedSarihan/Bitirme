@@ -38,62 +38,46 @@ namespace Tasarim.Data
         // --- İLİŞKİ VE AYARLAR (Fluent API) ---
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 1. Kullanıcı - Profil (1-1 İlişki)
-            modelBuilder.Entity<Kullanici>()
-                .HasOne(k => k.Profil)
-                .WithOne(p => p.Kullanici)
-                .HasForeignKey<Profil>(p => p.KullaniciID);
+            // --- MEVCUT İLİŞKİLERİNİZ (Kullanıcı, Profil, Sepet, Analiz, Kampanya) ---
+            modelBuilder.Entity<Kullanici>().HasOne(k => k.Profil).WithOne(p => p.Kullanici).HasForeignKey<Profil>(p => p.KullaniciID);
+            modelBuilder.Entity<Kullanici>().HasOne(k => k.Sepet).WithOne(s => s.Kullanici).HasForeignKey<Sepet>(s => s.KullaniciID);
+            modelBuilder.Entity<Yorum>().HasOne(y => y.YorumAnaliz).WithOne(ya => ya.Yorum).HasForeignKey<YorumAnaliz>(ya => ya.YorumID);
+            modelBuilder.Entity<Urun>().HasOne(u => u.LLSonuc).WithOne(l => l.Urun).HasForeignKey<LLSonuc>(l => l.UrunID);
+            modelBuilder.Entity<KampanyaUrunleri>().HasKey(cp => new { cp.UrunID, cp.KampanyaID });
 
-            // 2. Kullanıcı - Sepet (1-1 İlişki)
-            modelBuilder.Entity<Kullanici>()
-                .HasOne(k => k.Sepet)
-                .WithOne(s => s.Kullanici)
-                .HasForeignKey<Sepet>(s => s.KullaniciID);
+            modelBuilder.Entity<KampanyaUrunleri>().HasOne(cp => cp.Urun).WithMany(p => p.KampanyaUrunleri).HasForeignKey(cp => cp.UrunID);
+            modelBuilder.Entity<KampanyaUrunleri>().HasOne(cp => cp.Kampanya).WithMany(c => c.KampanyaUrunleri).HasForeignKey(cp => cp.KampanyaID);
 
-            // 3. Yorum - YorumAnaliz (1-1 İlişki)
-            modelBuilder.Entity<Yorum>()
-                .HasOne(y => y.YorumAnaliz)
-                .WithOne(ya => ya.Yorum)
-                .HasForeignKey<YorumAnaliz>(ya => ya.YorumID);
+            // --- PROFESYONEL EKLEMELER: UNIQUE CONSTRAINTS (BENZERSİZLİK) ---
+            // Aynı mail adresiyle ikinci bir kayıt yapılamaz
+            modelBuilder.Entity<Profil>().HasIndex(p => p.Mail).IsUnique();
+            // Aynı sipariş numarası iki kez üretilemez
+            modelBuilder.Entity<Siparis>().HasIndex(s => s.SiparisNo).IsUnique();
 
-            // 4. Ürün - LLSonuc (1-1 İlişki)
-            modelBuilder.Entity<Urun>()
-                .HasOne(u => u.LLSonuc)
-                .WithOne(l => l.Urun)
-                .HasForeignKey<LLSonuc>(l => l.UrunID);
-
-            //KampanyaUrunleri ara tablosu için composite key tanımlaması (UrunID + KampanyaID)
-            modelBuilder.Entity<KampanyaUrunleri>()
-                        .HasKey(cp => new { cp.UrunID, cp.KampanyaID});
-
-            // 5. Ürün - KampanyaUrunleri (1:N ilişki)
-            modelBuilder.Entity<KampanyaUrunleri>()
-                .HasOne(cp => cp.Urun)
-                .WithMany(p => p.KampanyaUrunleri)
-                .HasForeignKey(cp => cp.UrunID);
-
-            // 6. Kampanya - KampanyaUrunleri (1:N ilişki)
-            modelBuilder.Entity<KampanyaUrunleri>()
-                .HasOne(cp => cp.Kampanya)
-                .WithMany(c => c.KampanyaUrunleri)
-                .HasForeignKey(cp => cp.KampanyaID);
-
-
-            // 7. Para Alanları İçin Hassasiyet Ayarı
-            // SQL'de "decimal(18,2)" olarak tutulmasını sağlar.
+            // --- PARA BİRİMLERİ HASSASİYETİ ---
             modelBuilder.Entity<Urun>().Property(u => u.Fiyat).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Siparis>().Property(s => s.ToplamTutar).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<SiparisDetay>().Property(sd => sd.BirimFiyat).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Odeme>().Property(o => o.Tutar).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Kampanya>().Property(k => k.IndirimTutari).HasColumnType("decimal(18,2)");
+            // --- SİLME DAVRANIŞLARI (DATA INTEGRITY) ---
+            // Sipariş silinirse detayları silinsin (Mevcut doğru ayarınız)
+            modelBuilder.Entity<Siparis>().HasMany(s => s.SiparisDetaylari).WithOne(sd => sd.Siparis)
+                .HasForeignKey(sd => sd.SiparisID).OnDelete(DeleteBehavior.Cascade);
 
-            // DeleteBehavior Ayarları 
-            // Örneğin: Bir Sipariş silinirse, Detayları da silinsin mi? 
-            modelBuilder.Entity<Siparis>()
-                .HasMany(s => s.SiparisDetaylari)
-                .WithOne(sd => sd.Siparis)
-                .HasForeignKey(sd => sd.SiparisID)
-                .OnDelete(DeleteBehavior.Cascade);
-            // Bu projede IEntityTypeConfiguration uygulayan ne varsa bul ve uygula
+            // Ürün veya Varyasyon silinirse sipariş detayı SİLİNMESİN (Hata versin/Kısıtlasın)
+            // Bu sayede geçmiş satış verilerini korumuş oluruz.
+            modelBuilder.Entity<SiparisDetay>().HasOne(sd => sd.Urun).WithMany(u => u.SiparisDetaylari)
+                .HasForeignKey(sd => sd.UrunID).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SiparisDetay>().HasOne(sd => sd.UrunVaryasyon).WithMany(uv => uv.SiparisDetaylari)
+                .HasForeignKey(sd => sd.UrunVaryasyonID).OnDelete(DeleteBehavior.NoAction);
+
+            // --- CONCURRENCY TOKEN (STOK ÇAKIŞMA ÖNLEYİCİ) ---
+            // UrunVaryasyon tablosundaki RowVersion alanını DB tarafında mühürlüyoruz.
+            modelBuilder.Entity<UrunVaryasyon>().Property(uv => uv.RowVersion).IsRowVersion();
+
+            // Diğer konfigürasyonları uygula
             modelBuilder.ApplyConfigurationsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
             base.OnModelCreating(modelBuilder);
         }

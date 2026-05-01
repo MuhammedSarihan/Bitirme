@@ -1,0 +1,180 @@
+﻿@model IEnumerable<Tasarim.Core.Entities.Siparis>
+
+@{
+    ViewData["Title"] = "Siparişlerim";
+}
+
+<div class="container my-5 pt-4">
+    <div class="text-center mb-5 pb-2">
+        <h1 class="display-6 font-playfair fw-bold mb-2 text-dark">Siparişlerim</h1>
+        <div class="mx-auto bg-dark" style="height: 2px; width: 60px;"></div>
+        <p class="text-muted mt-3 small text-uppercase letter-spacing-1">Geçmiş Siparişleriniz ve Kargo Durumu</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 border border-dark-subtle" style="background-color: #fafafa;">
+                    <i class="fa-solid fa-bag-shopping fs-1 text-gold mb-3"></i>
+                    <h5 class="font-playfair text-dark">Henüz bir siparişiniz bulunmamaktadır.</h5>
+                    <a href="/Urunler" class="btn btn-dark rounded-0 mt-3 px-4 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg transition-300">Alışverişe Başla</a>
+                </div>
+            }
+            else
+            {
+                <div class="accordion accordion-flush border border-dark-subtle" id="siparislerAccordion">
+                    @{ int index = 0; }
+                    @foreach (var siparis in Model)
+                    {
+                        string collapseId = "collapse_" + siparis.ID;
+                        string headingId = "heading_" + siparis.ID;
+
+                        <div class="accordion-item border-0 border-bottom border-dark-subtle bg-transparent">
+                            
+                            <!-- Sipariş Başlık (Özet) -->
+                            <h2 class="accordion-header" id="@headingId">
+                                <button class="accordion-button collapsed rounded-0 shadow-none py-4" style="background-color: #fafafa;" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                    <div class="w-100 d-flex flex-column flex-md-row justify-content-between align-items-md-center pe-3">
+                                        <div class="mb-3 mb-md-0">
+                                            <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-1">Sipariş No</span>
+                                            <span class="fw-bold text-dark fs-5 font-playfair">@siparis.SiparisNo</span>
+                                        </div>
+                                        <div class="mb-3 mb-md-0 text-md-center">
+                                            <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-1">Tarih</span>
+                                            <span class="text-dark fw-medium">@siparis.SiparisTarihi.ToString("dd MMMM yyyy")</span>
+                                        </div>
+                                        <div class="mb-3 mb-md-0 text-md-center">
+                                            <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-1">Tutar</span>
+                                            <span class="text-gold fw-bold fs-5">@siparis.ToplamTutar.ToString("N2") TL</span>
+                                        </div>
+                                        <div class="text-md-end">
+                                            <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-1">Durum</span>
+                                            <!-- Durum Rozeti (Premium Siyah/Beyaz) -->
+                                            <span class="badge border border-dark text-dark rounded-0 px-3 py-2 text-uppercase letter-spacing-1" style="background-color: white;">
+                                                @(siparis.SiparisDurumu?.DurumAd ?? "Onay Bekliyor")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+
+                            <!-- Sipariş Detay (Açılır Alan) -->
+                            <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#siparislerAccordion">
+                                <div class="accordion-body bg-white p-4 p-md-5">
+                                    
+                                    <h6 class="font-playfair fw-bold mb-4 text-dark text-uppercase letter-spacing-1 border-bottom border-dark-subtle pb-3">
+                                        <i class="fa-solid fa-clipboard-list text-gold me-2"></i> Sipariş Detayları
+                                    </h6>
+                                    
+                                    <!-- Ürün Listesi -->
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-borderless align-middle mb-0">
+                                            <thead class="border-bottom border-dark-subtle text-muted small text-uppercase letter-spacing-1">
+                                                <tr>
+                                                    <th class="fw-normal">Ürün</th>
+                                                    <th class="text-center fw-normal">Adet</th>
+                                                    <th class="text-end fw-normal">Birim Fiyat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var detay in siparis.SiparisDetaylari)
+                                                {
+                                                    <tr class="border-bottom border-light">
+                                                        <td class="py-3 px-0">
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Resim Çerçevesi Premium -->
+                                                                <img src="~/img/@(detay.Urun.AnaResim ?? "placeholder.jpg")" alt="@detay.Urun.Baslik" style="width: 70px; height: 95px; object-fit: cover;" class="me-3 border border-dark-subtle p-1">
+                                                                <div>
+                                                                    <a href="/Urunler/Details/@detay.UrunID" class="text-dark text-decoration-none fw-bold hover-gold transition-300 font-playfair fs-6">@detay.Urun.Baslik</a>
+                                                                    <div class="small text-muted mt-1 text-uppercase letter-spacing-1" style="font-size: 0.75rem;">Kodu: @detay.Urun.UrunKod</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center py-3 text-dark fw-medium">@detay.Adet</td>
+                                                        <td class="text-end py-3 fw-bold text-dark">@detay.BirimFiyat.ToString("N2") TL</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Kargo ve Adres Bilgisi -->
+                                    <div class="row pt-4 border-top border-dark-subtle bg-light p-4 rounded-0">
+                                        
+                                        <!-- Adres Sütunu -->
+                                        <div class="col-md-6 mb-4 mb-md-0 border-end border-dark-subtle pe-md-4">
+                                            <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-3">
+                                                <i class="fa-solid fa-location-dot text-gold me-2"></i> Teslimat Adresi
+                                            </span>
+                                            <p class="mb-0 small text-dark lh-lg">@siparis.TeslimatAdresi</p>
+                                        </div>
+
+                                        <div class="col-md-6 ps-md-4 d-flex flex-column justify-content-center">
+
+                                            @if (siparis.SiparisDurumuID == 3)
+                                            {
+                                                <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-2">
+                                                    <i class="fa-solid fa-truck-fast text-gold me-2"></i> Kargo Takip No
+                                                </span>
+                                                @if(!string.IsNullOrEmpty(siparis.KargoNo))
+                                                {
+                                                    <span class="fw-bold text-dark fs-5 font-playfair mb-2">@siparis.KargoNo</span>
+                                                    <!-- İleride buraya kargo firmasının takip linkini bağlayabiliriz -->
+                                                    <a href="#" class="btn btn-sm btn-outline-dark rounded-0 d-inline-block text-uppercase letter-spacing-1" style="width: fit-content; font-size: 0.75rem;">Kargomu Takip Et</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-dark small fst-italic">Kargo numarası sisteme işleniyor...</span>
+                                                }
+                                            }
+                                            else if (siparis.SiparisDurumuID <= 2)
+                                            {
+                                                <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-2">
+                                                    <i class="fa-solid fa-box-open text-gold me-2"></i> Kargo Durumu
+                                                </span>
+                                                <span class="text-dark small">Siparişiniz özenle hazırlanıyor, henüz kargoya verilmedi.</span>
+                                            }
+                                            else
+                                            {
+                                                 <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-2">
+                                                    <i class="fa-solid fa-circle-check text-success me-2"></i> Kargo Durumu
+                                                </span>
+                                                <span class="text-dark small fw-bold">Teslim Edildi</span>
+                                            }
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        index++;
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold:hover { color: #D4AF37 !important; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+        .transition-300 { transition: all 0.4s ease; }
+        
+        /* Premium Accordion Customization */
+        .accordion-button:not(.collapsed) { 
+            color: #000; 
+            background-color: #fff !important; 
+            box-shadow: none; 
+            border-bottom: 1px solid #dee2e6;
+        }
+        .accordion-button:focus { box-shadow: none; border-color: rgba(0,0,0,0.1); }
+        .accordion-button::after { filter: grayscale(1); }
+    </style>
+}

@@ -1,0 +1,157 @@
+﻿@model IEnumerable<Tasarim.Core.Entities.Siparis>
+@{ 
+    ViewData["Title"] = "Sipariş Yönetimi";
+}
+
+<div class="container-fluid py-4">
+    <!-- Tablo -->
+    <div class="card border-dark-subtle rounded-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="siparisTablosu">
+                <thead class="bg-light border-bottom border-dark-subtle">
+                    <tr>
+                        <th class="ps-4">No</th>
+                        <th>Müşteri</th>
+                        <th>Tarih</th>
+                        <th>Tutar</th>
+                        <th>Durum Yönetimi</th>
+                        <th class="text-end pe-4">Aksiyonlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        var isLocked = item.SiparisDurumuID >= 4; // Teslim (4) veya İptal (5) kilitlidir.
+                        
+                        <!-- ANA SATIR -->
+                        <tr class="border-bottom border-light">
+                            <td class="ps-4 fw-bold">#@item.SiparisNo</td>
+                            <td>
+                                <strong>@item.Kullanici?.Profil?.Ad @item.Kullanici?.Profil?.Soyad</strong><br>
+                                <small class="text-muted">@item.Kullanici?.Profil?.TelNo</small>
+                            </td>
+                            <td>@item.SiparisTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="fw-bold text-gold">@item.ToplamTutar.ToString("N2") TL</td>
+                            <td>
+                                <!-- AKILLI SELECT KUTUSU -->
+                                <select class="form-select form-select-sm border-dark-subtle fw-bold quick-status" 
+                                        data-id="@item.ID" 
+                                        @(isLocked ? "disabled" : "") style="width: 160px;">
+                                    
+                                    @foreach (var d in ViewBag.Durumlar) {
+                                        // KRİTİK DÜZELTME: Sadece mevcut durum ve sonrasını (veya İptal'i) Listede Göster!
+                                        if (d.ID >= item.SiparisDurumuID || d.ID == 5)
+                                        {
+                                            <option value="@d.ID" selected="@(item.SiparisDurumuID == d.ID)">@d.DurumAd</option>
+                                        }
+                                    }
+
+                                </select>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group shadow-sm">
+                                    <!-- Açılır Liste Butonu -->
+                                    <button type="button" class="btn btn-sm btn-outline-dark rounded-0" data-bs-toggle="collapse" data-bs-target="#detay-@item.ID" title="Sipariş İçeriği">
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                    
+                                    <a asp-action="Detay" asp-route-id="@item.ID" class="btn btn-sm btn-dark rounded-0 text-uppercase" style="font-size: 0.75rem; padding-top: 6px;">İncele</a>
+                                    
+                                    <!-- Fiş/Yazdır Butonu -->
+                                    <a asp-action="FisYazdir" asp-route-id="@item.ID" target="_blank" class="btn btn-sm btn-outline-dark rounded-0" title="Fiş Çıktısı Al">
+                                        <i class="fa-solid fa-receipt text-gold"></i> Fiş
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- GİZLİ DETAY SATIRI (Açılır Önizleme) -->
+                        <tr class="collapse bg-light border-bottom border-dark" id="detay-@item.ID">
+                            <td colspan="6" class="p-0">
+                                <div class="p-4 border-start border-4 border-warning">
+                                    <h6 class="font-playfair fw-bold mb-3 small text-uppercase text-muted"><i class="fa-solid fa-box-open me-2"></i> Sipariş İçeriği Önizlemesi</h6>
+                                    <table class="table table-sm table-borderless mb-0 w-75">
+                                        <thead class="text-muted small border-bottom">
+                                            <tr>
+                                                <th>Ürün Kodu</th>
+                                                <th>Kategori</th>
+                                                <th>Beden / Renk</th>
+                                                <th>Adet</th>
+                                                <th class="text-end">Tutar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var d in item.SiparisDetaylari) {
+                                                <tr>
+                                                    <td class="fw-bold">@d.Urun.UrunKod</td>
+                                                    <td>@(d.Urun.Kategori?.KategoriAd ?? "Belirtilmemiş")</td>
+                                                    <td>@(d.UrunVaryasyon?.Beden ?? "-") / @(d.Urun?.Renk ?? "-")</td>
+                                                    <td>@d.Adet</td>
+                                                    <td class="text-end fw-bold">@((d.Adet * d.BirimFiyat).ToString("N2")) TL</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .text-gold { color: #D4AF37 !important; }
+        .collapse.show { background-color: #fafafa; }
+    </style>
+
+    <script>
+        // jQuery'ye bağımlı olmayan, %100 çalışan Saf JavaScript (Fetch API) Yapısı
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectBoxes = document.querySelectorAll('.quick-status');
+
+            selectBoxes.forEach(function (selectBox) {
+                selectBox.addEventListener('change', function () {
+                    const id = this.getAttribute('data-id');
+                    const yeniDurumId = this.value;
+                    
+                    // İşlem bitene kadar kutuyu kilitle
+                    this.disabled = true;
+
+                    // Form Data oluştur
+                    const formData = new URLSearchParams();
+                    formData.append('id', id);
+                    formData.append('yeniDurumId', yeniDurumId);
+
+                    // Arka plana POST isteği at
+                    fetch('/Admin/Siparis/HizliDurumGuncelle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: formData.toString()
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Başarılıysa sayfayı yenile ki yeni duruma göre kilitler aktif olsun
+                            window.location.reload();
+                        } else {
+                            // Backend'den hata dönerse (Örn: Teslim edilen iptal edilemez)
+                            alert(data.message);
+                            window.location.reload(); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Hata:', error);
+                        alert("İşlem sırasında bir hata oluştu.");
+                        window.location.reload();
+                    });
+                });
+            });
+        });
+    </script>
+}

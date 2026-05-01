@@ -17,7 +17,8 @@ namespace Tasarim.Core.Entities
 
         [Display(Name = "Kargo No")]
         public string? KargoNo { get; set; }
-
+        [Display(Name = "Teslimat Adresi")]
+        public string TeslimatAdresi { get; set; }
         public int KullaniciID { get; set; }
         public Kullanici Kullanici { get; set; }
 

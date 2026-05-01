@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Siparişiniz Alındı";
+}
+
+<div class="container my-5 py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <!-- Başarı İkonu -->
+            <div class="mb-4">
+                <i class="fa-solid fa-circle-check text-success display-1 shadow-sm rounded-circle"></i>
+            </div>
+
+            <!-- Başlık -->
+            <h1 class="font-playfair fw-bold mb-3 text-dark">Siparişiniz Başarıyla Alındı</h1>
+            <div class="mx-auto bg-dark mb-4" style="height: 2px; width: 60px;"></div>
+
+            <!-- Mesaj ve Sipariş Numarası -->
+            <p class="text-muted fs-5 mb-4">
+                LUVIA LUKKA'yı tercih ettiğiniz için teşekkür ederiz. Siparişiniz özenle hazırlanmak üzere işleme alınmıştır.
+            </p>
+
+            <div class="bg-light p-4 border border-dark-subtle rounded-0 mb-5 d-inline-block shadow-sm">
+                <p class="text-uppercase small fw-bold text-muted mb-1 letter-spacing-1">Sipariş Numaranız</p>
+                <h3 class="font-playfair fw-bold text-dark mb-0">@ViewBag.SiparisNo</h3>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/" class="btn btn-dark rounded-0 px-4 py-3 text-uppercase fw-bold letter-spacing-1 transition-300 hover-gold-bg">
+                    <i class="fa-solid fa-house me-2"></i> Ana Sayfaya Dön
+                </a>
+                <a href="/Urunler" class="btn btn-outline-dark rounded-0 px-4 py-3 text-uppercase fw-bold letter-spacing-1 transition-300 hover-gold-bg">
+                    Alışverişe Devam Et <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+        .transition-300 { transition: all 0.4s ease; }
+    </style>
+}

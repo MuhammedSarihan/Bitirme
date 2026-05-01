@@ -17,5 +17,9 @@ namespace Tasarim.Core.Entities
         // İlişki (Foreign Key): Bu beden/stok bilgisi hangi ürüne ait?
         public int UrunID { get; set; }
         public Urun Urun { get; set; }
+        //  Aynı anda satın alma krizlerini önleyen kalkan
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
+        public ICollection<SiparisDetay>? SiparisDetaylari { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tasarim.Data;
 
@@ -11,9 +12,11 @@ using Tasarim.Data;
 namespace Tasarim.Data.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260501141833_AddRowVersionToVaryasyon")]
+    partial class AddRowVersionToVaryasyon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -375,9 +378,6 @@ namespace Tasarim.Data.Migrations
                     b.HasIndex("KullaniciID")
                         .IsUnique();
 
-                    b.HasIndex("Mail")
-                        .IsUnique();
-
                     b.ToTable("Profiller");
 
                     b.HasData(
@@ -516,9 +516,6 @@ namespace Tasarim.Data.Migrations
 
                     b.HasIndex("SiparisDurumuID");
 
-                    b.HasIndex("SiparisNo")
-                        .IsUnique();
-
                     b.ToTable("Siparisler");
                 });
 
@@ -542,16 +539,11 @@ namespace Tasarim.Data.Migrations
                     b.Property<int>("UrunID")
                         .HasColumnType("int");
 
-                    b.Property<int>("UrunVaryasyonID")
-                        .HasColumnType("int");
-
                     b.HasKey("ID");
 
                     b.HasIndex("SiparisID");
 
                     b.HasIndex("UrunID");
-
-                    b.HasIndex("UrunVaryasyonID");
 
                     b.ToTable("SiparisDetaylari");
                 });
@@ -977,20 +969,12 @@ namespace Tasarim.Data.Migrations
                     b.HasOne("Tasarim.Core.Entities.Urun", "Urun")
                         .WithMany("SiparisDetaylari")
                         .HasForeignKey("UrunID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Tasarim.Core.Entities.UrunVaryasyon", "UrunVaryasyon")
-                        .WithMany("SiparisDetaylari")
-                        .HasForeignKey("UrunVaryasyonID")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Siparis");
 
                     b.Navigation("Urun");
-
-                    b.Navigation("UrunVaryasyon");
                 });
 
             modelBuilder.Entity("Tasarim.Core.Entities.Urun", b =>
@@ -1120,11 +1104,6 @@ namespace Tasarim.Data.Migrations
                     b.Navigation("Varyasyonlar");
 
                     b.Navigation("Yorumlar");
-                });
-
-            modelBuilder.Entity("Tasarim.Core.Entities.UrunVaryasyon", b =>
-                {
-                    b.Navigation("SiparisDetaylari");
                 });
 
             modelBuilder.Entity("Tasarim.Core.Entities.Yorum", b =>
