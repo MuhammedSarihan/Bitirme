@@ -1,6 +1,7 @@
 
 using LlmService;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Tasarim.Data;
 using Tasarim.Service.Abstract;
@@ -38,7 +39,11 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromDays(1);
     options.IOTimeout = TimeSpan.FromMinutes(10);
 });
-builder.Services.AddDbContext<DatabaseContext>();
+
+// Veritabanı bağlantısı (appsettings.json'daki "TasarimDbConnection" bağlantı adresini kullanarak)
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TasarimDbConnection")));
+
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(x =>

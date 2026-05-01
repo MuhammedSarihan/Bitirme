@@ -5,18 +5,22 @@ namespace Tasarim.Data
 {
     public class DatabaseContext : DbContext
     {
+
+        // Veritabanı bağlantısı için gerekli yapılandırmayı yapıyoruz (bağlantı adresi appsettings.json'dan alınacak)
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+        {
+        }
+
         // --- TABLO TANIMLARI (DbSet) ---
         public DbSet<Urun> Urunler { get; set; }
         public DbSet<Kategori> Kategoriler { get; set; }
         public DbSet<Marka> Markalar { get; set; }
         public DbSet<Resim> Resimler { get; set; }
-
         public DbSet<Kullanici> Kullanicilar { get; set; }
         public DbSet<Profil> Profiller { get; set; }
         public DbSet<Sepet> Sepetler { get; set; }
         public DbSet<SepetItem> SepetItems { get; set; }
         public DbSet<Favori> Favoriler { get; set; }
-
         public DbSet<Siparis> Siparisler { get; set; }
         public DbSet<SiparisDetay> SiparisDetaylari { get; set; }
         public DbSet<SiparisDurumu> SiparisDurumlari { get; set; }
@@ -29,12 +33,7 @@ namespace Tasarim.Data
         public DbSet<Yorum> Yorumlar { get; set; }
         public DbSet<YorumAnaliz> YorumAnalizleri { get; set; }
         public DbSet<LLSonuc> LLSonuclari { get; set; }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {// Kendi SQL Server'ınıza göre düzenleyebilirsiniz -> @"Server=PC_ADINIZ;
-            //Muhammed: DESKTOP-MUUA55B - Şevval: DESKTOP-BRRDK1D - Rafiga:  DESKTOP-2K6EHV2        
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-MUUA55B; Database=dbTasarim; Trusted_Connection=True; TrustServerCertificate=True;");
-            base.OnConfiguring(optionsBuilder);
-        }
+
 
         // --- İLİŞKİ VE AYARLAR (Fluent API) ---
         protected override void OnModelCreating(ModelBuilder modelBuilder)
