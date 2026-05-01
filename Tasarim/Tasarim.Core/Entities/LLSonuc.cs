@@ -10,6 +10,8 @@ namespace Tasarim.Core.Entities
         public string DuyguDagilim { get; set; }
         public string TopArtilar { get; set; }
         public string TopEksiler { get; set; }
+        public string TopSikayetler { get; set; }
+        public string TopOneriler { get; set; }
         public DateTime SonGuncelleme { get; set; }
 
         public int UrunID { get; set; }

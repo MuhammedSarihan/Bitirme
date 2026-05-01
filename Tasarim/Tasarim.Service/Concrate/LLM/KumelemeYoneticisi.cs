@@ -43,13 +43,15 @@ namespace Tasarim.Service.Concrete.LLM
                     UrunID = g.Key,
                     GuncelYorumSayisi = g.Count(),
                     Artilar = g.Select(x => x.Artilar ?? "").ToList(),
-                    Eksiler = g.Select(x => x.Eksiler ?? "").ToList()
+                    Eksiler = g.Select(x => x.Eksiler ?? "").ToList(),
+                    Sikayetler = g.Select(x => x.Sikayetler ?? "").ToList(),
+                    Oneriler = g.Select(x => x.Oneriler ?? "").ToList()
                 })
                 .ToListAsync(ct);
 
             var islenecekVeriListesi = new List<YorumVerisi>();
             var islenecekUrunIdleri = new List<int>();
-            var hamVeriler = new Dictionary<int, (List<string> Artilar, List<string> Eksiler)>();
+            var hamVeriler = new Dictionary<int, (List<string> Artilar, List<string> Eksiler, List<string> Sikayetler, List<string> Oneriler)>();
 
             foreach (var grup in tumYorumGruplari)
             {
@@ -61,12 +63,13 @@ namespace Tasarim.Service.Concrete.LLM
                     islenecekVeriListesi.Add(new YorumVerisi
                     {
                         UrunID = grup.UrunID,
-                        BirlesikYorum = string.Join(" ", grup.Artilar) + " " + string.Join(" ", grup.Eksiler),
+                        BirlesikYorum = string.Join(" ", grup.Artilar) + " " + string.Join(" ", grup.Eksiler) + " " + 
+                                        string.Join(" ", grup.Sikayetler) + " " + string.Join(" ", grup.Oneriler),
                         ToplamYorumSayisi = grup.GuncelYorumSayisi
                     });
 
                     islenecekUrunIdleri.Add(grup.UrunID);
-                    hamVeriler.Add(grup.UrunID, (grup.Artilar, grup.Eksiler));
+                    hamVeriler.Add(grup.UrunID, (grup.Artilar, grup.Eksiler, grup.Sikayetler, grup.Oneriler));
                 }
             }
 
@@ -104,6 +107,8 @@ namespace Tasarim.Service.Concrete.LLM
                 var hamVeri = hamVeriler[veri.UrunID];
                 string jsonTopArtilar = GetTop5Phrases(hamVeri.Artilar);
                 string jsonTopEksiler = GetTop5Phrases(hamVeri.Eksiler);
+                string jsonTopSikayetler = GetTop5Phrases(hamVeri.Sikayetler);
+                string jsonTopOneriler = GetTop5Phrases(hamVeri.Oneriler);
 
                 if (guncellenecekKayitlar.TryGetValue(veri.UrunID, out var mevcutKayit))
                 {
@@ -111,6 +116,8 @@ namespace Tasarim.Service.Concrete.LLM
                     mevcutKayit.ToplamYorum = veri.ToplamYorumSayisi;
                     mevcutKayit.TopArtilar = jsonTopArtilar;
                     mevcutKayit.TopEksiler = jsonTopEksiler;
+                    mevcutKayit.TopSikayetler = jsonTopSikayetler;
+                    mevcutKayit.TopOneriler = jsonTopOneriler;
                     mevcutKayit.SonGuncelleme = DateTime.Now;
                     _context.LLSonuclari.Update(mevcutKayit);
                 }
@@ -123,6 +130,8 @@ namespace Tasarim.Service.Concrete.LLM
                         ToplamYorum = veri.ToplamYorumSayisi,
                         TopArtilar = jsonTopArtilar,
                         TopEksiler = jsonTopEksiler,
+                        TopSikayetler = jsonTopSikayetler,
+                        TopOneriler = jsonTopOneriler,
                         SonGuncelleme = DateTime.Now
                     };
                     await _context.LLSonuclari.AddAsync(yeni, ct);

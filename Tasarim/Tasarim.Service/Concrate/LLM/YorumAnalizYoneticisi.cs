@@ -42,8 +42,8 @@ Analiz Formatı:
 ""duygu"": ""Pozitif/ Negatif/ Nötr"",
 ""artilar"": [""ürünün iyi özellikleri""],
 ""eksiler"": [""ürünün kötü özellikleri""],
-""sikayetler"": [""ürün hakkındaki şikayetler""],
-""oneriler"": [""ürünün geliştirilmesi için satıcıya veya diğer müşterilere öneriler""]
+""sikayetler"": [""ürünün geliştirilmesi gereken yönleri""],
+""oneriler"": [""ürünü alacak müşterilere tavsiyeler""]
 }}
 
 Analiz Edilecek Yorum:
