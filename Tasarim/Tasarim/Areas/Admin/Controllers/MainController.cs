@@ -57,7 +57,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Select(u => new SelectListItem
                 {
                     Value = u.ID.ToString(),
-                    Text = u.Baslik 
+                    Text = u.UrunKod
                 }).ToList();
 
             // Ana ekranda ürün seçiliyor ya da seçilmiyor bu bir filtreleme işlemi
@@ -65,7 +65,7 @@ namespace Tasarim.Areas.Admin.Controllers
             {
                 model.SeciliUrunAd = _context.Urunler
                     .Where(u => u.ID == urunId)
-                    .Select(u => u.Baslik)
+                    .Select(u => u.UrunKod)
                     .FirstOrDefault();
             }
 
@@ -158,7 +158,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Join(_context.Urunler,
                       ya => ya.UrunID,
                       u => u.ID,
-                      (ya, u) => new { UrunAd = u.Baslik, Skor = ya.PozitifSayisi })
+                      (ya, u) => new { UrunAd = u.UrunKod, Skor = ya.PozitifSayisi })
                 .ToList();
 
             model.EnPozitifUrunAdlari = enPozitifler.Select(x => x.UrunAd).ToList();
@@ -174,7 +174,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Join(_context.Urunler,
                       ya => ya.UrunID,
                       u => u.ID,
-                      (ya, u) => new { UrunAd = u.Baslik, Skor = ya.NegatifSayisi })
+                      (ya, u) => new { UrunAd = u.UrunKod, Skor = ya.NegatifSayisi })
                 .ToList();
 
             model.EnNegatifUrunAdlari = enNegatifler.Select(x => x.UrunAd).ToList();
