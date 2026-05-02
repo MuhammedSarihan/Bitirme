@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims; // User.FindFirstValue için gerekli
+using System.Security.Claims; 
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 using Tasarim.Models;
 
-// ÖNEMLİ: Sadece giriş yapmış kullanıcılar ödeme aşamasına geçebilir
+
 [Authorize]
 public class SiparisController : Controller
 {
@@ -17,37 +17,31 @@ public class SiparisController : Controller
         _context = context;
     }
 
-    // 1. ÖDEME SAYFASINI AÇ
+
     [HttpGet]
     public async Task<IActionResult> Odeme()
     {
-        // 1. Giriş yapmış kullanıcının ID'sini Session veya Claim'den al (Projedeki Auth yapına göre)
-        // Eğer Claim bazlı Cookie Authentication kullanıyorsan:
         string userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int currentUserId))
         {
             return RedirectToAction("Login", "Kullanici");
         }
 
-        // 2. Kullanıcının PROFIL bilgilerini çek
+
         var profil = await _context.Profiller
                                    .FirstOrDefaultAsync(p => p.KullaniciID == currentUserId);
 
-        // Profil yoksa (Kullanıcı kayıt olmuş ama profil doldurmamışsa)
+
         if (profil == null)
         {
-            // Kullanıcıyı profilini doldurması için yönlendirebilirsin
             return RedirectToAction("ProfilDuzenle", "Kullanici");
         }
-
-        // 3. Sepeti, Ürünleri ve KAMPANYALARI ile birlikte çek
-        // KampanyaliFiyat'ın hesaplanabilmesi için KampanyaUrunleri ve Kampanya tablolarını Include etmek ZORUNLUDUR!
         var sepet = await _context.Sepetler
             .Include(s => s.SepetItems)
                 .ThenInclude(si => si.UrunVaryasyon)
                     .ThenInclude(uv => uv.Urun)
-                        .ThenInclude(u => u.KampanyaUrunleri) // Kampanyalı fiyat için şart
-                            .ThenInclude(ku => ku.Kampanya)   // Kampanyalı fiyat için şart
+                        .ThenInclude(u => u.KampanyaUrunleri) 
+                            .ThenInclude(ku => ku.Kampanya) 
             .FirstOrDefaultAsync(s => s.KullaniciID == currentUserId);
 
         if (sepet == null || sepet.SepetItems == null || !sepet.SepetItems.Any())
@@ -55,12 +49,11 @@ public class SiparisController : Controller
             return RedirectToAction("Index", "Sepet");
         }
 
-        // 4. İndirimli Gerçek Tutarı Hesapla (KampanyaliFiyat kullanılıyor!)
+        // 4. İndirimli Gerçek Tutarı Hesapla 
         decimal gercekSepetToplami = sepet.SepetItems.Sum(item => item.Adet * item.UrunVaryasyon.Urun.KampanyaliFiyat);
 
         var model = new OdemeViewModel
         {
-            // PROFIL tablosundan gelen veriler
             AdSoyad = profil.Ad + " " + profil.Soyad,
             Telefon = profil.TelNo,
             TeslimatAdresi = profil.Adres,
@@ -92,7 +85,7 @@ public class SiparisController : Controller
         decimal gercekTutar = sepet.SepetItems.Sum(item => item.Adet * item.UrunVaryasyon.Urun.KampanyaliFiyat);
         string iyzicoIslemNo = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(); // Simülasyon
 
-        // --- 1. SİHİRLİ DOKUNUŞ: TRANSACTION BAŞLIYOR ---
+
         // Eğer aşağıdaki işlemlerin BİRİ bile hata verirse, veritabanına hiçbir şey yazılmaz!
         using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -151,7 +144,7 @@ public class SiparisController : Controller
             // Değişiklikleri veritabanına göndermeyi dene
             await _context.SaveChangesAsync();
 
-            // --- 2. SİHİRLİ DOKUNUŞ: İŞLEMİ ONAYLA ---
+
             // Her şey sorunsuz çalıştıysa, tüm kayıtları kalıcı hale getir!
             await transaction.CommitAsync();
 
@@ -159,7 +152,7 @@ public class SiparisController : Controller
         }
         catch (DbUpdateConcurrencyException)
         {
-            // KORKULAN SENARYO GERÇEKLEŞTİ: Aynı anda iki kişi butona bastı!
+            // KORKULAN SENARYO : Aynı anda iki kişi butona bastı!
             // Hemen bizim müşterimizin işlemini geri alıyoruz (Eksiye düşmeyi önlüyoruz).
             await transaction.RollbackAsync();
             ModelState.AddModelError("", "Siz siparişi tamamlarken maalesef başka bir müşteri bu ürünün son stoğunu satın aldı. Lütfen sepetinizi güncelleyin.");
@@ -171,7 +164,7 @@ public class SiparisController : Controller
             // Kimsenin parası boşa gitmesin, sipariş yarım kalmasın diye Rollback atıyoruz.
             await transaction.RollbackAsync();
             ModelState.AddModelError("", "Siparişiniz oluşturulurken sistemsel bir hata meydana geldi. Lütfen tekrar deneyin.");
-            // İleride buraya loglama ekleyebilirsin: _logger.LogError(ex, "Sipariş hatası");
+            // İleride buraya loglama ekleyebiliriz: _logger.LogError(ex, "Sipariş hatası");
             return View(model);
         }
     }
@@ -189,9 +182,11 @@ public class SiparisController : Controller
         // 2. Kullanıcıya ait siparişleri tüm detaylarıyla (Ürünler, Durum vb.) getir
         // OrderByDescending ile en son verilen siparişi en üstte gösteriyoruz
         var siparisler = await _context.Siparisler
-            .Include(s => s.SiparisDurumu) // Kargo durumu vs.
+            .Include(s => s.SiparisDurumu) 
             .Include(s => s.SiparisDetaylari)
-                .ThenInclude(sd => sd.Urun) // Siparişin içindeki ürünün resmi ve adı için
+                .ThenInclude(sd => sd.Urun) 
+                .Include(s => s.SiparisDetaylari)
+            .ThenInclude(sd => sd.UrunVaryasyon)
             .Where(s => s.KullaniciID == currentUserId)
             .OrderByDescending(s => s.SiparisTarihi)
             .ToListAsync();
@@ -200,7 +195,7 @@ public class SiparisController : Controller
     }
     public IActionResult Basarili(string siparisNo)
     {
-        // Eğer sipariş numarası boş gelirse güvenliği sağla
+        
         if (string.IsNullOrEmpty(siparisNo))
         {
             return RedirectToAction("Index", "Home");

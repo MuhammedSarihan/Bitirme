@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using odevVb.Utils;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 
@@ -11,154 +10,97 @@ namespace Tasarim.Areas.Admin.Controllers
     public class MarkalarController : Controller
     {
         private readonly DatabaseContext _context;
+        private readonly IWebHostEnvironment _env; // Resim yüklemek için ortam bilgisini alıyoruz
 
-        public MarkalarController(DatabaseContext context)
+        public MarkalarController(DatabaseContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
-        // GET: Admin/Markalar
+        // 1. LİSTELEME
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Markalar.ToListAsync());
+            var markalar = await _context.Markalar.ToListAsync();
+            return View(markalar);
         }
 
-        // GET: Admin/Markalar/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var marka = await _context.Markalar
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (marka == null)
-            {
-                return NotFound();
-            }
-
-            return View(marka);
-        }
-
-        // GET: Admin/Markalar/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Admin/Markalar/Create
+        // 2. TEK MERKEZLİ EKLEME, DÜZENLEME VE RESİM YÜKLEME
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( Marka marka, IFormFile? Logo)
+        public async Task<IActionResult> Kaydet(Marka model, IFormFile? YuklenenLogo, bool LogoyuSil)
         {
-            if (ModelState.IsValid)
-            {
-                marka.Logo = await FileHelper.FileLoaderAsync(Logo);
-                _context.Add(marka);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(marka);
-        }
-
-        // GET: Admin/Markalar/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var marka = await _context.Markalar.FindAsync(id);
-            if (marka == null)
-            {
-                return NotFound();
-            }
-            return View(marka);
-        }
-
-        // POST: Admin/Markalar/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Marka marka, IFormFile? Logo, bool cbResmiSil = false)
-        {
-            if (id != marka.ID)
-            {
-                return NotFound();
-            }
+            ModelState.Remove("Urunler");
 
             if (ModelState.IsValid)
             {
-                try
+                Marka? mevcutMarka = null;
+                if (model.ID != 0)
                 {
-                    if (cbResmiSil)
+                    mevcutMarka = await _context.Markalar.AsNoTracking().FirstOrDefaultAsync(m => m.ID == model.ID);
+                }
+
+                // 1. ADIM: EĞER KULLANICI "MEVCUT LOGOYU SİL" KUTUSUNU İŞARETLEDİYSE
+                if (LogoyuSil && mevcutMarka != null)
+                {
+                    // FİZİKSEL SİLME İŞLEMİ (Eski dosyayı sunucudan temizle)
+                    if (!string.IsNullOrEmpty(mevcutMarka.Logo))
+                    {
+                        string silinecekYol = Path.Combine(_env.WebRootPath, "img", mevcutMarka.Logo);
+                        if (System.IO.File.Exists(silinecekYol))
                         {
-                            marka.Logo =string.Empty;
+                            System.IO.File.Delete(silinecekYol);
+                        }
                     }
-                    if (Logo is not null)
-                    {
-                        marka.Logo = await FileHelper.FileLoaderAsync(Logo);
-                    }
-                    _context.Update(marka);
-                    await _context.SaveChangesAsync();
+
+                    model.Logo = null; // Veritabanından da adını sil
                 }
-                catch (DbUpdateConcurrencyException)
+                // Silinmediyse ve yeni resim de yoksa, eski resmi koru
+                else if (mevcutMarka != null && YuklenenLogo == null)
                 {
-                    if (!MarkaExists(marka.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    model.Logo = mevcutMarka.Logo;
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(marka);
-        }
 
-        // GET: Admin/Markalar/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var marka = await _context.Markalar
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (marka == null)
-            {
-                return NotFound();
-            }
-
-            return View(marka);
-        }
-
-        // POST: Admin/Markalar/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var marka = await _context.Markalar.FindAsync(id);
-            if (marka != null)
-            {
-                if (!string.IsNullOrEmpty(marka.Logo))
+                // 2. ADIM: YENİ BİR RESİM YÜKLENDİYSE
+                if (YuklenenLogo != null && YuklenenLogo.Length > 0)
                 {
-                    FileHelper.FileRemover(marka.Logo);
+                    // FİZİKSEL SİLME İŞLEMİ (Eğer markanın zaten eski bir logosu varsa, üstüne yeni yüklendiği için eskisini çöpe at)
+                    if (mevcutMarka != null && !string.IsNullOrEmpty(mevcutMarka.Logo) && !LogoyuSil)
+                    {
+                        string eskiYol = Path.Combine(_env.WebRootPath, "img", mevcutMarka.Logo);
+                        if (System.IO.File.Exists(eskiYol))
+                        {
+                            System.IO.File.Delete(eskiYol);
+                        }
+                    }
+
+                    // Yeni dosyayı kaydet
+                    string dosyaUzantisi = Path.GetExtension(YuklenenLogo.FileName);
+                    string yeniDosyaAdi = "marka_" + DateTime.Now.Ticks.ToString() + dosyaUzantisi;
+                    string kayitYolu = Path.Combine(_env.WebRootPath, "img", yeniDosyaAdi);
+
+                    using (var stream = new FileStream(kayitYolu, FileMode.Create))
+                    {
+                        await YuklenenLogo.CopyToAsync(stream);
+                    }
+
+                    model.Logo = yeniDosyaAdi;
                 }
-                _context.Markalar.Remove(marka);
+
+                // 3. ADIM: VERİTABANINA KAYDET VEYA GÜNCELLE
+                if (model.ID == 0)
+                {
+                    _context.Markalar.Add(model);
+                }
+                else
+                {
+                    _context.Markalar.Update(model);
+                }
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool MarkaExists(int id)
-        {
-            return _context.Markalar.Any(e => e.ID == id);
+            return RedirectToAction("Index");
         }
     }
 }

@@ -25,8 +25,8 @@ namespace Tasarim.Areas.Admin.Controllers
             var query = _context.Siparisler
                 .Include(s => s.SiparisDurumu)
                 .Include(s => s.Kullanici).ThenInclude(k => k.Profil)
-                .Include(s => s.SiparisDetaylari).ThenInclude(sd => sd.Urun).ThenInclude(u => u.Kategori) // Kategori için
-                .Include(s => s.SiparisDetaylari).ThenInclude(sd => sd.UrunVaryasyon) // Beden/Renk için
+                .Include(s => s.SiparisDetaylari).ThenInclude(sd => sd.Urun).ThenInclude(u => u.Kategori) 
+                .Include(s => s.SiparisDetaylari).ThenInclude(sd => sd.UrunVaryasyon) 
                 .AsQueryable();
 
             if (durumId.HasValue)
@@ -47,7 +47,7 @@ namespace Tasarim.Areas.Admin.Controllers
 
             if (siparis == null) return NotFound();
 
-            // AKILLI DURUM FİLTRESİ: Geçmişe dönüşü kökten engelliyoruz
+            //  Geçmişe dönüşü kökten engelliyoruz
             var tumDurumlar = await _context.SiparisDurumlari.ToListAsync();
 
             // Sadece mevcut durumdan büyük/eşit olanları VE İptal (5) seçeneğini getir

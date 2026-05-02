@@ -51,7 +51,7 @@
                                         </div>
                                         <div class="text-md-end">
                                             <span class="d-block small text-muted text-uppercase fw-bold letter-spacing-1 mb-1">Durum</span>
-                                            <!-- Durum Rozeti (Premium Siyah/Beyaz) -->
+                                            <!-- Durum Rozeti -->
                                             <span class="badge border border-dark text-dark rounded-0 px-3 py-2 text-uppercase letter-spacing-1" style="background-color: white;">
                                                 @(siparis.SiparisDurumu?.DurumAd ?? "Onay Bekliyor")
                                             </span>
@@ -74,6 +74,7 @@
                                             <thead class="border-bottom border-dark-subtle text-muted small text-uppercase letter-spacing-1">
                                                 <tr>
                                                     <th class="fw-normal">Ürün</th>
+                                                    <th class="text-center fw-normal">Varyasyon</th>
                                                     <th class="text-center fw-normal">Adet</th>
                                                     <th class="text-end fw-normal">Birim Fiyat</th>
                                                 </tr>
@@ -84,13 +85,18 @@
                                                     <tr class="border-bottom border-light">
                                                         <td class="py-3 px-0">
                                                             <div class="d-flex align-items-center">
-                                                                <!-- Resim Çerçevesi Premium -->
                                                                 <img src="~/img/@(detay.Urun.AnaResim ?? "placeholder.jpg")" alt="@detay.Urun.Baslik" style="width: 70px; height: 95px; object-fit: cover;" class="me-3 border border-dark-subtle p-1">
                                                                 <div>
                                                                     <a href="/Urunler/Details/@detay.UrunID" class="text-dark text-decoration-none fw-bold hover-gold transition-300 font-playfair fs-6">@detay.Urun.Baslik</a>
                                                                     <div class="small text-muted mt-1 text-uppercase letter-spacing-1" style="font-size: 0.75rem;">Kodu: @detay.Urun.UrunKod</div>
                                                                 </div>
                                                             </div>
+                                                        </td>
+                                                        <td class="text-center py-3">
+                                                            <!-- BEDEN VE RENK BİLGİSİ (Zarif Kutu İçinde) -->
+                                                            <span class="border border-dark-subtle px-3 py-1 small fw-bold text-dark text-uppercase letter-spacing-1" style="font-size: 0.7rem; background-color: #fafafa;">
+                                                                @(detay.UrunVaryasyon?.Beden ?? "-") / @(detay.Urun?.Renk ?? "-")
+                                                            </span>
                                                         </td>
                                                         <td class="text-center py-3 text-dark fw-medium">@detay.Adet</td>
                                                         <td class="text-end py-3 fw-bold text-dark">@detay.BirimFiyat.ToString("N2") TL</td>
@@ -121,7 +127,6 @@
                                                 @if(!string.IsNullOrEmpty(siparis.KargoNo))
                                                 {
                                                     <span class="fw-bold text-dark fs-5 font-playfair mb-2">@siparis.KargoNo</span>
-                                                    <!-- İleride buraya kargo firmasının takip linkini bağlayabiliriz -->
                                                     <a href="#" class="btn btn-sm btn-outline-dark rounded-0 d-inline-block text-uppercase letter-spacing-1" style="width: fit-content; font-size: 0.75rem;">Kargomu Takip Et</a>
                                                 }
                                                 else
