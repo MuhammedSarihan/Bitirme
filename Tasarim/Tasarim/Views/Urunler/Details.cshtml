@@ -10,7 +10,8 @@
     <div class="row g-5">
 
         <div class="col-lg-6">
-            <div class="sticky-top" style="top: 100px;">
+            <!-- ÇÖZÜM 2: z-index: 1 eklendi (Navbar çakışmasını önler) -->
+            <div class="sticky-top" style="top: 100px; z-index: 1;">
                 <div class="card border border-light shadow-sm mb-3 p-2 text-center position-relative">
                     @if (!string.IsNullOrEmpty(Model.AnaResim))
                     {
@@ -112,12 +113,27 @@
             <form asp-controller="Sepet" asp-action="Ekle" method="post" class="mb-3">
                 <div class="mb-4">
                     <div class="d-flex flex-wrap gap-2 mb-4">
+                        @{
+                            // ÇÖZÜM 1: Stok kontrolleri
+                            bool hasAnyStock = false;
+                            bool defaultSelected = false;
+                        }
+
                         @if (Model.Varyasyonlar != null && Model.Varyasyonlar.Any())
                         {
                             foreach (var varyasyon in Model.Varyasyonlar.OrderBy(v => v.Beden))
                             {
                                 bool stokYok = varyasyon.StokAdedi <= 0;
-                                <input type="radio" class="btn-check beden-radio" name="UrunVaryasyonID" value="@varyasyon.ID" id="beden_@varyasyon.ID" data-stok="@varyasyon.StokAdedi" autocomplete="off" @(stokYok ? "disabled" : "required")>
+                                if (!stokYok) { hasAnyStock = true; } 
+
+                                bool isChecked = false;
+                                if (!stokYok && !defaultSelected)
+                                {
+                                    isChecked = true;
+                                    defaultSelected = true;
+                                }
+
+                                <input type="radio" class="btn-check beden-radio" name="UrunVaryasyonID" value="@varyasyon.ID" id="beden_@varyasyon.ID" data-stok="@varyasyon.StokAdedi" autocomplete="off" @(stokYok ? "disabled" : "") @(isChecked ? "checked" : "") required>
                                 <label class="btn btn-outline-dark rounded-0 px-4 py-2 fw-semibold @(stokYok ? "opacity-50 text-decoration-line-through bg-light" : "")" for="beden_@varyasyon.ID">
                                     @varyasyon.Beden
                                 </label>
@@ -137,10 +153,11 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-dark btn-lg w-100 rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0 shadow-sm">
-                    <i class="fa-solid fa-bag-shopping me-2"></i> Sepete Ekle
+                <button type="submit" id="btnSepeteEkle" class="btn btn-dark btn-lg w-100 rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 hover-gold-bg border-0 shadow-sm" @(!hasAnyStock ? "disabled" : "")>
+                    <i class="fa-solid fa-bag-shopping me-2"></i> @(!hasAnyStock ? "Tükendi" : "Sepete Ekle")
                 </button>
             </form>
+            
             <div class="d-grid gap-3">
                 @if (ViewBag.FavorideMi != null && ViewBag.FavorideMi == true)
                 {
@@ -164,6 +181,7 @@
         </div>
     </div>
 
+    <!-- Orijinal Yorumlar Kısmın Buradan Başlıyor -->
     <div class="row mt-5 pt-5 border-top">
         <div class="col-lg-8 mx-auto">
             <h3 class="font-playfair fw-bold mb-4 text-center">Müşteri Yorumları</h3>
@@ -234,7 +252,6 @@
                                             }
                                             else
                                             {
-
                                                 <i class="fa-regular fa-star text-muted opacity-50"></i>
                                             }
                                         }
@@ -269,96 +286,24 @@
 
 @section Scripts {
     <style>
-        .text-gold {
-            color: #D4AF37 !important;
-        }
-
-        .hover-gold:hover {
-            color: #D4AF37 !important;
-            transition: 0.3s;
-        }
-
-        .hover-gold-bg:hover {
-            background-color: #D4AF37 !important;
-            color: #fff !important;
-            transition: 0.3s;
-        }
-
-        .font-playfair {
-            font-family: 'Playfair Display', serif;
-        }
-
-        .letter-spacing-1 {
-            letter-spacing: 1px;
-        }
-
-        .transition-300 {
-            transition: 0.3s ease;
-        }
-
-        .hover-opacity-100:hover {
-            opacity: 1 !important;
-            transform: scale(1.1);
-        }
-
-        .cursor-pointer {
-            cursor: pointer;
-        }
-
-        /* Galeri Özellikleri */
-        .thumb-wrapper {
-            width: 70px;
-            height: 90px;
-            cursor: pointer;
-            opacity: 0.5;
-            transition: 0.3s;
-            border: 2px solid transparent;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-            .thumb-wrapper img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .thumb-wrapper:hover {
-                opacity: 1;
-            }
-
-            .thumb-wrapper.active {
-                opacity: 1;
-                border-color: #0B132B;
-            }
-
-        /* Beden Seçici CSS */
-        .btn-outline-dark:hover {
-            background-color: #0B132B;
-            color: #fff;
-        }
-
-        .btn-check:checked + .btn-outline-dark {
-            background-color: #0B132B;
-            color: #D4AF37;
-            border-color: #0B132B;
-        }
-
-        /* Animasyon */
-        .fade-in-image {
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold:hover { color: #D4AF37 !important; transition: 0.3s; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: #fff !important; transition: 0.3s; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .transition-300 { transition: 0.3s ease; }
+        .hover-opacity-100:hover { opacity: 1 !important; transform: scale(1.1); }
+        .cursor-pointer { cursor: pointer; }
+        .thumb-wrapper { width: 70px; height: 90px; cursor: pointer; opacity: 0.5; transition: 0.3s; border: 2px solid transparent; border-radius: 4px; overflow: hidden; }
+        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-wrapper:hover { opacity: 1; }
+        .thumb-wrapper.active { opacity: 1; border-color: #0B132B; }
+        .btn-outline-dark:hover { background-color: #0B132B; color: #fff; }
+        .btn-check:checked + .btn-outline-dark { background-color: #0B132B; color: #D4AF37; border-color: #0B132B; }
+        .fade-in-image { animation: fadeIn 0.4s ease-in-out; }
         @@keyframes fadeIn {
-            from {
-                opacity: 0.8;
-                transform: scale(0.99);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0.8; transform: scale(0.99); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 
@@ -372,40 +317,36 @@
             document.querySelectorAll('.thumb-wrapper').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
         }
-                        document.addEventListener('DOMContentLoaded', function () {
+        
+        document.addEventListener('DOMContentLoaded', function () {
             const bedenRadios = document.querySelectorAll('.beden-radio');
             const miktarInput = document.getElementById('miktarInput');
             const stokUyari = document.getElementById('stokUyari');
 
-            // Hafızada tutacağımız aktif stok sınırı
             let aktifMaxStok = 1;
 
-            // 1. KURAL: Adet kutusuna sadece BİR KERE dinleyici ekliyoruz.
-            // Kullanıcı elle yazarsa veya oklara basarsa çalışır.
+            const seciliBeden = document.querySelector('.beden-radio:checked');
+            if (seciliBeden) {
+                aktifMaxStok = parseInt(seciliBeden.getAttribute('data-stok'));
+                miktarInput.disabled = false;
+                miktarInput.max = aktifMaxStok;
+            }
+
             miktarInput.addEventListener('input', function() {
                 let girilenDeger = parseInt(this.value) || 1;
-
                 if (girilenDeger > aktifMaxStok) {
-                    this.value = aktifMaxStok; // Değeri hemen yasal sınıra geri çek
-
-                    // Uyarıyı göster ve 3 saniye sonra gizle
+                    this.value = aktifMaxStok;
                     stokUyari.style.display = 'inline';
                     setTimeout(() => stokUyari.style.display = 'none', 3000);
                 }
             });
 
-            // 2. KURAL: Bedenler arası geçiş yapıldığında
             bedenRadios.forEach(radio => {
                 radio.addEventListener('change', function () {
-                    // Seçilen yeni bedenin stoğunu hafızaya al
                     aktifMaxStok = parseInt(this.getAttribute('data-stok'));
-
-                    // Adet kutusunun kilidini aç ve HTML sınırını güncelle
                     miktarInput.disabled = false;
                     miktarInput.max = aktifMaxStok;
 
-                    // Eğer müşteri 44 bedende 10 seçmişse ve 42 bedene (stok: 15) geçerse, 10 kalır sorun yok.
-                    // Ama 42 bedende 15 seçmişse ve 44 bedene (stok: 10) dönerse, kutudaki 15'i zorla 10'a düşür!
                     if (parseInt(miktarInput.value) > aktifMaxStok) {
                         miktarInput.value = aktifMaxStok;
                     }
@@ -413,5 +354,4 @@
             });
         });
     </script>
-
 }

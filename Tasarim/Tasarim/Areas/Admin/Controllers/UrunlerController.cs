@@ -18,11 +18,65 @@ namespace Tasarim.Areas.Admin.Controllers
             _context = context;
         }
 
-        // GET: Admin/Urunler
+        // 1. SAYFAYI AÇAN METOT (Ürünleri Çekmez, Sadece Filtre Kutularını Doldurur)
         public async Task<IActionResult> Index()
         {
-            var databaseContext = _context.Urunler.Where(p=>p.AktifMi).Include(u => u.Kategori).Include(u => u.Marka);
-            return View(await databaseContext.ToListAsync());
+            ViewBag.Kategoriler = await _context.Kategoriler.Where(k => k.AktifMi).OrderBy(k => k.SiraNo).ToListAsync();
+            ViewBag.Markalar = await _context.Markalar.Where(m => m.AktifMi).OrderBy(m => m.MarkaAd).ToListAsync();
+
+            // View'a model GÖNDERMİYORUZ. Sayfa boş açılacak, veriyi JS çekecek.
+            return View();
+        }
+
+        // 2. YENİ: ARKA PLANDA VERİ DAĞITAN AJAX METODU
+        [HttpGet]
+        public async Task<IActionResult> GetUrunler(string arama, int? kategoriId, int? markaId, bool? durum, int sayfa = 1, int sayfaBoyutu = 10)
+        {
+            var query = _context.Urunler
+                .Include(u => u.Kategori)
+                .Include(u => u.Marka)
+                .AsQueryable();
+
+            // 1. FİLTRELEME İŞLEMLERİ (Sorgu veritabanında çalışır, RAM'i yormaz)
+            if (!string.IsNullOrWhiteSpace(arama))
+            {
+                arama = arama.ToLower();
+                query = query.Where(u => u.Baslik.ToLower().Contains(arama) ||
+                                         u.UrunKod.ToLower().Contains(arama) ||
+                                         (u.ModelKodu != null && u.ModelKodu.ToLower().Contains(arama)) ||
+                                         (u.Renk != null && u.Renk.ToLower().Contains(arama)));
+            }
+
+            if (kategoriId.HasValue) query = query.Where(u => u.KategoriID == kategoriId.Value);
+            if (markaId.HasValue) query = query.Where(u => u.MarkaID == markaId.Value);
+            if (durum.HasValue) query = query.Where(u => u.AktifMi == durum.Value);
+
+            // 2. SAYFALAMA (PAGINATION) İÇİN HESAPLAMALAR
+            int toplamKayit = await query.CountAsync();
+            int toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
+
+            // 3. SADECE İSTENEN SAYFADAKİ KADAR VERİYİ ÇEK (Örn: 1. sayfadaki ilk 10 ürün)
+            var urunler = await query
+                .OrderByDescending(u => u.ID)
+                .Skip((sayfa - 1) * sayfaBoyutu)
+                .Take(sayfaBoyutu)
+                .Select(u => new {
+                    id = u.ID,
+                    baslik = u.Baslik,
+                    urunKod = u.UrunKod,
+                    modelKodu = u.ModelKodu,
+                    renk = u.Renk,
+                    fiyatFormatli = u.Fiyat.ToString("C2"),
+                    fiyatHam = u.Fiyat.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                    aktifMi = u.AktifMi,
+                    kategoriAd = u.Kategori != null ? u.Kategori.KategoriAd : "-",
+                    markaAd = u.Marka != null ? u.Marka.MarkaAd : "-",
+                    anaResim = u.AnaResim
+                })
+                .ToListAsync();
+
+            // Veriyi JavaScript'e JSON formatında yolla
+            return Json(new { urunler, toplamSayfa, mevcutSayfa = sayfa, toplamKayit });
         }
 
         // GET: Admin/Urunler/Details/5
@@ -34,7 +88,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Include(u => u.Kategori)
                 .Include(u => u.Marka)
                 .Include(u => u.Varyasyonlar)
-                .Include(u => u.Resimler) // DETAYDA GALERİYİ GÖRMEK İÇİN EKLENDİ
+                .Include(u => u.Resimler) 
                 .Include(u => u.Yorumlar)        
         .ThenInclude(y => y.Profil)
                 .FirstOrDefaultAsync(m => m.ID == id);
@@ -51,12 +105,11 @@ namespace Tasarim.Areas.Admin.Controllers
             ViewData["MarkaID"] = new SelectList(_context.Markalar, "ID", "MarkaAd");
             return View();
         }
-
         // POST: Admin/Urunler/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // List<IFormFile> EkGorseller EKLENDİ!
-        public async Task<IActionResult> Create(Urun urun, IFormFile? AnaResimDosyasi, IEnumerable<IFormFile>? EkGorseller)
+        // DİKKAT: Parametrenin sonuna "string kayitTuru" EKLENDİ!
+        public async Task<IActionResult> Create(Urun urun, IFormFile? AnaResimDosyasi, IEnumerable<IFormFile>? EkGorseller, string kayitTuru)
         {
             // 1. GÜVENLİK ADIMI: Toplam Boyut Kontrolü
             long toplamBoyut = EkGorseller?.Sum(f => f.Length) ?? 0;
@@ -87,7 +140,6 @@ namespace Tasarim.Areas.Admin.Controllers
                 _context.Add(urun);
                 await _context.SaveChangesAsync(); // Ürün kaydedilir ve urun.ID oluşur!
 
-                // ÜRÜN OLUŞTUKTAN SONRA ÇOKLU RESİMLERİ YÜKLE
                 if (EkGorseller != null && EkGorseller.Any())
                 {
                     int sira = 1;
@@ -104,7 +156,19 @@ namespace Tasarim.Areas.Admin.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return RedirectToAction(nameof(Index));
+
+                if (kayitTuru == "kaydetVeYeni")
+                {
+                    // Başarı mesajını TempData'ya atıp formu boş haliyle tekrar açıyoruz.
+                    TempData["Success"] = $"'{urun.Baslik}' başarıyla eklendi! Hız kesmeden sıradaki ürünü girebilirsiniz.";
+                    return RedirectToAction(nameof(Create));
+                }
+                else
+                {
+                    // Klasik "Kaydet" dendiğinde ana listeye dönüyoruz.
+                    TempData["Success"] = $"'{urun.Baslik}' başarıyla eklendi ve kataloğa alındı.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             ViewData["KategoriID"] = new SelectList(_context.Kategoriler, "ID", "KategoriAd", urun.KategoriID);
@@ -249,28 +313,41 @@ namespace Tasarim.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // Ürünü ve galerisindeki resimleri veritabanından çekiyoruz
             var urun = await _context.Urunler
-                .Include(u => u.Resimler) // Ürünü silerken galerisini de getirelim ki onları da çöpe atalım
+                .Include(u => u.Resimler)
                 .FirstOrDefaultAsync(u => u.ID == id);
 
             if (urun != null)
             {
-                // Ana resmi sil
-                if (!string.IsNullOrEmpty(urun.AnaResim)) FileHelper.FileRemover(urun.AnaResim);
+                // 1. ADIM: ANA RESMİ SUNUCUDAN FİZİKSEL OLARAK SİL
+                if (!string.IsNullOrEmpty(urun.AnaResim))
+                {
+                    FileHelper.FileRemover(urun.AnaResim);
+                    urun.AnaResim = string.Empty; // Veritabanındaki referansı da temizle
+                }
 
-                // Varsa galerideki tüm ekstra resimleri fiziksel olarak sil
-                if (urun.Resimler != null)
+                // 2. ADIM: GALERİDEKİ (EKSTRA) RESİMLERİ SUNUCUDAN SİL VE TABLODAN KALDIR
+                if (urun.Resimler != null && urun.Resimler.Any())
                 {
                     foreach (var galeriResmi in urun.Resimler)
                     {
-                        FileHelper.FileRemover(galeriResmi.ResimYolu);
+                        FileHelper.FileRemover(galeriResmi.ResimYolu); // Fiziksel sil
                     }
+                    // Resimler tablosundaki kayıtları tamamen sil (Çünkü ürün artık yok)
+                    _context.Resimler.RemoveRange(urun.Resimler);
                 }
 
-                _context.Urunler.Remove(urun);
+                // 3. ADIM: ÜRÜNÜ KÖKTEN SİLME, SADECE PASİFE AL (Soft Delete)
+                urun.AktifMi = false;
+
+                // Sipariş geçmişinde sorun olmaması için ürünü sildirtmiyoruz, güncelliyoruz.
+                _context.Urunler.Update(urun);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"'{urun.Baslik}' başarıyla arşivlendi. Görselleri sunucudan temizlendi.";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -278,5 +355,80 @@ namespace Tasarim.Areas.Admin.Controllers
         {
             return _context.Urunler.Any(e => e.ID == id);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> HizliFiyatGuncelle([FromBody] HizliFiyatRequest request)
+        {
+            var urun = await _context.Urunler.FindAsync(request.Id);
+            if (urun == null) return Json(new { success = false, message = "Ürün bulunamadı." });
+
+            urun.Fiyat = request.Fiyat;
+            _context.Update(urun);
+            await _context.SaveChangesAsync();
+
+            // JavaScript'in ekrana basması için formatlı halini (₺15.000,00) geri gönderiyoruz
+            return Json(new { success = true, formatliFiyat = urun.Fiyat.ToString("C2") });
+        }
+        [HttpPost]
+        public async Task<IActionResult> HizliStokGuncelle([FromBody] HizliStokRequest request)
+        {
+            // Veritabanındaki varyasyonlar (bedenler) tablonun adının "UrunVaryasyonlari" veya "Varyasyonlar" olduğunu varsayarak yazıyorum. 
+            // Eğer DbSet adın farklıysa (_context.Varyasyonlar) ona göre değiştirebilirsin.
+            var varyasyon = await _context.Set<UrunVaryasyon>().FindAsync(request.Id);
+
+            if (varyasyon == null) return Json(new { success = false, message = "Kayıt bulunamadı." });
+
+            varyasyon.StokAdedi = request.Stok;
+            _context.Update(varyasyon);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, yeniStok = varyasyon.StokAdedi });
+        }
+        [HttpPost]
+        public async Task<IActionResult> HizliBedenEkle([FromBody] HizliBedenRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Beden))
+                return Json(new { success = false, message = "Beden boş olamaz." });
+
+            // (Opsiyonel) Aynı beden daha önce eklenmiş mi kontrolü
+            var mevcutMu = await _context.Set<UrunVaryasyon>()
+                .AnyAsync(v => v.UrunID == request.UrunId && v.Beden.ToLower() == request.Beden.ToLower());
+
+            if (mevcutMu)
+                return Json(new { success = false, message = "Bu ürün için bu beden zaten mevcut. Lütfen listeden stoğunu güncelleyin." });
+
+            var yeniBeden = new UrunVaryasyon
+            {
+                UrunID = request.UrunId,
+                Beden = request.Beden,
+                StokAdedi = request.Stok
+            };
+
+            _context.Set<UrunVaryasyon>().Add(yeniBeden);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        // JSON verisini karşılamak için gerekli yardımcı sınıf
+        public class HizliBedenRequest
+        {
+            public int UrunId { get; set; }
+            public string Beden { get; set; }
+            public int Stok { get; set; }
+        }
+        public class HizliStokRequest
+        {
+            public int Id { get; set; }
+            public int Stok { get; set; }
+        }
+        // Gelen JSON verisini karşılamak için küçük bir yardımcı sınıf (Controller'ın en altına veya dışına koyabilirsin)
+        public class HizliFiyatRequest
+        {
+            public int Id { get; set; }
+            public decimal Fiyat { get; set; }
+        }
+
     }
 }

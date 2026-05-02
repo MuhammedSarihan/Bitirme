@@ -1,140 +1,224 @@
 ﻿@model IEnumerable<Tasarim.Core.Entities.Kategori>
-
 @{
-    ViewData["Title"] = "";
+    var anaKategoriler = Model.Where(k => k.UstKategoriID == null).OrderBy(k => k.SiraNo).ToList();
 }
-<p>Hiyerarşik bir görünüm vermeyei deneyelim</p>
-<div class="container-fluid mt-4">
+
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="mb-0 text-dark fw-bold">
-                <i class="fa-solid fa-swatchbook text-primary me-2"></i>Kategori Yönetimi
-            </h3>
-            <p class="text-muted small mt-1 mb-0">Mağazanızdaki tüm ürün kategorilerini buradan yönetebilir ve hızlıca arayabilirsiniz.</p>
-        </div>
-
-        <div class="d-flex gap-3 align-items-center">
-
-            <div class="input-group shadow-sm rounded-pill overflow-hidden" style="min-width: 300px; border: 1px solid #dee2e6;">
-                <span class="input-group-text bg-white border-0 text-muted ps-3">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
-                <input type="text" id="kategoriArama" class="form-control border-0 shadow-none" placeholder="Kategori adı ara...">
+            <h2 class="font-playfair fw-bold text-dark mb-1">Kategori Yönetimi</h2>
+            <p class="text-muted small text-uppercase letter-spacing-1 mb-0">Hiyerarşik Kategori ve Menü Düzeni</p>
+            
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input cursor-pointer border-dark" type="checkbox" id="chkSadeceAktif">
+                <label class="form-check-label small fw-bold text-muted cursor-pointer" for="chkSadeceAktif">Sadece Aktif Olanları Göster</label>
             </div>
-
-            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
-                <i class="fa-solid fa-plus me-1"></i> Yeni Ekle
-            </a>
         </div>
+        <button class="btn btn-dark rounded-0 px-4 py-2 text-uppercase letter-spacing-1 fw-bold hover-gold-bg transition-300" onclick="openKategoriModal()">
+            <i class="fa-solid fa-plus me-2"></i> Yeni Kategori
+        </button>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-dark-subtle rounded-0 shadow-sm">
+        <div class="card-header bg-light border-bottom border-dark-subtle py-3 d-none d-md-flex fw-bold text-uppercase small text-muted letter-spacing-1">
+            <div class="col-5 ps-3">Kategori Adı</div>
+            <div class="col-2 text-center">Sıra</div>
+            <div class="col-3 text-center">Durum / Menü</div>
+            <div class="col-2 text-end pe-4">İşlemler</div>
+        </div>
+        
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="kategorilerTablosu">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-secondary fw-semibold py-3 ps-4">@Html.DisplayNameFor(model => model.KategoriAd)</th>
-                            <th class="text-secondary fw-semibold">@Html.DisplayNameFor(model => model.KategoriResmi)</th>
-                            <th class="text-secondary fw-semibold text-center">@Html.DisplayNameFor(model => model.SiraNo)</th>
-                            <th class="text-secondary fw-semibold text-center">Durum</th>
-                            <th class="text-secondary fw-semibold text-center">Menüde Göster</th>
-                            <th class="text-secondary fw-semibold">Üst Kategori</th>
-                            <th class="text-secondary fw-semibold text-end pe-4" style="width: 150px;">İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
+            @if (!anaKategoriler.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-tags fs-1 mb-3 opacity-50"></i>
+                    <h5 class="font-playfair">Henüz hiç kategori eklenmemiş.</h5>
+                </div>
+            }
+
+            @foreach (var ana in anaKategoriler)
+            {
+                <!-- ANA KATEGORİ SATIRI  -->
+                <div class="d-flex align-items-center py-3 border-bottom border-light transition-300 row-hover bg-white filterable-row" data-aktif="@ana.AktifMi.ToString().ToLower()">
+                    <div class="col-5 ps-4">
+                        <span class="font-playfair fw-bold fs-5 text-dark"><i class="fa-solid fa-folder text-gold me-2"></i> @ana.KategoriAd</span>
+                    </div>
+                    <div class="col-2 text-center fw-medium text-muted">@ana.SiraNo</div>
+                    <div class="col-3 text-center">
+                        <span class="badge border border-dark rounded-0 px-2 py-1 @(ana.AktifMi ? "text-dark" : "text-muted opacity-50 text-decoration-line-through")">
+                            @(ana.AktifMi ? "Aktif" : "Pasif")
+                        </span>
+                        @if (ana.UstteGoster) { <i class="fa-solid fa-star text-gold ms-1" title="Menüde Gösteriliyor"></i> }
+                    </div>
+                    <div class="col-2 text-end pe-4">
+                        <button class="btn btn-sm btn-outline-dark rounded-0 px-3" onclick="openKategoriModal(@ana.ID, '@ana.KategoriAd', @ana.SiraNo, @ana.AktifMi.ToString().ToLower(), @ana.UstteGoster.ToString().ToLower(), null)">Düzenle</button>
+                    </div>
+                </div>
+
+                <!-- ALT KATEGORİLERİ (Eğer varsa) -->
+                var altKategoriler = Model.Where(k => k.UstKategoriID == ana.ID).OrderBy(k => k.SiraNo).ToList();
+                @if (altKategoriler.Any())
+                {
+                    <div class="bg-light border-bottom border-dark-subtle pb-2">
+                        @foreach (var alt in altKategoriler)
                         {
-                            <tr>
-                                <td class="fw-bold text-dark ps-4">
-                                    @Html.DisplayFor(modelItem => item.KategoriAd)
-                                </td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(item.KategoriResmi))
-                                    {
-                                        <span class="text-muted"><i class="fa-regular fa-image me-1"></i>Görsel Var</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted fst-italic">-</span>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    <span class="text-dark fw-medium">@Html.DisplayFor(modelItem => item.SiraNo)</span>
-                                </td>
-                                <td class="text-center">
-                                    @if (item.AktifMi)
-                                    {
-                                        <span class="badge rounded-pill bg-success bg-opacity-75 px-3">Aktif</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3">Pasif</span>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    @if (item.UstteGoster)
-                                    {
-                                        <span class="badge rounded-pill bg-info text-dark px-3">Evet</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge rounded-pill bg-light text-secondary border px-3">Hayır</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (item.UstKategoriID != null || item.UstKategoriID==0)
-                                    {
-                                        <span class="text-secondary fw-semibold">
-                                            <i class="fa-solid fa-level-up-alt fa-rotate-90 me-1 text-muted"></i> @item.UstKategori.KategoriAd
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span >Ana Kategori</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-inline-flex gap-1">
-                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-primary " title="Düzenle">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-outline-info " title="Detaylar">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-danger " title="Sil">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
+                            <!-- ALT KATEGORİ SATIRI (Filtre için class ve data-aktif eklendi) -->
+                            <div class="d-flex align-items-center py-2 transition-300 row-hover filterable-row" data-aktif="@alt.AktifMi.ToString().ToLower()">
+                                <div class="col-5 ps-5 ms-4">
+                                    <span class="text-dark fw-semibold"><i class="fa-solid fa-level-up-alt fa-rotate-90 text-muted me-2"></i> @alt.KategoriAd</span>
+                                </div>
+                                <div class="col-2 text-center small text-muted">@alt.SiraNo</div>
+                                <div class="col-3 text-center">
+                                    <span class="badge border border-secondary rounded-0 px-2 py-1 @(alt.AktifMi ? "text-secondary" : "text-muted opacity-50 text-decoration-line-through")">
+                                        @(alt.AktifMi ? "Aktif" : "Pasif")
+                                    </span>
+                                </div>
+                                <div class="col-2 text-end pe-4">
+                                    <button class="btn btn-sm btn-link text-dark text-decoration-none border-0 p-0 hover-gold" onclick="openKategoriModal(@alt.ID, '@alt.KategoriAd', @alt.SiraNo, @alt.AktifMi.ToString().ToLower(), @alt.UstteGoster.ToString().ToLower(), @ana.ID)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+                            </div>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    </div>
+                }
+            }
         </div>
     </div>
 </div>
+
+<!-- KATEGORİ EKLE/DÜZENLE MODAL (Pop-up Form) -->
+<div class="modal fade" id="kategoriModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-0 shadow-lg">
+            <div class="modal-header bg-dark text-white rounded-0 border-0 py-3">
+                <h5 class="modal-title font-playfair fw-bold letter-spacing-1" id="modalTitle">Yeni Kategori Ekle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form asp-action="Kaydet" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ID" id="kat_ID" value="0" />
+                    
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase letter-spacing-1 fw-bold text-muted">Kategori Adı</label>
+                        <input type="text" name="KategoriAd" id="kat_Ad" class="form-control rounded-0 border-dark-subtle fw-bold" required />
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase letter-spacing-1 fw-bold text-muted">Sıra No</label>
+                            <input type="number" name="SiraNo" id="kat_Sira" class="form-control rounded-0 border-dark-subtle" value="1" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase letter-spacing-1 fw-bold text-muted">Üst Kategori</label>
+                            <select name="UstKategoriID" id="kat_UstID" class="form-select rounded-0 border-dark-subtle">
+                                <option value="">-- Ana Kategori --</option>
+                                @foreach (var ana in anaKategoriler)
+                                {
+                                    <option value="@ana.ID">@ana.KategoriAd</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-4 border-top border-dark-subtle pt-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="AktifMi" id="kat_Aktif" value="true">
+                            <input type="hidden" name="AktifMi" value="false">
+                            <label class="form-check-label small fw-bold" for="kat_Aktif">Aktif Mi?</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="UstteGoster" id="kat_Menu" value="true">
+                            <input type="hidden" name="UstteGoster" value="false">
+                            <label class="form-check-label small fw-bold" for="kat_Menu">Menüde Göster</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer bg-light border-0 rounded-0 p-3">
+                    <button type="button" class="btn btn-outline-dark rounded-0 px-4" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-dark rounded-0 px-4 fw-bold letter-spacing-1 hover-gold-bg transition-300">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold:hover { color: #D4AF37 !important; transition: 0.3s; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+        .transition-300 { transition: all 0.3s ease; }
+        .row-hover:hover { background-color: #f8f9fa !important; }
+        .cursor-pointer { cursor: pointer; }
+        .form-switch .form-check-input:checked { background-color: #000; border-color: #000; }
+    </style>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const aramaKutusu = document.getElementById('kategoriArama');
+        function openKategoriModal(id = 0, ad = '', sira = 1, aktif = true, menu = false, ustId = null) {
+            document.getElementById('modalTitle').innerText = id === 0 ? "Yeni Kategori Ekle" : "Kategoriyi Düzenle";
+            
+            document.getElementById('kat_ID').value = id;
+            document.getElementById('kat_Ad').value = ad;
+            document.getElementById('kat_Sira').value = sira;
+            document.getElementById('kat_Aktif').checked = aktif;
+            document.getElementById('kat_Menu').checked = menu;
+            
+            const ustSelect = document.getElementById('kat_UstID');
+            ustSelect.value = ustId === null ? "" : ustId;
 
-            aramaKutusu.addEventListener('keyup', function () {
-                let filtre = this.value.toLowerCase();
-                // HTML'deki tablo ID'si ile eşleşmeli
-                let satirlar = document.querySelectorAll('#kategorilerTablosu tbody tr');
-
-                satirlar.forEach(function (satir) {
-                    let satirMetni = satir.textContent.toLowerCase();
-                    if (satirMetni.includes(filtre)) {
-                        satir.style.display = '';
-                    } else {
-                        satir.style.display = 'none';
-                    }
-                });
+            Array.from(ustSelect.options).forEach(opt => {
+                opt.disabled = (opt.value == id && id !== 0);
             });
+
+            var myModal = new bootstrap.Modal(document.getElementById('kategoriModal'));
+            myModal.show();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal içindeki aktiflik/menü kuralları
+            const chkAktif = document.getElementById('kat_Aktif');
+            const chkMenu = document.getElementById('kat_Menu');
+
+            chkAktif.addEventListener('change', function () {
+                if (!this.checked) chkMenu.checked = false;
+            });
+
+            chkMenu.addEventListener('change', function () {
+                if (this.checked) chkAktif.checked = true;
+            });
+
+            // Hafızalı Tablo Filtreleme İşlemi
+            const chkSadeceAktif = document.getElementById('chkSadeceAktif');
+            
+            if (chkSadeceAktif) {
+                const sayfaAnahtari = 'filtre_aktif_' + window.location.pathname;
+                const kaydedilmisAyar = localStorage.getItem(sayfaAnahtari);
+
+                chkSadeceAktif.checked = kaydedilmisAyar !== null ? (kaydedilmisAyar === 'true') : true;
+
+                function tabloyuFiltrele() {
+                    const sadeceAktifler = chkSadeceAktif.checked;
+                    localStorage.setItem(sayfaAnahtari, sadeceAktifler);
+
+                    document.querySelectorAll('.filterable-row').forEach(satir => {
+                        const aktifMi = satir.getAttribute('data-aktif') === 'true';
+                        
+                        if (sadeceAktifler && !aktifMi) {
+                            satir.classList.add('d-none');
+                        } else {
+                            satir.classList.remove('d-none');
+                        }
+                    });
+                }
+
+                tabloyuFiltrele();
+                chkSadeceAktif.addEventListener('change', tabloyuFiltrele);
+            }
         });
     </script>
 }
