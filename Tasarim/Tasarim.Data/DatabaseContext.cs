@@ -33,6 +33,7 @@ namespace Tasarim.Data
         public DbSet<Yorum> Yorumlar { get; set; }
         public DbSet<YorumAnaliz> YorumAnalizleri { get; set; }
         public DbSet<LLSonuc> LLSonuclari { get; set; }
+        public DbSet<UrunOzellikleri> UrunOzellikleri { get; set; }
 
 
         // --- İLİŞKİ VE AYARLAR (Fluent API) ---
@@ -80,6 +81,17 @@ namespace Tasarim.Data
             // Diğer konfigürasyonları uygula
             modelBuilder.ApplyConfigurationsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
             base.OnModelCreating(modelBuilder);
+
+
+            // Ürün tablosu ile UrunOzellikleri tablosu arasında 1-1 ilişki tanımlaması.
+            // Bu sayede her ürünün yalnızca bir tane AI analiz sonucu olabilir ve UrunID üzerinden birbirine bağlanır.
+            
+
+            modelBuilder.Entity<Urun>()
+                .HasOne(u => u.UrunOzellikleri)
+                .WithOne(uo => uo.Urun)
+                .HasForeignKey<UrunOzellikleri>(uo => uo.UrunID);
+
         }
 
 

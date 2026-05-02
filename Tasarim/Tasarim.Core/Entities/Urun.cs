@@ -55,6 +55,11 @@ namespace Tasarim.Core.Entities
 
         public LLSonuc LLSonuc { get; set; } // 1-1 İlişki
         [NotMapped]
+
+
+        // Gemini'den gelen görsel analiz sonuçları
+        public virtual UrunOzellikleri? UrunOzellikleri { get; set; }
+
         public decimal KampanyaliFiyat
         {
             get
