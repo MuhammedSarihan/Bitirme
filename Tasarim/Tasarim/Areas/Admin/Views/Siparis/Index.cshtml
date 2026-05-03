@@ -20,8 +20,7 @@
                 </thead>
                 <tbody>
                     @foreach (var item in Model) {
-                        var isLocked = item.SiparisDurumuID >= 4; // Teslim (4) veya İptal (5) kilitlidir.
-                        
+                        var isLocked = item.SiparisDurumuID >= 4; // Teslim (4) veya İptal (5) kilitlidir.                        
                         <!-- ANA SATIR -->
                         <tr class="border-bottom border-light">
                             <td class="ps-4 fw-bold">#@item.SiparisNo</td>
@@ -38,25 +37,21 @@
                                         @(isLocked ? "disabled" : "") style="width: 160px;">
                                     
                                     @foreach (var d in ViewBag.Durumlar) {
-                                        // KRİTİK DÜZELTME: Sadece mevcut durum ve sonrasını (veya İptal'i) Listede Göster!
                                         if (d.ID >= item.SiparisDurumuID || d.ID == 5)
                                         {
                                             <option value="@d.ID" selected="@(item.SiparisDurumuID == d.ID)">@d.DurumAd</option>
                                         }
                                     }
-
                                 </select>
                             </td>
                             <td class="text-end pe-4">
                                 <div class="btn-group shadow-sm">
-                                    <!-- Açılır Liste Butonu -->
                                     <button type="button" class="btn btn-sm btn-outline-dark rounded-0" data-bs-toggle="collapse" data-bs-target="#detay-@item.ID" title="Sipariş İçeriği">
                                         <i class="fa-solid fa-chevron-down"></i>
                                     </button>
                                     
                                     <a asp-action="Detay" asp-route-id="@item.ID" class="btn btn-sm btn-dark rounded-0 text-uppercase" style="font-size: 0.75rem; padding-top: 6px;">İncele</a>
                                     
-                                    <!-- Fiş/Yazdır Butonu -->
                                     <a asp-action="FisYazdir" asp-route-id="@item.ID" target="_blank" class="btn btn-sm btn-outline-dark rounded-0" title="Fiş Çıktısı Al">
                                         <i class="fa-solid fa-receipt text-gold"></i> Fiş
                                     </a>
@@ -64,7 +59,7 @@
                             </td>
                         </tr>
 
-                        <!-- GİZLİ DETAY SATIRI (Açılır Önizleme) -->
+                        <!-- GİZLİ DETAY SATIRI -->
                         <tr class="collapse bg-light border-bottom border-dark" id="detay-@item.ID">
                             <td colspan="6" class="p-0">
                                 <div class="p-4 border-start border-4 border-warning">
@@ -102,14 +97,19 @@
 </div>
 
 @section Scripts {
+    <!-- SweetAlert2 Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         .font-playfair { font-family: 'Playfair Display', serif; }
         .text-gold { color: #D4AF37 !important; }
         .collapse.show { background-color: #fafafa; }
+        /* SweetAlert LUVİA Uyumu */
+        .swal2-confirm { background-color: #000 !important; border-radius: 0 !important; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        .swal2-cancel { border-radius: 0 !important; text-transform: uppercase; font-size: 0.8rem; }
     </style>
 
     <script>
-        // jQuery'ye bağımlı olmayan, %100 çalışan Saf JavaScript (Fetch API) Yapısı
         document.addEventListener("DOMContentLoaded", function () {
             const selectBoxes = document.querySelectorAll('.quick-status');
 
@@ -117,41 +117,74 @@
                 selectBox.addEventListener('change', function () {
                     const id = this.getAttribute('data-id');
                     const yeniDurumId = this.value;
-                    
-                    // İşlem bitene kadar kutuyu kilitle
-                    this.disabled = true;
+                    const originalValue = this.getAttribute('data-current') || yeniDurumId;
 
-                    // Form Data oluştur
-                    const formData = new URLSearchParams();
-                    formData.append('id', id);
-                    formData.append('yeniDurumId', yeniDurumId);
+                    // EĞER "KARGOLANDI" SEÇİLDİYSE (ID: 3 olduğunu varsayıyorum)
+                    if (yeniDurumId == "3") {
+                        Swal.fire({
+                            title: 'KARGO BİLGİSİ',
+                            text: 'Lütfen kargo takip numarasını giriniz:',
+                            input: 'text',
+                            inputPlaceholder: 'Takip No (Opsiyonel)',
+                            showCancelButton: true,
+                            confirmButtonText: 'GÜNCELLE',
+                            cancelButtonText: 'İPTAL',
+                            confirmButtonColor: '#000',
+                            cancelButtonColor: '#6c757d',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Kullanıcı onayladıysa veriyi gönder
+                                sendUpdate(id, yeniDurumId, result.value, selectBox);
+                            } else {
+                                // İptal ettiyse selectbox'ı eski haline döndür
+                                window.location.reload();
+                            }
+                        });
+                    } else {
+                        // Diğer durumlar için doğrudan gönder
+                        sendUpdate(id, yeniDurumId, null, selectBox);
+                    }
+                });
+            });
 
-                    // Arka plana POST isteği at
-                    fetch('/Admin/Siparis/HizliDurumGuncelle', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: formData.toString()
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Başarılıysa sayfayı yenile ki yeni duruma göre kilitler aktif olsun
+            function sendUpdate(id, yeniDurumId, kargoNo, element) {
+                element.disabled = true;
+
+                const formData = new URLSearchParams();
+                formData.append('id', id);
+                formData.append('yeniDurumId', yeniDurumId);
+                if (kargoNo) formData.append('kargoNo', kargoNo);
+
+                fetch('/Admin/Siparis/HizliDurumGuncelle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı',
+                            text: 'Sipariş durumu güncellendi.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
                             window.location.reload();
-                        } else {
-                            // Backend'den hata dönerse (Örn: Teslim edilen iptal edilemez)
-                            alert(data.message);
-                            window.location.reload(); 
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Hata:', error);
-                        alert("İşlem sırasında bir hata oluştu.");
+                        });
+                    } else {
+                        Swal.fire('Hata', data.message, 'error').then(() => {
+                            window.location.reload();
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    Swal.fire('Hata', 'İşlem başarısız oldu.', 'error').then(() => {
                         window.location.reload();
                     });
                 });
-            });
+            }
         });
     </script>
 }

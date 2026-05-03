@@ -43,6 +43,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Include(s => s.Kullanici).ThenInclude(k => k.Profil)
                 .Include(s => s.SiparisDetaylari).ThenInclude(sd => sd.Urun)
                 .Include(s => s.SiparisDetaylari).ThenInclude(sd => sd.UrunVaryasyon)
+                .Include(s => s.Odemeler)
                 .FirstOrDefaultAsync(s => s.ID == id);
 
             if (siparis == null) return NotFound();
@@ -110,12 +111,17 @@ namespace Tasarim.Areas.Admin.Controllers
             return RedirectToAction("Detay", new { id = siparis.ID });
         }
 
-        // 3. HIZLI VE KATI DURUM GÜNCELLEME
+        // 3. HIZLI VE KATI DURUM GÜNCELLEME (Kargo Takip No Entegreli)
         [HttpPost]
-        public async Task<IActionResult> HizliDurumGuncelle(int id, int yeniDurumId)
+        public async Task<IActionResult> HizliDurumGuncelle(int id, int yeniDurumId, string kargoNo)
         {
-            var siparis = await _context.Siparisler.Include(s => s.SiparisDetaylari).FirstOrDefaultAsync(s => s.ID == id);
-            if (siparis == null) return Json(new { success = false, message = "Sipariş bulunamadı." });
+            // Siparişi ve detaylarını (stok iadesi için) çekiyoruz
+            var siparis = await _context.Siparisler
+                .Include(s => s.SiparisDetaylari)
+                .FirstOrDefaultAsync(s => s.ID == id);
+
+            if (siparis == null)
+                return Json(new { success = false, message = "Sipariş bulunamadı." });
 
             // KURAL 1: İptal edilen (5) bir sipariş ASLA geri döndürülemez.
             if (siparis.SiparisDurumuID == 5)
@@ -125,10 +131,17 @@ namespace Tasarim.Areas.Admin.Controllers
             if (siparis.SiparisDurumuID == 4)
                 return Json(new { success = false, message = "Teslim edilmiş sipariş değiştirilemez!" });
 
-            // KURAL 3: Süreç geriye doğru işleyemez (Örn: Kargoya verilen, Onay bekliyora dönemez). 
-            // Sadece İptal (5) durumu ileri yöndedir ve her zaman seçilebilir.
+            // KURAL 3: Süreç geriye doğru işleyemez (İptal hariç).
             if (yeniDurumId < siparis.SiparisDurumuID && yeniDurumId != 5)
                 return Json(new { success = false, message = "Sipariş durumu geriye doğru alınamaz!" });
+
+            // --- YENİ EKLENEN KARGO MANTIĞI ---
+            // Eğer yeni durum "Kargolandı" (3) ise ve bir numara gelmişse kaydet.
+            if (yeniDurumId == 3 && !string.IsNullOrEmpty(kargoNo))
+            {
+                siparis.KargoNo = kargoNo; // Modelinde bu alanın olduğundan eminiz.
+            }
+            // ---------------------------------
 
             // KURAL 4: Eğer sipariş YENİ İPTAL ediliyorsa stokları geri yükle.
             if (yeniDurumId == 5 && siparis.SiparisDurumuID != 5)
@@ -136,12 +149,14 @@ namespace Tasarim.Areas.Admin.Controllers
                 foreach (var detay in siparis.SiparisDetaylari)
                 {
                     var varyasyon = await _context.UrunVaryasyonlari.FindAsync(detay.UrunVaryasyonID);
-                    if (varyasyon != null) varyasyon.StokAdedi += detay.Adet;
+                    if (varyasyon != null)
+                        varyasyon.StokAdedi += detay.Adet;
                 }
             }
 
             siparis.SiparisDurumuID = yeniDurumId;
             await _context.SaveChangesAsync();
+
             return Json(new { success = true });
         }
 

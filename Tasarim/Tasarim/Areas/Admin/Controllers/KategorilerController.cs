@@ -16,19 +16,18 @@ namespace Tasarim.Areas.Admin.Controllers
             _context = context;
         }
 
-        // 1. LİSTELEME (Arayüz zaten kendi içinde hiyerarşiyi hallediyor)
+        //  LİSTELEME 
         public async Task<IActionResult> Index()
         {
             var kategoriler = await _context.Kategoriler.OrderBy(k => k.SiraNo).ToListAsync();
             return View(kategoriler);
         }
 
-        // 2. TEK MERKEZLİ EKLEME VE DÜZENLEME (MODAL'DAN GELEN)
+        //  TEK MERKEZLİ EKLEME VE DÜZENLEME (MODAL'DAN GELEN)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Kaydet(Kategori model)
         {
-            // Eski Create/Edit'teki gibi formdan gelmeyen ilişkileri yoksayıyoruz ki ModelState patlamasın
             ModelState.Remove("UstKategori");
             ModelState.Remove("AltKategoriler");
             ModelState.Remove("Urunler");

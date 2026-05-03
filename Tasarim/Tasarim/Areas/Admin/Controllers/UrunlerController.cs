@@ -18,17 +18,16 @@ namespace Tasarim.Areas.Admin.Controllers
             _context = context;
         }
 
-        // 1. SAYFAYI AÇAN METOT (Ürünleri Çekmez, Sadece Filtre Kutularını Doldurur)
         public async Task<IActionResult> Index()
         {
             ViewBag.Kategoriler = await _context.Kategoriler.Where(k => k.AktifMi).OrderBy(k => k.SiraNo).ToListAsync();
             ViewBag.Markalar = await _context.Markalar.Where(m => m.AktifMi).OrderBy(m => m.MarkaAd).ToListAsync();
 
-            // View'a model GÖNDERMİYORUZ. Sayfa boş açılacak, veriyi JS çekecek.
+            //  Sayfa boş açılacak, veriyi JS çekecek.
             return View();
         }
 
-        // 2. YENİ: ARKA PLANDA VERİ DAĞITAN AJAX METODU
+        // ARKA PLANDA VERİ DAĞITAN AJAX METODU
         [HttpGet]
         public async Task<IActionResult> GetUrunler(string arama, int? kategoriId, int? markaId, bool? durum, int sayfa = 1, int sayfaBoyutu = 10)
         {
@@ -111,7 +110,7 @@ namespace Tasarim.Areas.Admin.Controllers
         // DİKKAT: Parametrenin sonuna "string kayitTuru" EKLENDİ!
         public async Task<IActionResult> Create(Urun urun, IFormFile? AnaResimDosyasi, IEnumerable<IFormFile>? EkGorseller, string kayitTuru)
         {
-            // 1. GÜVENLİK ADIMI: Toplam Boyut Kontrolü
+            //  GÜVENLİK ADIMI: Toplam Boyut Kontrolü
             long toplamBoyut = EkGorseller?.Sum(f => f.Length) ?? 0;
             if (toplamBoyut > 20971520) // 20 MB
             {
@@ -194,7 +193,7 @@ namespace Tasarim.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Eğer rol yapın varsa buraya [Authorize(Roles = "Admin")] eklemeyi unutma!
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminYorumSil(int YorumID, int UrunID)
         {
             // Yorumu doğrudan ID'sine göre bul
@@ -212,7 +211,6 @@ namespace Tasarim.Areas.Admin.Controllers
         // POST: Admin/Urunler/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // List<IFormFile> EkGorseller EKLENDİ!
         public async Task<IActionResult> Edit(int id, Urun urun, IFormFile? AnaResimDosyasi, IEnumerable<IFormFile>? EkGorseller, bool cbResmiSil = false)
         {
             if (id != urun.ID) return NotFound();
@@ -334,11 +332,11 @@ namespace Tasarim.Areas.Admin.Controllers
                     {
                         FileHelper.FileRemover(galeriResmi.ResimYolu); // Fiziksel sil
                     }
-                    // Resimler tablosundaki kayıtları tamamen sil (Çünkü ürün artık yok)
+                    // Resimler tablosundaki kayıtları tamamen sil 
                     _context.Resimler.RemoveRange(urun.Resimler);
                 }
 
-                // 3. ADIM: ÜRÜNÜ KÖKTEN SİLME, SADECE PASİFE AL (Soft Delete)
+                // 3. ADIM: ÜRÜNÜ KÖKTEN SİLME, SADECE PASİFE AL 
                 urun.AktifMi = false;
 
                 // Sipariş geçmişinde sorun olmaması için ürünü sildirtmiyoruz, güncelliyoruz.
@@ -367,14 +365,12 @@ namespace Tasarim.Areas.Admin.Controllers
             _context.Update(urun);
             await _context.SaveChangesAsync();
 
-            // JavaScript'in ekrana basması için formatlı halini (₺15.000,00) geri gönderiyoruz
+          
             return Json(new { success = true, formatliFiyat = urun.Fiyat.ToString("C2") });
         }
         [HttpPost]
         public async Task<IActionResult> HizliStokGuncelle([FromBody] HizliStokRequest request)
         {
-            // Veritabanındaki varyasyonlar (bedenler) tablonun adının "UrunVaryasyonlari" veya "Varyasyonlar" olduğunu varsayarak yazıyorum. 
-            // Eğer DbSet adın farklıysa (_context.Varyasyonlar) ona göre değiştirebilirsin.
             var varyasyon = await _context.Set<UrunVaryasyon>().FindAsync(request.Id);
 
             if (varyasyon == null) return Json(new { success = false, message = "Kayıt bulunamadı." });
