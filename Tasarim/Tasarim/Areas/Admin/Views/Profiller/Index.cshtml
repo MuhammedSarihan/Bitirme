@@ -59,107 +59,102 @@
                         <th class="text-dark fw-bold text-end pe-4 text-uppercase small letter-spacing-1" style="width: 170px;">İşlemler</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-user-xmark fs-1 mb-3"></i>
-                                <h5>Kayıt Bulunamadı</h5>
-                                <p>Arama kriterlerinize uygun müşteri profili sistemde mevcut değil.</p>
-                            </td>
-                        </tr>
-                    }
-                    
-                    @foreach (var item in Model)
-                    {
-                        <tr class="border-bottom border-light">
-                            <td class="ps-4">
-                                <div class="fw-bold text-dark fs-6">@item.Ad @item.Soyad</div>
-                            </td>
-                            <td>
-                                <div class="small"><i class="fa-solid fa-envelope me-2 text-gold"></i>@item.Mail</div>
-                                <div class="small mt-1"><i class="fa-solid fa-phone me-2 text-gold"></i>@item.TelNo</div>
-                            </td>
-                            <td class="text-center">
-                                <div class="d-inline-flex gap-1">
-                                    <span class="badge bg-dark rounded-0 fw-normal">Yaş: @item.Yas</span>
-                                    <span class="badge bg-dark rounded-0 fw-normal">Boy: @item.Boy</span>
-                                    <span class="badge bg-dark rounded-0 fw-normal">Kilo: @item.Kilo</span>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                @if (item.Cinsiyet == "Kadın")
-                                {
-                                    <span class="badge bg-light text-dark border border-dark rounded-0 px-3"><i class="fa-solid fa-venus me-1 text-gold"></i>Kadın</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-light text-dark border border-dark rounded-0 px-3"><i class="fa-solid fa-mars me-1 text-gold"></i>Erkek</span>
-                                }
-                            </td>
-                            <td>
-                                <span class="fw-medium text-muted">@item.Kullanici?.KullaniciAd</span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group shadow-sm">
-                                    <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-dark rounded-0" title="Düzenle">
-                                        <i class="fa-solid fa-pen text-gold"></i>
-                                    </a>
-                                    <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-dark rounded-0" title="Detaylar">
-                                        <i class="fa-solid fa-magnifying-glass"></i> İncele
-                                    </a>
-                                    <td class="text-end pe-4">
-    <div class="btn-group shadow-sm">
-        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-dark rounded-0" title="Düzenle">
+<tbody>
+    @if (!Model.Any())
+    {
+        <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-user-xmark fs-1 mb-3"></i>
+                <h5>Kayıt Bulunamadı</h5>
+                <p>Arama kriterlerinize uygun müşteri profili sistemde mevcut değil.</p>
+            </td>
+        </tr>
+    }
+
+    @foreach (var item in Model)
+    {
+        <tr class="border-bottom border-light">
+            <td class="ps-4">
+                <div class="fw-bold text-dark fs-6">@item.Ad @item.Soyad</div>
+            </td>
+            <td>
+                <div class="small"><i class="fa-solid fa-envelope me-2 text-gold"></i>@item.Mail</div>
+                <div class="small mt-1"><i class="fa-solid fa-phone me-2 text-gold"></i>@item.TelNo</div>
+            </td>
+            <td class="text-center">
+                <div class="d-inline-flex gap-1">
+                    <span class="badge bg-dark rounded-0 fw-normal">Yaş: @item.Yas</span>
+                    <span class="badge bg-dark rounded-0 fw-normal">Boy: @item.Boy</span>
+                    <span class="badge bg-dark rounded-0 fw-normal">Kilo: @item.Kilo</span>
+                </div>
+            </td>
+            <td class="text-center">
+                @if (item.Cinsiyet == "Kadın")
+                {
+                    <span class="badge bg-light text-dark border border-dark rounded-0 px-3"><i class="fa-solid fa-venus me-1 text-gold"></i>Kadın</span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-dark border border-dark rounded-0 px-3"><i class="fa-solid fa-mars me-1 text-gold"></i>Erkek</span>
+                }
+            </td>
+            <td>
+                <span class="fw-medium text-muted">@item.Kullanici?.KullaniciAd</span>
+            </td>
+            <td class="text-end pe-4">
+    <div class="d-flex justify-content-end align-items-stretch gap-1">
+        <!-- DÜZENLE -->
+        <a asp-action="Edit" asp-route-id="@item.ID" 
+           class="btn btn-sm btn-outline-dark rounded-0 d-flex align-items-center justify-content-center" 
+           style="width: 35px; height: 35px;" title="Düzenle">
             <i class="fa-solid fa-pen text-gold"></i>
         </a>
-        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-dark rounded-0" title="Detaylar">
-            <i class="fa-solid fa-magnifying-glass"></i> İncele
-        </a>
-        
-        <!-- SİLME YERİNE YENİ AKILLI BAN/AKTİF BUTONU -->
-        @if (item.Kullanici != null && item.Kullanici.AdminMi == true)
-                                            {
-                                                <!-- Adminler banlanamaz, bu yüzden buton yerine sabit bir yetki ikonu gösteriyoruz -->
-                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 disabled" title="Yönetici Hesabı">
-                                                    <i class="fa-solid fa-user-shield"></i>
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <form asp-action="DurumDegistir" method="post" class="d-inline m-0 p-0">
-            <input type="hidden" name="id" value="@item.ID" />
-            <!-- Sayfalamayı ve aramayı kaybetmemek için gizli inputlar -->
-            <input type="hidden" name="arama" value="@ViewBag.ArananKelime" />
-            <input type="hidden" name="sayfa" value="@ViewBag.MevcutSayfa" />
 
-            @if (item.Kullanici != null && item.Kullanici.AktifMi)
-            {
-                <!-- AKTİF KULLANICI (YEŞİL BUTON) -->
-                <button type="submit" class="btn btn-sm btn-success rounded-0" title="Kullanıcıyı Banla" 
-                        onclick="return confirm('Bu müşteriyi banlamak ve sisteme girişini engellemek istediğinize emin misiniz?');">
-                    <i class="fa-solid fa-user-check"></i>
-                </button>
-            }
-            else
-            {
-                <!-- BANLI KULLANICI (KIRMIZI BUTON) -->
-                <button type="submit" class="btn btn-sm btn-danger rounded-0" title="Banı Kaldır" 
-                        onclick="return confirm('Bu müşterinin banını kaldırmak ve sisteme girişine tekrar izin vermek istediğinize emin misiniz?');">
-                    <i class="fa-solid fa-ban"></i>
-                </button>
-            }
-        </form>
-                                            }
-                                            
+        <!-- İNCELE -->
+        <a asp-action="Details" asp-route-id="@item.ID" 
+           class="btn btn-sm btn-dark rounded-0 d-flex align-items-center px-3" 
+           style="height: 35px;" title="Detaylar">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> <span class="small">İncele</span>
+        </a>
+
+        <!-- DURUM (BAN/AKTİF) -->
+        @if (item.Kullanici != null && item.Kullanici.AdminMi == true)
+        {
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 disabled d-flex align-items-center justify-content-center" 
+                    style="width: 35px; height: 35px;" title="Yönetici Hesabı">
+                <i class="fa-solid fa-user-shield"></i>
+            </button>
+        }
+        else
+        {
+            <form asp-action="DurumDegistir" method="post" class="m-0 p-0 d-inline-block">
+                <input type="hidden" name="id" value="@item.ID" />
+                <input type="hidden" name="arama" value="@ViewBag.ArananKelime" />
+                <input type="hidden" name="sayfa" value="@ViewBag.MevcutSayfa" />
+
+                @if (item.Kullanici != null && item.Kullanici.AktifMi)
+                {
+                    <button type="submit" class="btn btn-sm btn-success rounded-0 d-flex align-items-center justify-content-center" 
+                            style="width: 35px; height: 35px;" title="Kullanıcıyı Banla"
+                            onclick="return confirm('Bu müşteriyi banlamak istediğinize emin misiniz?');">
+                        <i class="fa-solid fa-user-check"></i>
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-sm btn-danger rounded-0 d-flex align-items-center justify-content-center" 
+                            style="width: 35px; height: 35px;" title="Banı Kaldır"
+                            onclick="return confirm('Bu müşterinin banını kaldırmak istediğinize emin misiniz?');">
+                        <i class="fa-solid fa-ban"></i>
+                    </button>
+                }
+            </form>
+        }
     </div>
 </td>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
+        </tr>
+    }
+</tbody>
             </table>
         </div>
     </div>
