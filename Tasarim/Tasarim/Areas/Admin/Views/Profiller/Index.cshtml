@@ -109,9 +109,52 @@
                                     <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-dark rounded-0" title="Detaylar">
                                         <i class="fa-solid fa-magnifying-glass"></i> İncele
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-danger rounded-0" title="Sil">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
+                                    <td class="text-end pe-4">
+    <div class="btn-group shadow-sm">
+        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-dark rounded-0" title="Düzenle">
+            <i class="fa-solid fa-pen text-gold"></i>
+        </a>
+        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-dark rounded-0" title="Detaylar">
+            <i class="fa-solid fa-magnifying-glass"></i> İncele
+        </a>
+        
+        <!-- SİLME YERİNE YENİ AKILLI BAN/AKTİF BUTONU -->
+        @if (item.Kullanici != null && item.Kullanici.AdminMi == true)
+                                            {
+                                                <!-- Adminler banlanamaz, bu yüzden buton yerine sabit bir yetki ikonu gösteriyoruz -->
+                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 disabled" title="Yönetici Hesabı">
+                                                    <i class="fa-solid fa-user-shield"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="DurumDegistir" method="post" class="d-inline m-0 p-0">
+            <input type="hidden" name="id" value="@item.ID" />
+            <!-- Sayfalamayı ve aramayı kaybetmemek için gizli inputlar -->
+            <input type="hidden" name="arama" value="@ViewBag.ArananKelime" />
+            <input type="hidden" name="sayfa" value="@ViewBag.MevcutSayfa" />
+
+            @if (item.Kullanici != null && item.Kullanici.AktifMi)
+            {
+                <!-- AKTİF KULLANICI (YEŞİL BUTON) -->
+                <button type="submit" class="btn btn-sm btn-success rounded-0" title="Kullanıcıyı Banla" 
+                        onclick="return confirm('Bu müşteriyi banlamak ve sisteme girişini engellemek istediğinize emin misiniz?');">
+                    <i class="fa-solid fa-user-check"></i>
+                </button>
+            }
+            else
+            {
+                <!-- BANLI KULLANICI (KIRMIZI BUTON) -->
+                <button type="submit" class="btn btn-sm btn-danger rounded-0" title="Banı Kaldır" 
+                        onclick="return confirm('Bu müşterinin banını kaldırmak ve sisteme girişine tekrar izin vermek istediğinize emin misiniz?');">
+                    <i class="fa-solid fa-ban"></i>
+                </button>
+            }
+        </form>
+                                            }
+                                            
+    </div>
+</td>
                                 </div>
                             </td>
                         </tr>

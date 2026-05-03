@@ -138,8 +138,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 {
                     KullaniciAd = profil.Kullanici.KullaniciAd,
                     Sifre = profil.Kullanici.Sifre,
-                    // Eğer istersen Profil'deki maili Kullanıcı tablosuna da kopyalayabilirsin:
-                    // Mail = profil.Mail 
+                    AktifMi = true
                 };
 
                 // 2. Kullanıcıyı Veritabanına Kaydediyoruz
@@ -235,46 +234,23 @@ namespace Tasarim.Areas.Admin.Controllers
 
             return View(profil);
         }
-
-        // GET: Admin/Profiller/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: Admin/Profiller/DurumDegistir
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DurumDegistir(int id, string arama, int sayfa = 1)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var profil = await _context.Profiller
                 .Include(p => p.Kullanici)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (profil == null)
+                .FirstOrDefaultAsync(p => p.ID == id);
+
+            if (profil != null && profil.Kullanici != null)
             {
-                return NotFound();
+                // Kullanıcının mevcut durumunun tam tersini al (Aktifse -> Banla, Banlıysa -> Aktif yap)
+                profil.Kullanici.AktifMi = !profil.Kullanici.AktifMi;
+                await _context.SaveChangesAsync();
             }
 
-            return View(profil);
-        }
-
-        // POST: Admin/Profiller/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var profil = await _context.Profiller
-        .Include(p => p.Kullanici)
-        .FirstOrDefaultAsync(p => p.ID == id);
-            var silinecekKullanici = profil.Kullanici;
-            if (profil != null)
-            {
-                _context.Profiller.Remove(profil);
-                if (silinecekKullanici != null)
-                {
-                    _context.Kullanicilar.Remove(silinecekKullanici);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { arama = arama, sayfa = sayfa });
         }
 
         private bool ProfilExists(int id)
