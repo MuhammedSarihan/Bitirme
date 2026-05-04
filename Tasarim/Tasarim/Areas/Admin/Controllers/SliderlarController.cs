@@ -17,152 +17,95 @@ namespace Tasarim.Areas.Admin.Controllers
             _context = context;
         }
 
-        // GET: Admin/Sliderlar
+        // 1. ANA SAYFA: Sadece listeyi getirir
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Sliders.ToListAsync());
+            var sliderlar = await _context.Sliders.OrderBy(s => s.SiraNo).ToListAsync();
+            return View(sliderlar);
         }
 
-        // GET: Admin/Sliderlar/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // --- BUNDAN SONRASI AJAX (MODAL) İŞLEMLERİ İÇİNDİR ---
+
+        // 2. GETİR: Modal açıldığında düzenlenecek veriyi getirir
+        [HttpGet]
+        public async Task<IActionResult> GetSlider(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var slider = await _context.Sliders
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (slider == null)
-            {
-                return NotFound();
-            }
-
-            return View(slider);
-        }
-
-        // GET: Admin/Sliderlar/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Admin/Sliderlar/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Slider slider, IFormFile? AnaResimDosyasi)
-        {
-            ModelState.Remove("SliderResim");
-            if (ModelState.IsValid)
-            {
-                if (AnaResimDosyasi != null)
-                {
-                    slider.SliderResim = await FileHelper.FileLoaderAsync(AnaResimDosyasi);
-                }
-                _context.Add(slider);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(slider);
-        }
-
-        // GET: Admin/Sliderlar/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var slider = await _context.Sliders.FindAsync(id);
-            if (slider == null)
-            {
-                return NotFound();
-            }
-            return View(slider);
+            if (slider == null) return NotFound();
+            return Json(slider);
         }
 
-        // POST: Admin/Sliderlar/Edit/5
+        // 3. KAYDET VEYA GÜNCELLE (Form Submit)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Slider slider, IFormFile? AnaResimDosyasi, bool cbResmiSil = false)
+        public async Task<IActionResult> Save(Slider model, IFormFile? resimDosyasi)
         {
-            if (id != slider.ID)
+            try
             {
-                return NotFound();
-            }
+                // YENİ EKLEME İŞLEMİ
+                if (model.ID == 0)
+                {
+                    if (resimDosyasi != null)
+                    {
+                        model.SliderResim = await FileHelper.FileLoaderAsync(resimDosyasi);
+                    }
+                    _context.Sliders.Add(model);
+                }
+                // GÜNCELLEME İŞLEMİ
+                else
+                {
+                    var mevcutSlider = await _context.Sliders.FindAsync(model.ID);
+                    if (mevcutSlider == null) return Json(new { success = false, message = "Kayıt bulunamadı." });
 
-            ModelState.Remove("SliderResim");
-            if (ModelState.IsValid)
+                    // Eğer yeni resim yüklendiyse
+                    if (resimDosyasi != null)
+                    {
+                        // ESKİ RESMİ SUNUCUDAN SİL (Çöp birikmesini önle)
+                        if (!string.IsNullOrEmpty(mevcutSlider.SliderResim))
+                        {
+                            FileHelper.FileRemover(mevcutSlider.SliderResim);
+                        }
+
+                        // YENİ RESMİ YÜKLE
+                        mevcutSlider.SliderResim = await FileHelper.FileLoaderAsync(resimDosyasi);
+                    }
+
+                    // Diğer bilgileri güncelle
+                    mevcutSlider.Baslik = model.Baslik;
+                    mevcutSlider.SliderAciklama = model.SliderAciklama;
+                    mevcutSlider.Link = model.Link;
+                    mevcutSlider.SiraNo = model.SiraNo;
+
+                    _context.Update(mevcutSlider);
+                }
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
             {
-                try
-                {
-                    if (cbResmiSil)
-                    {
-                        slider.SliderResim = string.Empty;
-                    }
-
-                    if (AnaResimDosyasi != null)
-                    {
-                        slider.SliderResim = await FileHelper.FileLoaderAsync(AnaResimDosyasi);
-                    }
-                    _context.Update(slider);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SliderExists(slider.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = false, message = "Bir hata oluştu: " + ex.Message });
             }
-            return View(slider);
         }
 
-        // GET: Admin/Sliderlar/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var slider = await _context.Sliders
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (slider == null)
-            {
-                return NotFound();
-            }
-
-            return View(slider);
-        }
-
-        // POST: Admin/Sliderlar/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // 4. SİL (Senin Hassas Noktan: Görsel de silinecek)
+        [HttpPost]
+        public async Task<IActionResult> DeleteSlider(int id)
         {
             var slider = await _context.Sliders.FindAsync(id);
             if (slider != null)
             {
-                if (!string.IsNullOrEmpty(slider.SliderResim)) FileHelper.FileRemover(slider.SliderResim);
+                // SUNUCUDAN GÖRSELİ KALICI OLARAK SİL
+                if (!string.IsNullOrEmpty(slider.SliderResim))
+                {
+                    FileHelper.FileRemover(slider.SliderResim);
+                }
 
                 _context.Sliders.Remove(slider);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
             }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool SliderExists(int id)
-        {
-            return _context.Sliders.Any(e => e.ID == id);
+            return Json(new { success = false, message = "Kayıt bulunamadı." });
         }
     }
 }

@@ -3,19 +3,23 @@
 
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h3 class="mb-0 text-dark fw-bold font-playfair">
-                <i class="fa-solid fa-boxes-stacked text-gold me-2"></i>Ürün Kataloğu
-            </h3>
-            <p class="text-muted small mt-1 mb-0 letter-spacing-1 text-uppercase">Mağazanızdaki Tüm Ürünlerin Yönetimi</p>
-        </div>
-
-        <div class="d-flex gap-2 align-items-center flex-wrap">
-            <a href="/Admin/Urunler/Create" class="btn btn-dark rounded-pill px-4 shadow-sm text-nowrap fw-bold letter-spacing-1 hover-gold-bg transition-300">
-                <i class="fa-solid fa-plus me-1"></i> Yeni Ürün Ekle
-            </a>
-        </div>
+    <div>
+        <h3 class="mb-0 text-dark fw-bold font-playfair">
+            <i class="fa-solid fa-boxes-stacked text-gold me-2"></i>Ürün Kataloğu
+        </h3>
+        <p class="text-muted small mt-1 mb-0 letter-spacing-1 text-uppercase">Mağazanızdaki Tüm Ürünlerin Yönetimi</p>
     </div>
+
+    <div class="d-flex gap-3 align-items-center flex-wrap">
+        <a href="/Admin/UrunVaryasyonlar/Create" class="btn btn-outline-dark rounded-pill px-4 shadow-sm text-nowrap fw-bold letter-spacing-1 hover-gold-bg transition-300">
+            <i class="fa-solid fa-layer-group text-gold me-2"></i> Stok/Beden Ekle
+        </a>
+        
+        <a href="/Admin/Urunler/Create" class="btn btn-dark rounded-pill px-4 shadow-sm text-nowrap fw-bold letter-spacing-1 hover-gold-bg transition-300">
+            <i class="fa-solid fa-plus text-gold me-2"></i> Yeni Ürün Ekle
+        </a>
+    </div>
+</div>
 
     <!-- Filtreleme Çubuğu -->
     <div class="card border-0 shadow-sm rounded-4 mb-4 bg-light">
@@ -50,10 +54,10 @@
                 }
             </select>
 
-           <div class="form-check form-switch ms-1 mb-0 d-flex align-items-center gap-2">
-    <input class="form-check-input cursor-pointer border-dark shadow-sm m-0" type="checkbox" id="chkSadeceAktif" style="width: 2.5em; height: 1.25em;">
-    <label class="form-check-label small fw-bold text-dark cursor-pointer text-uppercase letter-spacing-1 mt-1" for="chkSadeceAktif">Sadece Aktifler</label>
-</div>
+            <div class="form-check form-switch ms-1 mb-0 d-flex align-items-center gap-2">
+                <input class="form-check-input cursor-pointer border-dark shadow-sm m-0" type="checkbox" id="chkSadeceAktif" style="width: 2.5em; height: 1.25em;">
+                <label class="form-check-label small fw-bold text-dark cursor-pointer text-uppercase letter-spacing-1 mt-1" for="chkSadeceAktif">Sadece Aktifler</label>
+            </div>
 
         </div>
     </div>
@@ -62,7 +66,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 w-100">
+                <table class="table table-hover align-middle mb-0 w-100" style="border-collapse: collapse;">
                     <thead class="bg-dark text-white">
                         <tr>
                             <th class="fw-semibold py-3 ps-4 rounded-top-start text-uppercase small letter-spacing-1">Ürün Bilgisi</th>
@@ -70,7 +74,7 @@
                             <th class="fw-semibold text-uppercase small letter-spacing-1">Kategori & Marka</th>
                             <th class="fw-semibold text-uppercase small letter-spacing-1">Fiyat</th>
                             <th class="fw-semibold text-center text-uppercase small letter-spacing-1">Durum</th>
-                            <th class="fw-semibold text-end pe-4 rounded-top-end text-uppercase small letter-spacing-1" style="width: 180px;">İşlemler</th>
+                            <th class="fw-semibold text-end pe-4 rounded-top-end text-uppercase small letter-spacing-1" style="width: 200px;">İşlemler</th>
                         </tr>
                     </thead>
                     <tbody id="tabloGövdesi">
@@ -125,42 +129,36 @@
         .transition-300 { transition: all 0.3s ease; }
         .page-link { color: #000; border-color: #dee2e6; cursor: pointer; }
         .page-item.active .page-link { background-color: #000; border-color: #000; color: white; }
+        /* Yeni: Açılır sekme içi gölge efekti */
+        .shadow-inner { box-shadow: inset 0px 4px 6px -4px rgba(0,0,0,0.2) !important; }
+        .border-warning { border-color: #D4AF37 !important; }
+        .bg-warning { background-color: #D4AF37 !important; }
     </style>
     <script>
-        // SUNUCU TARAFLI ARAMA VE SAYFALAMA MİMARİSİ
     let aktifSayfa = 1;
-    const sayfaBoyutu = 10; // İstersen 20 yapabilirsin
+    const sayfaBoyutu = 10;
     let aramaZamanlayici;
 
     const filtreArama = document.getElementById('filtreArama');
     const filtreKategori = document.getElementById('filtreKategori');
     const filtreMarka = document.getElementById('filtreMarka');
-    
-    // YENİ: Şalter elementini alıyoruz
     const chkSadeceAktif = document.getElementById('chkSadeceAktif');
 
-    // Tarayıcı hafızasından kullanıcının son seçimini oku
     const sayfaAnahtari = 'filtre_aktif_urunler_sayfasi';
     const kaydedilmisAyar = localStorage.getItem(sayfaAnahtari);
     
-    // Eğer hafızada ayar varsa onu uygula, ilk kez giriyorsa varsayılan olarak açık (true) bırak
     if (chkSadeceAktif) {
         chkSadeceAktif.checked = kaydedilmisAyar !== null ? (kaydedilmisAyar === 'true') : true;
     }
 
-    // Verileri API'den (Controller'dan) çekme fonksiyonu
     function urunleriGetir() {
         const arama = filtreArama.value;
         const katId = filtreKategori.value;
         const markaId = filtreMarka.value;
-        
-        // YENİ: Şalter açıksa sadece aktifleri (true) yolla, kapalıysa hepsini getirmesi için boş yolla
         const durum = chkSadeceAktif.checked ? 'true' : '';
 
-        // Kullanıcının şalter seçimini tarayıcı hafızasına kaydet
         localStorage.setItem(sayfaAnahtari, chkSadeceAktif.checked);
 
-        // Arka planda sunucuya istek atıyoruz
         const url = `/Admin/Urunler/GetUrunler?arama=${encodeURIComponent(arama)}&kategoriId=${katId}&markaId=${markaId}&durum=${durum}&sayfa=${aktifSayfa}&sayfaBoyutu=${sayfaBoyutu}`;
 
         fetch(url)
@@ -172,10 +170,9 @@
             });
     }
 
-    // HTML tablosunu JSON verisiyle baştan çizen fonksiyon
     function tabloyuCiz(urunler) {
         const tbody = document.getElementById('tabloGövdesi');
-        tbody.innerHTML = ''; // Önceki satırları temizle
+        tbody.innerHTML = ''; 
 
         if(urunler.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">Arama kriterlerine uygun ürün bulunamadı.</td></tr>`;
@@ -195,28 +192,97 @@
                 ? `<span class="badge rounded-pill bg-success px-3 shadow-sm">Aktif</span>`
                 : `<span class="badge rounded-pill bg-danger px-3 shadow-sm">Pasif</span>`;
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `                <td class="ps-4">                    <div class="d-flex align-items-center gap-3">                        ${resimHtml}                        <div>                            <div class="fw-bold text-dark fs-6 mb-1">${u.baslik}</div>                            <div class="text-muted small mb-1"><i class="fa-solid fa-barcode me-1 opacity-75"></i>Kod: <strong class="text-dark">${u.urunKod}</strong></div>                            <div class="text-secondary small"><i class="fa-solid fa-link me-1 opacity-75"></i>Model: ${u.modelKodu || '-'}</div>                        </div>                    </div>                </td>                <td class="text-center">${renkHtml}</td>                <td>                    <div class="small fw-medium text-dark"><i class="fa-solid fa-layer-group text-muted me-2 opacity-75"></i>${u.kategoriAd}</div>                    <div class="small text-muted mt-1"><i class="fa-solid fa-copyright me-2 opacity-75"></i>${u.markaAd}</div>                </td>                <td>                    <span id="fiyatGosterge_${u.id}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fs-6 fw-bold shadow-sm">                        ${u.fiyatFormatli}                    </span>                </td>                <td class="text-center">${durumHtml}</td>                <td class="text-end pe-4">                    <div class="d-inline-flex gap-1">                        <button onclick="openHizliFiyatModal(${u.id}, '${u.baslik.replace(/'/g, "\\'")}', '${u.fiyatHam}')" class="btn btn-sm btn-outline-warning text-dark border-warning hover-gold-bg" title="Hızlı Fiyat Güncelle">                            <i class="fa-solid fa-bolt"></i>                        </button>                        <a href="/Admin/Urunler/Edit/${u.id}" class="btn btn-sm btn-outline-dark" title="Düzenle"><i class="fa-solid fa-pen"></i></a>                        <a href="/Admin/Urunler/Details/${u.id}" class="btn btn-sm btn-outline-secondary" title="Detaylar & Stok"><i class="fa-solid fa-list-check"></i></a>                        <a href="/Admin/Urunler/Delete/${u.id}" class="btn btn-sm btn-outline-danger" title="Sil"><i class="fa-solid fa-trash"></i></a>                    </div>                </td>            `;
-            tbody.appendChild(tr);
+            // YENİ: Varyasyon kutucuklarının HTML'i
+            let varyasyonHtml = '';
+            if (u.varyasyonlar && u.varyasyonlar.length > 0) {
+                u.varyasyonlar.forEach(v => {
+                    let borderClass = v.stokAdedi === 0 ? "border-danger text-danger" : (v.stokAdedi <= 10 ? "border-warning text-dark bg-warning bg-opacity-10" : "border-dark text-dark");
+                    varyasyonHtml += `
+                        <div class="border ${borderClass} rounded-2 px-2 py-1 text-center shadow-sm bg-white" style="min-width: 65px;">
+                            <div class="fw-bold fs-6 border-bottom border-secondary border-opacity-25 mb-1">${v.beden}</div>
+                            <div class="small fw-medium">${v.stokAdedi} Ad.</div>
+                        </div>`;
+                });
+            } else {
+                varyasyonHtml = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 text-uppercase letter-spacing-1"><i class="fa-solid fa-triangle-exclamation me-1"></i>Varyasyon Girilmemiş</span>`;
+            }
+
+            // 1. ANA SATIR (Ürün Bilgileri ve Butonlar)
+            const trAna = document.createElement('tr');
+            trAna.innerHTML = `
+                <td class="ps-4">
+                    <div class="d-flex align-items-center gap-3">
+                        ${resimHtml}
+                        <div>
+                            <div class="fw-bold text-dark fs-6 mb-1">${u.baslik}</div>
+                            <div class="text-muted small mb-1"><i class="fa-solid fa-barcode me-1 opacity-75"></i>Kod: <strong class="text-dark">${u.urunKod}</strong></div>
+                            <div class="text-secondary small"><i class="fa-solid fa-link me-1 opacity-75"></i>Model: ${u.modelKodu || '-'}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-center">${renkHtml}</td>
+                <td>
+                    <div class="small fw-medium text-dark"><i class="fa-solid fa-layer-group text-muted me-2 opacity-75"></i>${u.kategoriAd}</div>
+                    <div class="small text-muted mt-1"><i class="fa-solid fa-copyright me-2 opacity-75"></i>${u.markaAd}</div>
+                </td>
+                <td>
+                    <span id="fiyatGosterge_${u.id}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fs-6 fw-bold shadow-sm">
+                        ${u.fiyatFormatli}
+                    </span>
+                </td>
+                <td class="text-center">${durumHtml}</td>
+                <td class="text-end pe-4">
+                    <div class="d-inline-flex gap-1">
+                        <!-- YENİ: Stok Aç/Kapa Butonu -->
+                        <button class="btn btn-sm btn-dark hover-gold-bg transition-300" type="button" data-bs-toggle="collapse" data-bs-target="#stokSatir_${u.id}" title="Stokları Göster">
+                            <i class="fa-solid fa-cubes-stacked text-gold"></i>
+                        </button>
+                        
+                        <button onclick="openHizliFiyatModal(${u.id}, '${u.baslik.replace(/'/g, "\\'")}', '${u.fiyatHam}')" class="btn btn-sm btn-outline-warning text-dark border-warning hover-gold-bg" title="Hızlı Fiyat Güncelle">
+                            <i class="fa-solid fa-bolt"></i>
+                        </button>
+                        <a href="/Admin/Urunler/Edit/${u.id}" class="btn btn-sm btn-outline-dark" title="Düzenle"><i class="fa-solid fa-pen"></i></a>
+                        <a href="/Admin/Urunler/Details/${u.id}" class="btn btn-sm btn-outline-secondary" title="Detaylar"><i class="fa-solid fa-list-check"></i></a>
+                        <a href="/Admin/Urunler/Delete/${u.id}" class="btn btn-sm btn-outline-danger" title="Sil"><i class="fa-solid fa-trash"></i></a>
+                    </div>
+                </td>
+            `;
+
+            // 2. GİZLİ STOK SATIRI (Genişleyebilir Alan)
+            const trStok = document.createElement('tr');
+            trStok.id = `stokSatir_${u.id}`;
+            trStok.className = 'collapse accordion-collapse';
+            trStok.innerHTML = `
+                <td colspan="6" class="p-0 border-0 bg-light shadow-inner">
+                    <div class="px-5 py-3 d-flex align-items-center gap-3">
+                        <div class="fw-bold text-uppercase small letter-spacing-1 text-muted" style="min-width: 130px;">
+                            <i class="fa-solid fa-arrow-turn-down fa-rotate-270 text-gold me-2"></i> Beden & Stok :
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            ${varyasyonHtml}
+                        </div>
+                    </div>
+                </td>
+            `;
+
+            // İki satırı da tabloya ekle
+            tbody.appendChild(trAna);
+            tbody.appendChild(trStok);
         });
     }
 
-    // Alt taraftaki (1,2,3, İleri, Geri) butonlarını çizen fonksiyon
     function sayfalamayiCiz(toplamSayfa, mevcutSayfa) {
         const ul = document.getElementById('sayfalamaAlani');
         ul.innerHTML = '';
             
         if(toplamSayfa <= 1) return;
 
-        // Önceki Butonu
         ul.innerHTML += `<li class="page-item ${mevcutSayfa === 1 ? 'disabled' : ''}"><a class="page-link" onclick="sayfaDegistir(${mevcutSayfa - 1})"><i class="fa-solid fa-chevron-left"></i></a></li>`;
             
-        // Sayfa Numaraları
         for(let i = 1; i <= toplamSayfa; i++) {
             ul.innerHTML += `<li class="page-item ${i === mevcutSayfa ? 'active' : ''}"><a class="page-link" onclick="sayfaDegistir(${i})">${i}</a></li>`;
         }
 
-        // Sonraki Butonu
         ul.innerHTML += `<li class="page-item ${mevcutSayfa === toplamSayfa ? 'disabled' : ''}"><a class="page-link" onclick="sayfaDegistir(${mevcutSayfa + 1})"><i class="fa-solid fa-chevron-right"></i></a></li>`;
     }
 
@@ -225,21 +291,18 @@
         urunleriGetir();
     }
 
-    // FİLTRE TETİKLENMELERİ
     filtreKategori.addEventListener('change', () => { aktifSayfa = 1; urunleriGetir(); });
     filtreMarka.addEventListener('change', () => { aktifSayfa = 1; urunleriGetir(); });
-    chkSadeceAktif.addEventListener('change', () => { aktifSayfa = 1; urunleriGetir(); }); // YENİ: Şalter değişimi
+    chkSadeceAktif.addEventListener('change', () => { aktifSayfa = 1; urunleriGetir(); });
         
-    // Klavye ile arama yaparken her harfte istek atmamak için gecikme (Debounce) ekledik
     filtreArama.addEventListener('keyup', () => {
         clearTimeout(aramaZamanlayici);
         aramaZamanlayici = setTimeout(() => {
             aktifSayfa = 1;
             urunleriGetir();
-        }, 300); // Kullanıcı yazmayı bıraktıktan 0.3 saniye sonra arar
+        }, 300);
     });
 
-    // Sayfa ilk yüklendiğinde verileri getir
     document.addEventListener('DOMContentLoaded', urunleriGetir);
 
     // --- HIZLI FİYAT MODALI FONKSİYONLARI ---
@@ -273,5 +336,4 @@
         .catch(error => alert('Sistemsel bir hata oluştu.'));
     }
     </script>
-    
 }

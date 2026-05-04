@@ -12,8 +12,8 @@ namespace Tasarim.Data.Configurations
             builder.Property(x => x.Sifre).IsRequired().HasColumnType("varchar(64)").HasMaxLength(64); // Hashlenmiş şifre için
 
             builder.HasData(
-                new Kullanici { ID = 1, KullaniciAd = "Admin", Sifre = "1", AdminMi=true },
-                new Kullanici { ID = 2, KullaniciAd = "Kullanıcı", Sifre = "1", AdminMi = false }
+                new Kullanici { ID = 1, KullaniciAd = "Admin", Sifre = "1", AdminMi=true, AktifMi = true },
+                new Kullanici { ID = 2, KullaniciAd = "Kullanıcı", Sifre = "1", AdminMi = false,AktifMi = true }
             );
         }
     }

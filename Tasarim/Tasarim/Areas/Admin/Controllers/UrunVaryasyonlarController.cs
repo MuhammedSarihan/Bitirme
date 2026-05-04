@@ -17,42 +17,20 @@ namespace Tasarim.Areas.Admin.Controllers
             _context = context;
         }
 
-        // GET: Admin/UrunVaryasyonlar
-        public async Task<IActionResult> Index()
-        {
-            var databaseContext = _context.UrunVaryasyonlari.Include(u => u.Urun);
-            return View(await databaseContext.ToListAsync());
-        }
-
-        // GET: Admin/UrunVaryasyonlar/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var urunVaryasyon = await _context.UrunVaryasyonlari
-                .Include(u => u.Urun)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (urunVaryasyon == null)
-            {
-                return NotFound();
-            }
-
-            return View(urunVaryasyon);
-        }
-
-        // GET: Admin/UrunVaryasyonlar/Create
+        // Toplu Stok Ekleme Sayfasını Aç (GET)
+        [HttpGet]
         public IActionResult Create()
         {
+            // Dropdown için ürünleri gönderiyoruz
             ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod");
-            // Ekrana başlangıçta 5 adet boş beden/stok satırı gönderiyoruz
+
             var model = new Models.TopluVaryasyonViewModel();
             model.Varyasyonlar = new List<UrunVaryasyon>();
+
             return View(model);
         }
 
+        //  Eklenen Stokları Veritabanına Kaydet/Güncelle (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Models.TopluVaryasyonViewModel model)
@@ -67,122 +45,33 @@ namespace Tasarim.Areas.Admin.Controllers
             {
                 foreach (var varyasyon in eklenecekVaryasyonlar)
                 {
-
                     // 1. ADIM: Veritabanında aynı Ürün ve aynı Beden var mı?
                     var varolanVaryasyon = await _context.UrunVaryasyonlari
                         .FirstOrDefaultAsync(v => v.UrunID == varyasyon.UrunID && v.Beden == varyasyon.Beden);
 
                     if (varolanVaryasyon != null)
                     {
-                        // 2. ADIM (VARSA): Sadece mevcut stoğun üzerine ekle
+                        // VARSA : Sadece mevcut stoğun üzerine ekle (Güncelleme İşlemi)
                         varolanVaryasyon.StokAdedi += varyasyon.StokAdedi;
                         _context.Update(varolanVaryasyon);
                     }
                     else
                     {
-                        // 3. ADIM (YOKSA): Normal kayıt yap
+                        // YOKSA: Yeni varyasyon olarak kaydet (Ekleme İşlemi)
                         _context.Add(varyasyon);
                     }
                 }
 
                 // Tüm liste döngüden çıktıktan sonra tek seferde kaydet
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                // İşlem bitince yeni tasarladığımız Ürün Kataloğuna geri dön!
+                return RedirectToAction("Index", "Urunler");
             }
 
             // Hata veya eksik giriş varsa listeyi tekrar doldur ve sayfaya dön
             ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod", model.SecilenUrunID);
             return View(model);
-
-        }
-        // GET: Admin/UrunVaryasyonlar/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var urunVaryasyon = await _context.UrunVaryasyonlari.FindAsync(id);
-            if (urunVaryasyon == null)
-            {
-                return NotFound();
-            }
-            ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod", urunVaryasyon.UrunID);
-            return View(urunVaryasyon);
-        }
-
-        // POST: Admin/UrunVaryasyonlar/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,  UrunVaryasyon urunVaryasyon)
-        {
-            if (id != urunVaryasyon.ID)
-            {
-                return NotFound();
-            }
-            ModelState.Remove("Urun");
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(urunVaryasyon);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UrunVaryasyonExists(urunVaryasyon.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["UrunID"] = new SelectList(_context.Urunler, "ID", "UrunKod", urunVaryasyon.UrunID);
-            return View(urunVaryasyon);
-        }
-
-        // GET: Admin/UrunVaryasyonlar/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var urunVaryasyon = await _context.UrunVaryasyonlari
-                .Include(u => u.Urun)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (urunVaryasyon == null)
-            {
-                return NotFound();
-            }
-
-            return View(urunVaryasyon);
-        }
-
-        // POST: Admin/UrunVaryasyonlar/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var urunVaryasyon = await _context.UrunVaryasyonlari.FindAsync(id);
-            if (urunVaryasyon != null)
-            {
-                _context.UrunVaryasyonlari.Remove(urunVaryasyon);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool UrunVaryasyonExists(int id)
-        {
-            return _context.UrunVaryasyonlari.Any(e => e.ID == id);
         }
     }
 }
