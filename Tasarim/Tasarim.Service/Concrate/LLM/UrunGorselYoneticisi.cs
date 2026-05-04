@@ -15,53 +15,89 @@ namespace LlmService
 
         public async Task<UrunOzellikleri> GorseliAnalizEt(byte[] imageBytes, int urunId)
         {
-            // PROMPT: Maksimum hassasiyet için optimize edildi.
-            string prompt = @"Sen profesyonel bir e-ticaret veri giriş uzmanı ve moda analistisin. 
-            Görevin: Sana gönderilen ürün görselini analiz etmek ve sistemimize uygun veriyi hazırlamak.
+            string prompt = @"Sen teknik bir veri ayıklama robotusun. 
+Görevin: Görseli analiz et ve verileri SADECE JSON objesi olarak döndür.
+KRİTİK KURALLAR:
+1. JSON dışında tek bir kelime bile yazma.
+2. Kod blokları (```json ) kullanma, doğrudan '{' ile başla ve '}' ile bitir.
+3. Değerler boş olamaz; 'Bilinmiyor' veya en yakın tahmini yaz.
 
-            KURALLAR:
-            1. SADECE aşağıda belirtilen JSON formatında cevap ver.
-            2. JSON dışında asla açıklama, 'İşte analiziniz', 'Tabii ki' gibi giriş cümleleri yazma.
-            3. Eğer görselden bir özelliği anlayamazsan boş bırakma, en mantıklı tahmini yap.
-            4. Renkleri ana renkler (Kırmızı, Siyah, Lacivert vb.) olarak belirt.
+JSON FORMATI:
+{
+  ""AnaKategori"": ""Kategori adı"",
+  ""AnaRenk"": ""Baskın renk"",
+  ""Materyal"": ""Malzeme tipi"",
+  ""Stil"": ""Tarz örneği"",
+  ""Detaylar"": ""SEO uyumlu kısa açıklama""
+}";
 
-            JSON FORMATI:
-            {
-              ""AnaKategori"": ""Ürünün en üst kategorisi (Örn: Ayakkabı, Üst Giyim, Aksesuar)"",
-              ""AnaRenk"": ""Ürünün baskın rengi"",
-              ""Materyal"": ""Ürünün yapıldığı ana malzeme (Örn: Deri, Pamuk, Polyester, Metal)"",
-              ""Stil"": ""Ürünün tarzı (Örn: Casual, Klasik, Spor, Şık)"",
-              ""Detaylar"": ""Ürünü tanımlayan, SEO uyumlu, kısa ve etkileyici bir cümle.""
-            }";
-
-            // Provider üzerinden analizi başlatıyoruz
             string rawResponse = await _geminiProvider.AnalyzeImageAsync(prompt, imageBytes);
 
-            // Markdown ve olası boşluk temizliği
-            string cleanJson = rawResponse
-                .Replace("```json", "")
-                .Replace("```", "")
-                .Trim();
+            // EĞER GELEN YANIT "Hata" İLE BAŞLIYORSA JSON OLARAK İŞLEME, DOĞRUDAN KAYDET
+            if (rawResponse.StartsWith("Hata"))
+            {
+                return new UrunOzellikleri
+                {
+                    UrunID = urunId,
+                    Detaylar = rawResponse // Hatayı buraya yazdırıyoruz
+                };
+            }
 
+
+            // Daha agresif temizlik: Sadece { ve } arasını al
+            string cleanJson = rawResponse;
+            int start = cleanJson.IndexOf("{");
+            int end = cleanJson.LastIndexOf("}");
+            if (start != -1 && end != -1)
+            {
+                cleanJson = cleanJson.Substring(start, (end - start) + 1);
+            }
             try
             {
-                var result = JsonSerializer.Deserialize<UrunOzellikleri>(cleanJson);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true
+                };
+
+                var result = JsonSerializer.Deserialize<UrunOzellikleri>(cleanJson, options);
 
                 if (result != null)
                 {
                     result.UrunID = urunId;
+                    if (string.IsNullOrEmpty(result.AnaKategori))
+                    {
+                        result.Detaylar = "Ham Yanit: " + cleanJson.Substring(0, Math.Min(cleanJson.Length, 100));
+                    }
                 }
                 return result;
-            }
-            catch (Exception)
+            } // Try burada bitiyor
+            catch (Exception ex)
             {
-                // Hata durumunda sistemin çökmemesi için fallback (yedek) nesne
+                // Hata durumunda burası çalışır
                 return new UrunOzellikleri
                 {
                     UrunID = urunId,
-                    Detaylar = "Görsel analiz edilemedi veya format hatası oluştu."
+                    Detaylar = "Hata oluştu: " + ex.Message
                 };
             }
         }
+
+
+        }
     }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

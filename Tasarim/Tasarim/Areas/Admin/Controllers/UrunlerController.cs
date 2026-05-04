@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LlmService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using odevVb.Utils;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
-
+using LlmService;
 namespace Tasarim.Areas.Admin.Controllers
 {
     [Area("Admin"), Authorize(Policy = "AdminPolicy")]
@@ -13,9 +14,17 @@ namespace Tasarim.Areas.Admin.Controllers
     {
         private readonly DatabaseContext _context;
 
-        public UrunlerController(DatabaseContext context)
+        //  SERVİSİ BURAYA EKLE (BEN EKLEDIM) 
+        private readonly UrunGorselYoneticisi _urunGorselYoneticisi;
+        
+
+        // Constructor'a yeni parametreyi ekliyoruz (BEN EKLEDIM)
+        public UrunlerController(DatabaseContext context, UrunGorselYoneticisi urunGorselYoneticisi) 
         {
             _context = context;
+            // SERVİSİ BURADA EŞİTLE (BEN EKLEDIM) 
+            _urunGorselYoneticisi = urunGorselYoneticisi;
+            
         }
 
         // 1. SAYFAYI AÇAN METOT (Ürünleri Çekmez, Sadece Filtre Kutularını Doldurur)
@@ -139,6 +148,27 @@ namespace Tasarim.Areas.Admin.Controllers
 
                 _context.Add(urun);
                 await _context.SaveChangesAsync(); // Ürün kaydedilir ve urun.ID oluşur!
+
+                //  AI ANALİZİNİ BURADA BAŞLAT 
+                if (AnaResimDosyasi != null && AnaResimDosyasi.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        await AnaResimDosyasi.CopyToAsync(ms);
+                        byte[] imageBytes = ms.ToArray();
+
+                        // Gemini'yi çalıştır ve sonucu al
+                        var analizSonucu = await _urunGorselYoneticisi.GorseliAnalizEt(imageBytes, urun.ID);
+
+                        if (analizSonucu != null)
+                        {
+                            _context.Set<UrunOzellikleri>().Add(analizSonucu);
+                            await _context.SaveChangesAsync(); // Analiz sonuçlarını veritabanına yaz
+                        }
+                    }
+                }
+                
+
 
                 if (EkGorseller != null && EkGorseller.Any())
                 {

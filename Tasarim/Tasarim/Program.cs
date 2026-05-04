@@ -27,6 +27,13 @@ builder.Services.AddScoped<ILlmProvider, GroqLlmProvider>();
 // LLM Yöneticilerini sisteme kaydediyoruz
 builder.Services.AddScoped<YorumAnalizYoneticisi>();
 builder.Services.AddScoped<KumelemeYoneticisi>();
+
+// Gemini SERVİS KAYITLARI BURAYA 
+builder.Services.AddScoped<IGeminiProvider, GeminiLlmProvider>();
+builder.Services.AddScoped<UrunGorselYoneticisi>();
+
+
+
 // sepet
 builder.Services.AddScoped<ISepetService, SepetService>();
 
