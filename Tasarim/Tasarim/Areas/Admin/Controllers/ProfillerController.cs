@@ -18,10 +18,44 @@ namespace Tasarim.Areas.Admin.Controllers
         }
 
         // GET: Admin/Profiller
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string arama, int sayfa = 1)
         {
-            var databaseContext = _context.Profiller.Include(p => p.Kullanici);
-            return View(await databaseContext.ToListAsync());
+            var query = _context.Profiller.Include(p => p.Kullanici).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(arama))
+            {
+                arama = arama.ToLower();
+                query = query.Where(p =>
+                    p.Ad.ToLower().Contains(arama) ||
+                    p.Soyad.ToLower().Contains(arama) ||
+                    p.Mail.ToLower().Contains(arama) ||
+                    p.TelNo.Contains(arama) ||
+                    (p.Kullanici != null && p.Kullanici.KullaniciAd.ToLower().Contains(arama))
+                );
+            }
+            else
+            {
+                // En yeniler en üstte
+                query = query.OrderByDescending(p => p.ID);
+            }
+
+            // --- SAYFALAMA MATEMATİĞİ ---
+            int sayfaBoyutu = 10;
+            int toplamKayıt = await query.CountAsync(); // Filtreye uyan toplam kaç kişi var?
+            int toplamSayfa = (int)Math.Ceiling(toplamKayıt / (double)sayfaBoyutu); // Kaç sayfa eder?
+
+            // Sadece o sayfanın verilerini getir (Skip ve Take ile)
+            var veriler = await query
+                .Skip((sayfa - 1) * sayfaBoyutu)
+                .Take(sayfaBoyutu)
+                .ToListAsync();
+
+            // View tarafında butonları çizebilmek için verileri yolluyoruz
+            ViewBag.ArananKelime = arama;
+            ViewBag.MevcutSayfa = sayfa;
+            ViewBag.ToplamSayfa = Math.Max(1, toplamSayfa); // Hiç kayıt yoksa bile 1 sayfa görünsün
+
+            return View(veriler);
         }
 
         // GET: Admin/Profiller/Details/5
@@ -35,10 +69,39 @@ namespace Tasarim.Areas.Admin.Controllers
             var profil = await _context.Profiller
                 .Include(p => p.Kullanici)
                 .FirstOrDefaultAsync(m => m.ID == id);
+
             if (profil == null)
             {
                 return NotFound();
             }
+
+            //  E-TİCARET İSTATİSTİKLERİ HESAPLAMASI 
+            if (profil.KullaniciID != null)
+            {
+                // Kullanıcının tüm siparişlerini çekiyoruz
+                var kullaniciSiparisleri = await _context.Siparisler
+                    .Where(s => s.KullaniciID == profil.KullaniciID)
+                    .ToListAsync();
+
+                // Toplam Sipariş Adedi
+                ViewBag.SiparisSayisi = kullaniciSiparisleri.Count;
+
+                // Toplam Harcama
+                ViewBag.ToplamHarcama = kullaniciSiparisleri
+                    .Where(s => s.SiparisDurumuID != 5)
+                    .Sum(s => s.ToplamTutar);
+
+                // Son Sipariş Tarihi
+                var sonSiparis = kullaniciSiparisleri.OrderByDescending(s => s.SiparisTarihi).FirstOrDefault();
+                ViewBag.SonSiparisTarihi = sonSiparis != null ? sonSiparis.SiparisTarihi.ToString("dd.MM.yyyy HH:mm") : "Sipariş Bulunmuyor";
+            }
+            else
+            {
+                ViewBag.SiparisSayisi = 0;
+                ViewBag.ToplamHarcama = 0m;
+                ViewBag.SonSiparisTarihi = "Hesap Yok";
+            }
+            // --------------------------------------------------
 
             return View(profil);
         }
@@ -75,8 +138,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 {
                     KullaniciAd = profil.Kullanici.KullaniciAd,
                     Sifre = profil.Kullanici.Sifre,
-                    // Eğer istersen Profil'deki maili Kullanıcı tablosuna da kopyalayabilirsin:
-                    // Mail = profil.Mail 
+                    AktifMi = true
                 };
 
                 // 2. Kullanıcıyı Veritabanına Kaydediyoruz
@@ -98,24 +160,6 @@ namespace Tasarim.Areas.Admin.Controllers
         }
 
 
-        // POST: Admin/Profiller/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("ID,Ad,Soyad,Mail,TelNo,Adres,Cinsiyet,Yas,Boy,Kilo,KullaniciID")] Profil profil)
-        //{
-        //    // Formdan gelmeyen, sadece veritabanı ilişkisi için olan objeyi doğrulamadan çıkarıyoruz.
-        //    ModelState.Remove("Kullanici");
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(profil);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["KullaniciID"] = new SelectList(_context.Kullanicilar, "ID", "KullaniciAd", profil.KullaniciID);
-        //    return View(profil);
-        //}
 
         // GET: Admin/Profiller/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -135,10 +179,6 @@ namespace Tasarim.Areas.Admin.Controllers
             ViewData["KullaniciID"] = new SelectList(_context.Kullanicilar, "ID", "KullaniciAd", profil.KullaniciID);
             return View(profil);
         }
-
-        // POST: Admin/Profiller/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Ad,Soyad,Mail,TelNo,Adres,Cinsiyet,Yas,Boy,Kilo,KullaniciID")] Profil profil)
@@ -147,14 +187,31 @@ namespace Tasarim.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            // Formdan gelmeyen, sadece veritabanı ilişkisi için olan objeyi doğrulamadan çıkarıyoruz.
+
+            // Formdan gelmeyen objeyi doğrulamadan çıkarıyoruz
             ModelState.Remove("Kullanici");
+
             if (ModelState.IsValid)
             {
+                // Veritabanında aynı mail adresine sahip AMA farklı ID'ye sahip (yani başkası) biri var mı?
+                bool mailKullaniliyorMu = await _context.Profiller
+                    .AnyAsync(p => p.Mail == profil.Mail && p.ID != profil.ID);
+
+                if (mailKullaniliyorMu)
+                {
+                    // Varsa, direkt Mail inputunun altına hatayı basıyoruz
+                    ModelState.AddModelError("Mail", "Bu e-posta adresi sistemde başka bir müşteri tarafından kullanılmaktadır!");
+
+                    // Sayfa patlamasın diye kullanıcı bilgisini tekrar çekip View'a geri dönüyoruz
+                    profil.Kullanici = await _context.Kullanicilar.FirstOrDefaultAsync(k => k.ID == profil.KullaniciID);
+                    return View(profil);
+                }
+
                 try
                 {
                     _context.Update(profil);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -167,56 +224,39 @@ namespace Tasarim.Areas.Admin.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["KullaniciID"] = new SelectList(_context.Kullanicilar, "ID", "KullaniciAd", profil.KullaniciID);
-            return View(profil);
-        }
-
-        // GET: Admin/Profiller/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var profil = await _context.Profiller
-                .Include(p => p.Kullanici)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (profil == null)
-            {
-                return NotFound();
-            }
-
-            return View(profil);
-        }
-
-        // POST: Admin/Profiller/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var profil = await _context.Profiller
-        .Include(p => p.Kullanici)
-        .FirstOrDefaultAsync(p => p.ID == id);
-            var silinecekKullanici = profil.Kullanici;
-            if (profil != null)
-            {
-                _context.Profiller.Remove(profil);
-                if (silinecekKullanici != null)
+                catch (Exception)
                 {
-                    _context.Kullanicilar.Remove(silinecekKullanici);
+                    ModelState.AddModelError(string.Empty, "Kayıt güncellenirken bir hata oluştu.");
                 }
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            profil.Kullanici = await _context.Kullanicilar.FirstOrDefaultAsync(k => k.ID == profil.KullaniciID);
+
+            return View(profil);
+        }
+        // POST: Admin/Profiller/DurumDegistir
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DurumDegistir(int id, string arama, int sayfa = 1)
+        {
+            var profil = await _context.Profiller
+                .Include(p => p.Kullanici)
+                .FirstOrDefaultAsync(p => p.ID == id);
+
+            if (profil != null && profil.Kullanici != null)
+            {
+                // Kullanıcının mevcut durumunun tam tersini al (Aktifse -> Banla, Banlıysa -> Aktif yap)
+                profil.Kullanici.AktifMi = !profil.Kullanici.AktifMi;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index), new { arama = arama, sayfa = sayfa });
         }
 
         private bool ProfilExists(int id)
         {
             return _context.Profiller.Any(e => e.ID == id);
         }
+
     }
 }

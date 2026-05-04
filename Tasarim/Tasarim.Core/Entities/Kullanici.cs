@@ -10,11 +10,13 @@ namespace Tasarim.Core.Entities
         [Display(Name = "Kullanıcı Adı")]
         public string KullaniciAd { get; set; }
 
-        [Display(Name = "Şifre")]
-        public string Sifre { get; set; } // Identity kullanınca burası değişecek ama şemana sadık kaldım.
+        [Display(Name = "Şifre")] // Şifreler genellikle hashlenmiş olarak saklanır ama ilerde yapcaz arkadaşlar
+        public string Sifre { get; set; } 
 
         [Display(Name = "Yönetici mi?")]
         public bool AdminMi { get; set; }
+
+        public bool AktifMi { get; set; } = true; // Varsayılan olarak herkes aktif doğar
 
         // Navigation Properties
         public Profil? Profil { get; set; }

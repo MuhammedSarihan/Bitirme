@@ -12,9 +12,10 @@ namespace Tasarim.Core.Entities
 
         [Display(Name = "Soyad")]
         public string Soyad { get; set; }
-
+        [Required(ErrorMessage = "E-posta adresi boş bırakılamaz!")]
+        [EmailAddress(ErrorMessage = "Lütfen geçerli bir e-posta formatı giriniz!")]
         [Display(Name = "E-Posta")]
-        public string? Mail { get; set; }
+        public string Mail { get; set; }
 
         [Display(Name = "Telefon")]
         public string? TelNo { get; set; }

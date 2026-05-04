@@ -63,7 +63,12 @@ namespace Tasarim.Controllers
                     ModelState.AddModelError("", "Kullanıcı adı veya şifre hatalı!");
                     return View(model); // Hata varsa hemen sayfayı döndür
                 }
-
+               
+                if (hesap.AktifMi == false)
+                {
+                    ModelState.AddModelError("", "⚠️ Hesabınız sistem yöneticisi tarafından askıya alınmıştır. Lütfen bizimle iletişime geçiniz.");
+                    return View(model);
+                }
                 string rolIsmi = (hesap.AdminMi == true) ? "Admin" : "Musteri";
                 string returnUrl = (hesap.AdminMi == true) ? "/Admin" : "/Hesap/Index";
 
@@ -71,14 +76,13 @@ namespace Tasarim.Controllers
                 {
                     new Claim(ClaimTypes.Name, hesap.KullaniciAd),
                     new Claim(ClaimTypes.Role, rolIsmi),
-                    // Standart NameIdentifier kullanıyoruz
                     new Claim(ClaimTypes.NameIdentifier, hesap.ID.ToString())
                 };
 
                 var userIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 ClaimsPrincipal userPrincipal = new ClaimsPrincipal(userIdentity);
 
-                // Şemayı belirterek güvenli giriş yapıyoruz
+                
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, userPrincipal);
 
                 return Redirect(returnUrl);
@@ -116,7 +120,8 @@ namespace Tasarim.Controllers
                     {
                         KullaniciAd = model.KullaniciAd,
                         Sifre = model.Sifre,
-                        AdminMi = false
+                        AdminMi = false,
+                        AktifMi = true
                     }
                 };
 

@@ -1,6 +1,5 @@
 ﻿@model Tasarim.Core.Entities.Siparis
 @{ 
-    ViewData["Title"] = "Sipariş Detayı - " + Model.SiparisNo;
     bool isLocked = Model.SiparisDurumuID == 4 || Model.SiparisDurumuID == 5;
 }
 
@@ -49,7 +48,49 @@
                     </div>
                 </div>
             </div>
+            <div class="card border-dark-subtle rounded-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom border-dark-subtle py-3">
+                    <h6 class="font-playfair fw-bold m-0 text-uppercase"><i class="fa-solid fa-credit-card me-2 text-gold"></i>Ödeme Bilgileri</h6>
+                </div>
+                 @if (Model.Odemeler != null && Model.Odemeler.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-sm table-borderless mb-0 small">
+                <thead>
+                    <tr class="border-bottom text-muted text-uppercase" style="font-size: 0.7rem;">
+                        <th>İşlem No</th>
+                        <th>Tarih</th>
+                        <th>Durum</th>
+                        <th class="text-end">Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var odeme in Model.Odemeler)
+                    {
+                        <tr class="align-middle border-bottom border-light">
+                            <td class="fw-bold text-dark">@odeme.IslemNo</td>
+                            <td>@odeme.OdemeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <!-- Duruma göre renklenen badge (Başarılı, Bekliyor vb. durumlar için) -->
+                                <span class="badge @(odeme.OdemeDurumu == "Başarılı" ? "bg-success" : "bg-secondary") rounded-0">
+                                    @odeme.OdemeDurumu
+                                </span>
+                            </td>
+                            <td class="text-end fw-bold text-dark">@odeme.Tutar.ToString("N2") TL</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="py-2">
+            <p class="text-muted small mb-0"><i class="fa-solid fa-circle-info me-1"></i> Bu siparişe ait kayıtlı bir ödeme işlemi bulunamadı.</p>
+        </div>
+    }
 
+            </div>
             <!-- 2. Ürün Listesi (ALTTA VE RESİMLİ) -->
             <div class="card border-dark-subtle rounded-0 shadow-sm">
                 <div class="card-header bg-white border-bottom border-dark-subtle py-3">

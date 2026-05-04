@@ -10,7 +10,7 @@ namespace Tasarim.Areas.Admin.Controllers
     public class MarkalarController : Controller
     {
         private readonly DatabaseContext _context;
-        private readonly IWebHostEnvironment _env; // Resim yüklemek için ortam bilgisini alıyoruz
+        private readonly IWebHostEnvironment _env; 
 
         public MarkalarController(DatabaseContext context, IWebHostEnvironment env)
         {
@@ -18,14 +18,14 @@ namespace Tasarim.Areas.Admin.Controllers
             _env = env;
         }
 
-        // 1. LİSTELEME
+        //  LİSTELEME
         public async Task<IActionResult> Index()
         {
             var markalar = await _context.Markalar.ToListAsync();
             return View(markalar);
         }
 
-        // 2. TEK MERKEZLİ EKLEME, DÜZENLEME VE RESİM YÜKLEME
+        //  TEK MERKEZLİ EKLEME, DÜZENLEME VE RESİM YÜKLEME
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Kaydet(Marka model, IFormFile? YuklenenLogo, bool LogoyuSil)
@@ -40,7 +40,7 @@ namespace Tasarim.Areas.Admin.Controllers
                     mevcutMarka = await _context.Markalar.AsNoTracking().FirstOrDefaultAsync(m => m.ID == model.ID);
                 }
 
-                // 1. ADIM: EĞER KULLANICI "MEVCUT LOGOYU SİL" KUTUSUNU İŞARETLEDİYSE
+                //  EĞER KULLANICI "MEVCUT LOGOYU SİL" KUTUSUNU İŞARETLEDİYSE
                 if (LogoyuSil && mevcutMarka != null)
                 {
                     // FİZİKSEL SİLME İŞLEMİ (Eski dosyayı sunucudan temizle)
@@ -61,7 +61,7 @@ namespace Tasarim.Areas.Admin.Controllers
                     model.Logo = mevcutMarka.Logo;
                 }
 
-                // 2. ADIM: YENİ BİR RESİM YÜKLENDİYSE
+                // YENİ BİR RESİM YÜKLENDİYSE
                 if (YuklenenLogo != null && YuklenenLogo.Length > 0)
                 {
                     // FİZİKSEL SİLME İŞLEMİ (Eğer markanın zaten eski bir logosu varsa, üstüne yeni yüklendiği için eskisini çöpe at)
@@ -87,7 +87,7 @@ namespace Tasarim.Areas.Admin.Controllers
                     model.Logo = yeniDosyaAdi;
                 }
 
-                // 3. ADIM: VERİTABANINA KAYDET VEYA GÜNCELLE
+                // VERİTABANINA KAYDET VEYA GÜNCELLE
                 if (model.ID == 0)
                 {
                     _context.Markalar.Add(model);

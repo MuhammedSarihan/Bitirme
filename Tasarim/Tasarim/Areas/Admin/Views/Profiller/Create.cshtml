@@ -1,38 +1,41 @@
 ﻿@model Tasarim.Core.Entities.Profil
 
 @{
-    ViewData["Title"] = "";
+    ViewData["Title"] = "Yeni Profil Oluştur";
 }
 
 <div class="container-fluid mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-5">
+            <div class="card border-0 shadow-sm rounded-0">
+                <div class="card-body p-5 bg-white border border-dark-subtle">
 
                     <div class="d-flex align-items-center mb-4">
-                        <h3 class="mb-0 text-dark fw-bold">
-                            <i class="fa-solid fa-user-plus text-primary me-2"></i>Yeni Müşteri Profili Oluştur
+                        <h3 class="mb-0 text-dark fw-bold font-playfair text-uppercase letter-spacing-1">
+                            <i class="fa-solid fa-user-plus text-gold me-2"></i>Yeni Müşteri Profili Oluştur
                         </h3>
                     </div>
-                    <hr class="text-muted mb-4" />
+                    <hr class="border-dark mb-5" />
 
                     <form asp-action="Create">
                         @if (!ViewData.ModelState.IsValid)
                         {
-                            <div asp-validation-summary="All" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
+                            <div asp-validation-summary="All" class="alert alert-danger rounded-0 border-0 border-start border-4 border-danger bg-light" role="alert"></div>
                         }
 
                         <div class="row g-5">
+                            <!-- KİŞİSEL BİLGİLER -->
                             <div class="col-md-6">
-                                <h5 class="text-primary mb-3"><i class="fa-solid fa-address-card me-2"></i>Kişisel Bilgiler</h5>
+                                <h6 class="font-playfair fw-bold mb-4 small text-uppercase text-muted border-bottom pb-2">
+                                    <i class="fa-solid fa-address-card me-2 text-dark"></i>Kişisel Bilgiler
+                                </h6>
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
-                                        <label asp-for="Ad" class="form-label fw-semibold text-secondary">Ad <span class="text-danger fw-bold">*</span></label>
-                                        <div class="input-group shadow-sm">
-                                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
-                                            <input asp-for="Ad" class="form-control border-start-0 ps-0" placeholder="Müşteri Adı"
+                                        <label asp-for="Ad" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Ad <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-dark rounded-0 border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+                                            <input asp-for="Ad" class="form-control border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input" placeholder="Müşteri Adı"
                                                    required
                                                    oninvalid="this.setCustomValidity('Lütfen müşterinin adını giriniz.')"
                                                    oninput="this.setCustomValidity('')" />
@@ -41,8 +44,8 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label asp-for="Soyad" class="form-label fw-semibold text-secondary">Soyad <span class="text-danger fw-bold">*</span></label>
-                                        <input asp-for="Soyad" class="form-control shadow-sm" placeholder="Müşteri Soyadı"
+                                        <label asp-for="Soyad" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Soyad <span class="text-danger">*</span></label>
+                                        <input asp-for="Soyad" class="form-control border-dark rounded-0 shadow-none luvia-input" placeholder="Müşteri Soyadı"
                                                required
                                                oninvalid="this.setCustomValidity('Lütfen müşterinin soyadını giriniz.')"
                                                oninput="this.setCustomValidity('')" />
@@ -51,10 +54,10 @@
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label asp-for="Mail" class="form-label fw-semibold text-secondary">E-Posta Adresi <span class="text-danger fw-bold">*</span></label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
-                                        <input asp-for="Mail" type="email" class="form-control border-start-0 ps-0" placeholder="ornek@mail.com"
+                                    <label asp-for="Mail" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">E-Posta Adresi <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-dark rounded-0 border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
+                                        <input asp-for="Mail" type="email" class="form-control border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input" placeholder="ornek@mail.com"
                                                required
                                                oninvalid="this.setCustomValidity('Lütfen müşterinin geçerli bir e-posta adresini giriniz.')"
                                                oninput="this.setCustomValidity('')" />
@@ -63,32 +66,35 @@
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label asp-for="TelNo" class="form-label fw-semibold text-secondary">Telefon Numarası</label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
-                                        <input asp-for="TelNo" class="form-control border-start-0 ps-0" placeholder="05XX XXX XX XX" />
+                                    <label asp-for="TelNo" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Telefon Numarası</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-dark rounded-0 border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                                        <input asp-for="TelNo" class="form-control border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input" placeholder="05XX XXX XX XX" />
                                     </div>
                                     <span asp-validation-for="TelNo" class="text-danger small"></span>
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label asp-for="Adres" class="form-label fw-semibold text-secondary">Açık Adres</label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-location-dot text-muted"></i></span>
-                                        <textarea asp-for="Adres" class="form-control border-start-0 ps-0" rows="2" placeholder="Teslimat adresi detayları..."></textarea>
+                                    <label asp-for="Adres" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Açık Adres</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-dark rounded-0 border-end-0"><i class="fa-solid fa-location-dot text-muted"></i></span>
+                                        <textarea asp-for="Adres" class="form-control border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input" rows="2" placeholder="Teslimat adresi detayları..."></textarea>
                                     </div>
                                     <span asp-validation-for="Adres" class="text-danger small"></span>
                                 </div>
                             </div>
 
+                            <!-- FİZİKSEL ÖZELLİKLER & HESAP -->
                             <div class="col-md-6">
-                                <h5 class="text-info mb-3"><i class="fa-solid fa-person-half-dress me-2"></i>Fiziksel Özellikler & Hesap</h5>
+                                <h6 class="font-playfair fw-bold mb-4 small text-uppercase text-muted border-bottom pb-2">
+                                    <i class="fa-solid fa-ruler me-2 text-dark"></i>Fiziksel Özellikler & Hesap
+                                </h6>
 
                                 <div class="form-group mb-3">
-                                    <label asp-for="Cinsiyet" class="form-label fw-semibold text-secondary">Cinsiyet</label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-venus-mars text-muted"></i></span>
-                                        <select asp-for="Cinsiyet" class="form-select border-start-0 ps-0">
+                                    <label asp-for="Cinsiyet" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Cinsiyet</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-dark rounded-0 border-end-0"><i class="fa-solid fa-venus-mars text-muted"></i></span>
+                                        <select asp-for="Cinsiyet" class="form-select border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input">
                                             <option value="">-- Cinsiyet Seçin --</option>
                                             <option value="Kadın">Kadın</option>
                                             <option value="Erkek">Erkek</option>
@@ -99,46 +105,46 @@
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-4">
-                                        <label asp-for="Yas" class="form-label fw-semibold text-secondary">Yaş</label>
-                                        <input asp-for="Yas" class="form-control shadow-sm" type="number" placeholder="Örn: 28" />
+                                        <label asp-for="Yas" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Yaş</label>
+                                        <input asp-for="Yas" class="form-control border-dark rounded-0 shadow-none luvia-input text-center" type="number" placeholder="Örn: 28" />
                                         <span asp-validation-for="Yas" class="text-danger small"></span>
                                     </div>
                                     <div class="col-md-4">
-                                        <label asp-for="Boy" class="form-label fw-semibold text-secondary">Boy (cm)</label>
-                                        <input asp-for="Boy" class="form-control shadow-sm" type="number" placeholder="Örn: 187" />
+                                        <label asp-for="Boy" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Boy (cm)</label>
+                                        <input asp-for="Boy" class="form-control border-dark rounded-0 shadow-none luvia-input text-center" type="number" placeholder="Örn: 187" />
                                         <span asp-validation-for="Boy" class="text-danger small"></span>
                                     </div>
                                     <div class="col-md-4">
-                                        <label asp-for="Kilo" class="form-label fw-semibold text-secondary">Kilo (kg)</label>
-                                        <input asp-for="Kilo" class="form-control shadow-sm" type="number" placeholder="Örn: 75" />
+                                        <label asp-for="Kilo" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Kilo (kg)</label>
+                                        <input asp-for="Kilo" class="form-control border-dark rounded-0 shadow-none luvia-input text-center" type="number" placeholder="Örn: 75" />
                                         <span asp-validation-for="Kilo" class="text-danger small"></span>
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-3 p-4 bg-light rounded-3 border">
-                                    <h6 class="text-dark fw-bold mb-3 border-bottom pb-2">
-                                        <i class="fa-solid fa-user-shield me-2 text-primary"></i>Sistem Giriş Bilgileri
+                                <div class="form-group mb-3 p-4 bg-light border-start border-4 border-dark rounded-0">
+                                    <h6 class="text-dark fw-bold mb-3 border-bottom border-dark-subtle pb-2 font-playfair text-uppercase letter-spacing-1 small">
+                                        <i class="fa-solid fa-user-shield me-2 text-gold"></i>Sistem Giriş Bilgileri
                                     </h6>
 
-                                    <div class="alert alert-info py-2 small mb-4 border-0 border-start border-info border-4">
+                                    <div class="alert bg-white py-2 small mb-4 border-0 border-start border-dark border-4 rounded-0 text-muted">
                                         <i class="fa-solid fa-circle-info me-1"></i> Müşterinin sisteme giriş yapabilmesi için benzersiz bir kullanıcı adı ve geçici şifre belirleyin.
                                     </div>
 
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label asp-for="Kullanici.KullaniciAd" class="form-label fw-semibold text-secondary">Kullanıcı Adı</label>
-                                            <div class="input-group shadow-sm">
-                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-at text-muted"></i></span>
-                                                <input asp-for="Kullanici.KullaniciAd" class="form-control border-start-0 ps-0" placeholder="Örn: musteri123" required />
+                                            <label asp-for="Kullanici.KullaniciAd" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Kullanıcı Adı <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-dark rounded-0 border-end-0"><i class="fa-solid fa-at text-muted"></i></span>
+                                                <input asp-for="Kullanici.KullaniciAd" class="form-control border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input" placeholder="Örn: musteri123" required />
                                             </div>
                                             <span asp-validation-for="Kullanici.KullaniciAd" class="text-danger small"></span>
                                         </div>
 
                                         <div class="col-md-6">
-                                            <label asp-for="Kullanici.Sifre" class="form-label fw-semibold text-secondary">Geçici Şifre</label>
-                                            <div class="input-group shadow-sm">
-                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-key text-muted"></i></span>
-                                                <input asp-for="Kullanici.Sifre" type="password" class="form-control border-start-0 ps-0" placeholder="Şifre belirleyin" required />
+                                            <label asp-for="Kullanici.Sifre" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">Geçici Şifre <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-dark rounded-0 border-end-0"><i class="fa-solid fa-key text-muted"></i></span>
+                                                <input asp-for="Kullanici.Sifre" type="password" class="form-control border-dark rounded-0 border-start-0 ps-0 shadow-none luvia-input" placeholder="Şifre belirleyin" required />
                                             </div>
                                             <span asp-validation-for="Kullanici.Sifre" class="text-danger small"></span>
                                         </div>
@@ -147,14 +153,14 @@
                             </div>
                         </div>
 
-                        <hr class="text-muted my-4" />
+                        <hr class="border-dark my-5" />
 
                         <div class="d-flex justify-content-between align-items-center">
-                            <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
+                            <a asp-action="Index" class="btn btn-outline-dark px-4 rounded-0 fw-medium text-uppercase letter-spacing-1">
                                 <i class="fa-solid fa-arrow-left me-2"></i>Listeye Dön
                             </a>
-                            <button type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm fw-bold">
-                                <i class="fa-solid fa-plus me-2"></i>Profili Oluştur
+                            <button type="submit" class="btn btn-dark px-5 rounded-0 shadow-sm fw-bold text-uppercase letter-spacing-1">
+                                <i class="fa-solid fa-plus text-gold me-2"></i>Profili Oluştur
                             </button>
                         </div>
 
@@ -169,4 +175,17 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .text-gold { color: #D4AF37 !important; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        
+        /* LUVİA Input Focus Efekti */
+        .luvia-input:focus, .form-select:focus {
+            border-color: #000 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+    </style>
 }
