@@ -38,10 +38,6 @@ namespace Tasarim.Core.Entities
         // Navigation Properties
         public Kategori Kategori { get; set; }
         public Marka Marka { get; set; }
-        // İŞTE MERKEZİ ÇÖZÜM: Veritabanına eklenmeyecek akıllı özellik
-        
-
-        // YENİ EKLENEN: Bir ürünün birden fazla beden/stok (varyasyon) bilgisi olabilir
         public ICollection<UrunVaryasyon>? Varyasyonlar { get; set; }
 
         public ICollection<Resim>? Resimler { get; set; }

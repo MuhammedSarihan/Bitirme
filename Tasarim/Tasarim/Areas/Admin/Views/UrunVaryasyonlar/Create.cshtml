@@ -1,81 +1,93 @@
 ﻿@model Tasarim.Areas.Admin.Models.TopluVaryasyonViewModel
 
 @{
-    ViewData["Title"] = "Toplu Varyasyon Ekle";
 }
 
-<div class="container-fluid mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-5">
+<div class="container-fluid mt-4 mb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-0 text-dark fw-bold font-playfair letter-spacing-1">
+                <i class="fa-solid fa-layer-group text-gold me-2"></i>Toplu Stok Paneli
+            </h3>
+            <p class="text-muted small mt-1 mb-0 text-uppercase letter-spacing-1">Seçili ürüne ait varyasyonları listeye ekleyip tek seferde kaydedin.</p>
+        </div>
+        <!-- YENİ ROTA: Listeye Dön butonu artık Ürünler/Index sayfasına gidiyor -->
+        <a asp-controller="Urunler" asp-action="Index" class="btn btn-outline-dark rounded-pill px-4 fw-bold letter-spacing-1 shadow-sm">
+            <i class="fa-solid fa-arrow-left me-2"></i>Kataloğa Dön
+        </a>
+    </div>
 
-                    <div class="d-flex align-items-center mb-4">
-                        <h3 class="mb-0 text-dark fw-bold">
-                            <i class="fa-solid fa-layer-group text-primary me-2"></i>Toplu Beden ve Stok Ekle
-                        </h3>
-                    </div>
-                    <hr class="text-muted mb-4" />
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                
+                <form asp-action="Create" id="varyasyonForm">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger m-3 rounded-3 shadow-sm" role="alert"></div>
 
-                    <form asp-action="Create" id="varyasyonForm">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 shadow-sm" role="alert"></div>
-
-                        <div class="row g-3 align-items-end mb-4 bg-light p-4 rounded-3 border">
+                    <!-- ÜST FORM ALANI (Listeye Ekleme Yeri) -->
+                    <div class="card-body bg-light p-4 border-bottom border-dark-subtle">
+                        <div class="row g-3 align-items-end">
                             <div class="col-md-5">
-                                <label asp-for="SecilenUrunID" class="form-label fw-bold text-dark mb-2">
-                                    <i class="fa-solid fa-box text-primary me-2"></i>Ürün Kodu
+                                <label asp-for="SecilenUrunID" class="form-label small fw-bold text-dark text-uppercase letter-spacing-1 mb-2">
+                                    <i class="fa-solid fa-box-open text-gold me-1"></i> Bağlı Ürün
                                 </label>
-                                <select asp-for="SecilenUrunID" id="urunAramaListesi" class="form-select form-select-lg shadow-sm" asp-items="ViewBag.UrunID">
-                                    <option value="">-- Kod Seçiniz / Arayınız --</option>
+                                <select asp-for="SecilenUrunID" id="urunAramaListesi" class="form-select shadow-none" asp-items="ViewBag.UrunID">
+                                    <option value="">-- Ürün Arayın veya Seçin --</option>
                                 </select>
                                 <span asp-validation-for="SecilenUrunID" class="text-danger small mt-2 d-block"></span>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label fw-bold text-dark mb-2">Beden</label>
-                                <input type="text" id="tempBeden" class="form-control form-control-lg shadow-sm" placeholder="Örn: 42, S" />
+                                <label class="form-label small fw-bold text-dark text-uppercase letter-spacing-1 mb-2">
+                                    <i class="fa-solid fa-ruler text-gold me-1"></i> Beden
+                                </label>
+                                <input type="text" id="tempBeden" class="form-control border-dark-subtle shadow-none text-uppercase" style="height: 44px;" placeholder="Örn: 42, M" />
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold text-dark mb-2">Adet</label>
-                                <input type="number" id="tempAdet" class="form-control form-control-lg shadow-sm" min="0" placeholder="0" />
+                                <label class="form-label small fw-bold text-dark text-uppercase letter-spacing-1 mb-2">
+                                    <i class="fa-solid fa-cubes text-gold me-1"></i> Adet
+                                </label>
+                                <input type="number" id="tempAdet" class="form-control border-dark-subtle shadow-none fw-bold text-center" style="height: 44px;" value="1" min="1" />
                             </div>
                             <div class="col-md-2">
-                                <button type="button" id="btnEkle" class="btn btn-outline-dark btn-lg w-100 fw-bold shadow-sm" style="height: 48px;">
-                                    Ekle
+                                <button type="button" id="btnEkle" class="btn btn-dark w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 shadow-sm" style="height: 44px;">
+                                    <i class="fa-solid fa-plus me-1 text-gold"></i> EKLE
                                 </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="border rounded bg-white shadow-sm mb-4 overflow-hidden">
-                            <table class="table table-hover mb-0 text-center align-middle">
-                                <thead class="table-light border-bottom">
-                                    <tr>
-                                        <th class="text-secondary fw-bold py-3">Kod</th>
-                                        <th class="text-secondary fw-bold py-3">Beden</th>
-                                        <th class="text-secondary fw-bold py-3">Adet</th>
-                                        <th class="text-secondary fw-bold py-3">Sil</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="varyasyonTableBody">
-                                   
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="form-text mb-4 text-muted">
-                            * Eklemek istemediğiniz veya boş kalan satırlar kaydedilmeyecektir.
-                        </div>
+                    <!-- ALT TABLO VE KAYDET ALANI -->
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark text-uppercase small letter-spacing-1">
+                                <tr>
+                                    <th class="ps-4 py-3" style="width: 40%;">Seçilen Ürün Bilgisi</th>
+                                    <th class="py-3 text-center" style="width: 20%;">Beden</th>
+                                    <th class="py-3 text-center" style="width: 20%;">Adet</th>
+                                    <th class="pe-4 py-3 text-end" style="width: 20%;">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="varyasyonTableBody" class="bg-white">
+                                <!-- JS ile dinamik satırlar buraya gelecek -->
+                                <tr id="bosDurum">
+                                    <td colspan="4" class="text-center py-5 text-muted fst-italic">
+                                        <i class="fa-solid fa-arrow-up d-block fs-3 mb-2 opacity-25"></i>
+                                        Yukarıdaki formu kullanarak listeye beden eklemeye başlayın.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a asp-action="Index" class="btn btn-light border px-4 rounded-pill fw-medium text-secondary">
-                                <i class="fa-solid fa-arrow-left me-2"></i>Listeye Dön
-                            </a>
-                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-2 shadow-sm fw-bold fs-5 text-uppercase border-2" style="letter-spacing: 2px;">
-                                KAYDET
-                            </button>
-                        </div>
-                    </form>
+                    <div class="card-footer bg-white border-top border-dark-subtle p-4 d-flex justify-content-between align-items-center">
+                        <span class="small text-muted fst-italic">* Eklemek istemediğiniz veya boş kalan satırlar kaydedilmeyecektir.</span>
+                        <button type="submit" id="btnKaydet" class="btn btn-dark rounded-pill px-5 py-2 fw-bold letter-spacing-1 hover-gold-bg transition-300 shadow-sm" disabled>
+                            <i class="fa-solid fa-check text-gold me-2"></i> VERİTABANINA KAYDET
+                        </button>
+                    </div>
+                </form>
 
-                </div>
             </div>
         </div>
     </div>
@@ -92,8 +104,6 @@
 
     <script>
         $(document).ready(function() {
-            console.log("1. Sayfa yüklendi, jQuery çalışıyor.");
-
             // Select2 Kurulumu
             $('#urunAramaListesi').select2({
                 placeholder: "-- Ürün Kodunu Arayın veya Seçin --",
@@ -101,81 +111,113 @@
                 width: '100%'
             });
 
-            // Benzersiz satır sayacı (Silme işlemi için gerekli altyapı)
+            // YENİ EKLENTİ: Ürünler sayfasından ?urunId=... parametresiyle gelindiyse
+            // Select2 içindeki ürünü otomatik olarak seç
+            const urlParams = new URLSearchParams(window.location.search);
+            const urunId = urlParams.get('urunId');
+            if (urunId) {
+                $('#urunAramaListesi').val(urunId).trigger('change');
+            }
+
             var satirSayaci = 0;
 
             // "Ekle" Butonu İşlevi
             $('#btnEkle').click(function(e) {
-                e.preventDefault(); // Sayfanın yenilenmesini durdur
-                console.log("2. Ekle butonuna tıklandı.");
+                e.preventDefault(); 
 
                 var secilenUrunId = $('#urunAramaListesi').val();
                 var secilenUrunMetni = $('#urunAramaListesi option:selected').text();
-                var beden = $('#tempBeden').val();
+                var beden = $('#tempBeden').val().trim().toUpperCase();
                 var adet = $('#tempAdet').val();
 
-                console.log("3. Alınan Veriler - ID:", secilenUrunId, " Beden:", beden, " Adet:", adet);
-
-                if (!secilenUrunId || !beden || !adet) {
+                if (!secilenUrunId || !beden || !adet || parseInt(adet) < 1) {
                     alert('Lütfen Ürün, Beden ve Adet bilgisini eksiksiz giriniz.');
                     return;
                 }
-              // Çöp Kutusuyla satır silme işlemi
-            $('#varyasyonTableBody').on('click', '.btn-sil', function() {
-                $(this).closest('tr').fadeOut(300, function() {
-                    $(this).remove(); // 300ms'lik hafif bir animasyonla satırı tamamen DOM'dan kaldırır
-                });
-            console.log("Satır silindi.");
-        });
 
-                // ASP.NET Core listeleri için gizli index mühürü
+                // Boş yazısını kaldır
+                $('#bosDurum').remove();
+
+                // Güvenli ASP.NET Core Index mühürü
                 var indexInput = '<input type="hidden" name="Varyasyonlar.Index" value="' + satirSayaci + '" />';
 
-                // Yeni Satır HTML'i (Güvenli tırnak formatıyla yazıldı)
-                var yeniSatir = '<tr>' +
-                    '<td class="text-muted fw-medium">' +
+                // LUVİA konseptine uygun satır tasarımı
+                var yeniSatir = '<tr id="satir_' + satirSayaci + '">' +
+                    '<td class="ps-4 fw-medium text-dark">' +
                         indexInput +
                         '<input type="hidden" name="Varyasyonlar[' + satirSayaci + '].UrunID" value="' + secilenUrunId + '" />' +
-                        (secilenUrunMetni !== "-- Kod Seçiniz / Arayınız --" ? secilenUrunMetni : secilenUrunId) +
+                        '<i class="fa-solid fa-check text-success me-2 opacity-50"></i>' + (secilenUrunMetni !== "-- Ürün Arayın veya Seçin --" ? secilenUrunMetni : secilenUrunId) +
                     '</td>' +
-                    '<td>' +
-                        '<input name="Varyasyonlar[' + satirSayaci + '].Beden" value="' + beden + '" class="form-control text-center border-0 bg-transparent shadow-none" readonly />' +
+                    '<td class="text-center fw-bold text-dark fs-5">' +
+                        beden +
+                        '<input type="hidden" name="Varyasyonlar[' + satirSayaci + '].Beden" value="' + beden + '" />' +
                     '</td>' +
-                    '<td>' +
-                        '<input name="Varyasyonlar[' + satirSayaci + '].StokAdedi" value="' + adet + '" type="number" class="form-control text-center border-0 bg-transparent shadow-none fw-bold text-success" readonly />' +
+                    '<td class="text-center fw-bold text-success">' +
+                        adet + ' Adet' +
+                        '<input type="hidden" name="Varyasyonlar[' + satirSayaci + '].StokAdedi" value="' + adet + '" />' +
                     '</td>' +
-                    '<td>' +
-                        '<button type="button" class="btn btn-sm btn-outline-danger btn-sil" title="Bu satırı sil">' +
-                            '<i class="fa-solid fa-trash"></i> Sil' +
+                    '<td class="pe-4 text-end">' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 btn-sil" title="Bu satırı sil">' +
+                            '<i class="fa-solid fa-trash me-1"></i> Sil' +
                         '</button>' +
                     '</td>' +
                 '</tr>';
 
-                // Tabloya satırı ekle
                 $('#varyasyonTableBody').append(yeniSatir);
-                console.log("4. Satır tabloya başarıyla eklendi.");
+                satirSayaci++; 
 
-                satirSayaci++; // Sayacı bir artır
+                // Kaydet butonunu aktifleştir
+                $('#btnKaydet').prop('disabled', false);
 
-                // Hızlı giriş için geçici inputları temizle ve Beden'e odaklan
+                // Formu temizle
                 $('#tempBeden').val('');
-                $('#tempAdet').val('');
+                $('#tempAdet').val('1');
                 $('#tempBeden').focus();
+            });
+
+            // Çöp Kutusuyla satır silme işlemi
+            $('#varyasyonTableBody').on('click', '.btn-sil', function() {
+                $(this).closest('tr').fadeOut(300, function() {
+                    $(this).remove();
+                    
+                    // Tabloda hiç satır kalmadıysa eski haline döndür
+                    if($('#varyasyonTableBody tr').length === 0) {
+                        $('#btnKaydet').prop('disabled', true);
+                        $('#varyasyonTableBody').html(`
+                            <tr id="bosDurum">
+                                <td colspan="4" class="text-center py-5 text-muted fst-italic">
+                                    <i class="fa-solid fa-arrow-up d-block fs-3 mb-2 opacity-25"></i>
+                                    Yukarıdaki formu kullanarak listeye beden eklemeye başlayın.
+                                </td>
+                            </tr>
+                        `);
+                    }
+                });
             });
         });
     </script>
 
     <style>
+        .text-gold { color: #D4AF37 !important; }
+        .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .transition-300 { transition: all 0.3s ease; }
+        
+        /* Select2 Kütüphanesi LUVİA Özelleştirmesi */
         .select2-container .select2-selection--single {
-            height: 48px !important;
-            padding: 8px 12px;
+            height: 44px !important;
+            padding: 7px 12px;
             border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
+            box-shadow: none !important;
         }
-
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 46px !important;
+            height: 42px !important;
             right: 10px !important;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #000;
         }
     </style>
 }

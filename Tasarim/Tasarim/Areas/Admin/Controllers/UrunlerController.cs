@@ -43,6 +43,7 @@ namespace Tasarim.Areas.Admin.Controllers
             var query = _context.Urunler
                 .Include(u => u.Kategori)
                 .Include(u => u.Marka)
+                .Include(u => u.Varyasyonlar)
                 .AsQueryable();
 
             // 1. FİLTRELEME İŞLEMLERİ (Sorgu veritabanında çalışır, RAM'i yormaz)
@@ -63,7 +64,7 @@ namespace Tasarim.Areas.Admin.Controllers
             int toplamKayit = await query.CountAsync();
             int toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
 
-            // 3. SADECE İSTENEN SAYFADAKİ KADAR VERİYİ ÇEK (Örn: 1. sayfadaki ilk 10 ürün)
+            // 3. TEK VE KUSURSUZ SORGUMUZ
             var urunler = await query
                 .OrderByDescending(u => u.ID)
                 .Skip((sayfa - 1) * sayfaBoyutu)
@@ -74,16 +75,24 @@ namespace Tasarim.Areas.Admin.Controllers
                     urunKod = u.UrunKod,
                     modelKodu = u.ModelKodu,
                     renk = u.Renk,
-                    fiyatFormatli = u.Fiyat.ToString("C2"),
-                    fiyatHam = u.Fiyat.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
-                    aktifMi = u.AktifMi,
+
+                    // Kategori veya Marka silinmişse sistem çökmesin diye null kontrol
                     kategoriAd = u.Kategori != null ? u.Kategori.KategoriAd : "-",
                     markaAd = u.Marka != null ? u.Marka.MarkaAd : "-",
-                    anaResim = u.AnaResim
+
+                    anaResim = u.AnaResim,
+                    aktifMi = u.AktifMi,
+
+                    // Fiyat formatlamaları
+                    fiyatFormatli = u.Fiyat.ToString("N2") + " TL",
+                    fiyatHam = u.Fiyat.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+
+                    
+                    varyasyonlar = u.Varyasyonlar.Select(v => new { beden = v.Beden, stokAdedi = v.StokAdedi }).ToList()
                 })
                 .ToListAsync();
 
-            // Veriyi JavaScript'e JSON formatında yolla
+            // Veriyi JavaScript'e JSON formatında tek parça halinde yolla
             return Json(new { urunler, toplamSayfa, mevcutSayfa = sayfa, toplamKayit });
         }
 
@@ -147,7 +156,7 @@ namespace Tasarim.Areas.Admin.Controllers
 
                 _context.Add(urun);
                 await _context.SaveChangesAsync(); // Ürün kaydedilir ve urun.ID oluşur!
-
+                //-------------------------------------------------------------------------------------------------------------
                 //  AI ANALİZİNİ BURADA BAŞLAT 
                 if (AnaResimDosyasi != null && AnaResimDosyasi.Length > 0)
                 {
@@ -166,7 +175,8 @@ namespace Tasarim.Areas.Admin.Controllers
                         }
                     }
                 }
-                
+
+                //-------------------------------------------------------------------------------------------------------------
 
 
                 if (EkGorseller != null && EkGorseller.Any())
