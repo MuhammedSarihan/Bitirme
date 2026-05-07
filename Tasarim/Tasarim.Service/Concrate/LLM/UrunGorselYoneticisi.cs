@@ -16,20 +16,20 @@ namespace LlmService
         public async Task<UrunOzellikleri> GorseliAnalizEt(byte[] imageBytes, int urunId)
         {
             string prompt = @"Sen teknik bir veri ayıklama robotusun. 
-Görevin: Görseli analiz et ve verileri SADECE JSON objesi olarak döndür.
-KRİTİK KURALLAR:
-1. JSON dışında tek bir kelime bile yazma.
-2. Kod blokları (```json ) kullanma, doğrudan '{' ile başla ve '}' ile bitir.
-3. Değerler boş olamaz; 'Bilinmiyor' veya en yakın tahmini yaz.
+           Görevin: Görseli analiz et ve verileri SADECE JSON objesi olarak döndür.
+           KRİTİK KURALLAR:
+           1. JSON dışında tek bir kelime bile yazma.
+           2. Kod blokları (```json ) kullanma, doğrudan '{' ile başla ve '}' ile bitir.
+           3. Değerler boş olamaz; 'Bilinmiyor' veya en yakın tahmini yaz.
 
-JSON FORMATI:
-{
-  ""AnaKategori"": ""Kategori adı"",
-  ""AnaRenk"": ""Baskın renk"",
-  ""Materyal"": ""Malzeme tipi"",
-  ""Stil"": ""Tarz örneği"",
-  ""Detaylar"": ""SEO uyumlu kısa açıklama""
-}";
+          JSON FORMATI:
+          {
+          ""AnaKategori"": ""Kategori adı"",
+          ""AnaRenk"": ""Baskın renk"",
+          ""Materyal"": ""Malzeme tipi"",
+          ""Stil"": ""Tarz örneği"",
+          ""Detaylar"": ""SEO uyumlu kısa açıklama""
+          }";
 
             string rawResponse = await _geminiProvider.AnalyzeImageAsync(prompt, imageBytes);
 

@@ -1,4 +1,6 @@
-﻿<header class="sticky-top bg-white shadow-sm transition-300">
+﻿<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<header class="sticky-top bg-white shadow-sm transition-300">
 
     <div class="border-bottom py-3">
         <div class="container d-flex align-items-center justify-content-between gap-3">
@@ -12,12 +14,29 @@
             </a>
 
             <form action="/Urunler/Index" class="flex-grow-1 mx-lg-5 d-none d-lg-block" role="search" style="max-width: 600px;">
-                <div class="input-group">
-                    <input name="q" type="search" class="form-control rounded-start-pill border-secondary py-2 px-4 bg-light" placeholder="Ürün, kategori veya marka ara..." aria-label="Search">
-                    <button type="submit" class="btn btn-dark rounded-end-pill px-4 hover-gold-bg border-0 transition-300">
+                <div class="input-group" style="position: relative;">
+                    <!-- Arama Kutusu -->
+                    <input name="q" id="searchInput" type="search"
+                           class="form-control rounded-pill border-secondary py-2 ps-4 pe-5 bg-light"
+                           placeholder="Ürün, kategori veya marka ara..." aria-label="Search">
+                    <!-- Kamera Butonu (Kutunun İçinde Sağda) -->
+                    <button type="button" id="btnVisualSearch"
+                            style="position: absolute; right: 65px; top: 50%; transform: translateY(-50%); z-index: 5; border: none; background: none; color: #6c757d;"
+                            class="hover-gold transition-300">
+                        <i class="fa-solid fa-camera fs-5"></i>
+                    </button>
+                    <!-- Büyüteç Butonu -->
+                    <button type="submit" class="btn btn-dark rounded-pill px-4 hover-gold-bg border-0 transition-300"
+                            style="margin-left: -45px; z-index: 6;">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
+
+                
+
+
+                <!-- Gizli Dosya Girişi ID'si 'visualSearchInput' olmalı -->
+                <input type="file" id="visualSearchInput" style="display: none;" accept="image/*">
             </form>
 
             <div class="d-flex align-items-center gap-3 gap-xl-4">
@@ -77,3 +96,56 @@
         </div>
     </nav>
 </header>
+<script>
+    // Sayfa tamamen yüklendiğinde çalışmasını sağla
+    document.addEventListener('DOMContentLoaded', function () {
+        
+        const btnKamera = document.getElementById('btnVisualSearch');
+        const fileInput = document.getElementById('visualSearchInput');
+
+        if (btnKamera && fileInput) {
+            // Kamera butonuna basınca dosya seçiciyi aç
+            btnKamera.onclick = function () {
+                fileInput.click();
+            };
+
+            // Dosya seçilince işlemleri başlat
+            fileInput.onchange = function () {
+    if (this.files && this.files[0]) { // --- YENİ: YÜKLENİYOR MESAJI BURADA ÇIKACAK ---
+    Swal.fire({
+    title: 'Görsel Analiz Ediliyor',
+    text: 'Benzer ürünler aranıyor...',
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    didOpen: () => {
+    Swal.showLoading(); // Dönen yüklenme simgesini gösterir
+    }
+    });
+                    // Kullanıcıya işlemin başladığını göster
+                    console.log("Dosya seçildi: " + this.files[0].name);
+                    
+                    let formData = new FormData();
+                    formData.append("imageFile", this.files[0]);
+
+                    // Backend'e gönder
+                    fetch('/Urunler/VisualSearch', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            alert("Analiz Hatası: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Hata:", error);
+                        alert("Sistem bağlantı hatası oluştu.");
+                    });
+                }
+            };
+        }
+    });
+</script>
