@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LlmService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,18 +10,21 @@ using Tasarim.Service.Concrete.LLM;
 
 namespace Tasarim.Areas.Admin.Controllers
 {
+    
     [Area("Admin"), Authorize(Policy = "AdminPolicy")]
+   
     public class MainController : Controller
     {
         private readonly YorumAnalizYoneticisi _analizYoneticisi;
         private readonly KumelemeYoneticisi _kumelemeYoneticisi;
         private readonly DatabaseContext _context;
-
-        public MainController(DatabaseContext context, YorumAnalizYoneticisi analizYoneticisi, KumelemeYoneticisi kumelemeYoneticisi)
+        private readonly UrunGorselYoneticisi _urunGorselYoneticisi;
+        public MainController(DatabaseContext context, YorumAnalizYoneticisi analizYoneticisi, KumelemeYoneticisi kumelemeYoneticisi, UrunGorselYoneticisi urunGorselYoneticisi)
         {
             _analizYoneticisi = analizYoneticisi;
             _kumelemeYoneticisi = kumelemeYoneticisi;
             _context = context;
+            _urunGorselYoneticisi = urunGorselYoneticisi;
         }
 
         //Yapay Zeka işlemlerini sırayla tetikleyen bir aksiyon
@@ -39,6 +43,22 @@ namespace Tasarim.Areas.Admin.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        // --- YENİ EKLEDİĞİMİZ METOT ---
+        [HttpPost]
+        public async Task<IActionResult> TopluGorselAnalizEt()
+        {
+            try
+            {
+                int adet = await _urunGorselYoneticisi.AnalizEdilmemisGorselleriTopluAnalizEt();
+                return Json(new { success = true, message = $"{adet} yeni ürün başarıyla analiz edildi." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Hata: " + ex.Message });
+            }
+        }
+
 
         // Ana ekran gösterge paneli aksiyonu
         [HttpGet]

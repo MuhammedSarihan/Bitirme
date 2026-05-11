@@ -158,7 +158,7 @@ namespace Tasarim.Areas.Admin.Controllers
                 await _context.SaveChangesAsync(); // Ürün kaydedilir ve urun.ID oluşur!
                 //-------------------------------------------------------------------------------------------------------------
                 //  AI ANALİZİNİ BURADA BAŞLAT 
-                if (AnaResimDosyasi != null && AnaResimDosyasi.Length > 0)
+               /* if (AnaResimDosyasi != null && AnaResimDosyasi.Length > 0)
                 {
                     using (var ms = new MemoryStream())
                     {
@@ -174,7 +174,7 @@ namespace Tasarim.Areas.Admin.Controllers
                             await _context.SaveChangesAsync(); // Analiz sonuçlarını veritabanına yaz
                         }
                     }
-                }
+                } */
 
                 //-------------------------------------------------------------------------------------------------------------
 

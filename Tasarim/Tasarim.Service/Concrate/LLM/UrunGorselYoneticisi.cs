@@ -1,17 +1,68 @@
 ﻿using System.Text.Json;
 using Tasarim.Core.Entities;
 using Tasarim.Service.Abstract;
+using Tasarim.Data; // DatabaseContext için
+using Microsoft.EntityFrameworkCore;
 
 namespace LlmService
 {
     public class UrunGorselYoneticisi
     {
         private readonly IGeminiProvider _geminiProvider;
-
-        public UrunGorselYoneticisi(IGeminiProvider geminiProvider)
+        private readonly DatabaseContext _context; // Veritabanı bağlantısı eklendi
+        public UrunGorselYoneticisi(IGeminiProvider geminiProvider, DatabaseContext context)
         {
             _geminiProvider = geminiProvider;
+            _context = context;
         }
+
+        public async Task<int> AnalizEdilmemisGorselleriTopluAnalizEt()
+        {
+            // SADECE AnalizTablosunda HİÇ kaydı olmayanları getir (Böylece eskiden analiz edilen 5 taneye dokunmaz)
+            var bekleyenler = await _context.Urunler
+                .Where(u => !string.IsNullOrEmpty(u.AnaResim))
+                .Where(u => !_context.Set<UrunOzellikleri>().Any(o => o.UrunID == u.ID))
+                .ToListAsync();
+
+            int basariliSayisi = 0;
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            foreach (var urun in bekleyenler)
+            {
+                try
+                {
+                    // Veritabanındaki ismi temizle
+                    string sadeceDosyaAdi = Path.GetFileName(urun.AnaResim).Trim();
+
+                    // SENİN KLASÖRÜN: Resimlerin 'img' klasöründe olduğunu gördüm
+                    string yol1 = Path.Combine(wwwroot, "img", sadeceDosyaAdi);
+                    string yol2 = Path.Combine(wwwroot, urun.AnaResim.Replace("/", "\\").TrimStart('\\'));
+
+                    // Hangi yol doluysa onu al
+                    string gercekYol = File.Exists(yol1) ? yol1 : (File.Exists(yol2) ? yol2 : null);
+
+                    if (gercekYol == null)
+                    {
+                        // Buraya hata kaydetmiyoruz ki "0" görünmesin, sadece dosyayı bulamazsa atlasın
+                        continue;
+                    }
+
+                    byte[] imageBytes = await File.ReadAllBytesAsync(gercekYol);
+                    var sonuc = await GorseliAnalizEt(imageBytes, urun.ID);
+
+                    if (sonuc != null)
+                    {
+                        _context.Set<UrunOzellikleri>().Add(sonuc);
+                        basariliSayisi++;
+                    }
+                }
+                catch { continue; }
+            }
+
+            await _context.SaveChangesAsync();
+            return basariliSayisi;
+        }
+
 
         public async Task<UrunOzellikleri> GorseliAnalizEt(byte[] imageBytes, int urunId)
         {
@@ -84,8 +135,9 @@ namespace LlmService
         }
 
 
-        }
     }
+}
+    
 
 
 
