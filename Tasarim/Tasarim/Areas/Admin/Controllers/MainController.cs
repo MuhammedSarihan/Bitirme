@@ -67,10 +67,14 @@ namespace Tasarim.Areas.Admin.Controllers
             var model = new GostergePaneliViewModel();
             model.SeciliUrunId = urunId;
 
-            // Yorumlar tablosundan YorumAnalizleri tablosundakiler çıkarılır ve analiz edilmemiş yorumlar bulunur
-            int toplamYorumlar = _context.Yorumlar.Count();
-            int analizEdilenler = _context.YorumAnalizleri.Count();
-            model.BekleyenYorumSayisi = Math.Max(0, toplamYorumlar - analizEdilenler);
+            int bekleyenYorumSayisi = _context.Yorumlar
+                .Count(y => y.AnalizEdilirMi == 0 && !_context.YorumAnalizleri.Any(ya => ya.YorumID == y.ID));
+
+            int bekleyenGorselSayisi = _context.Urunler
+                .Count(u => u.AktifMi && !_context.UrunOzellikleri.Any(uo => uo.UrunID == u.ID));
+
+            model.BekleyenYorumSayisi = bekleyenYorumSayisi;
+            model.BekleyenGorselSayisi = bekleyenGorselSayisi;
 
             // Dropdown için ürün listesi
             model.UrunlerListesi = _context.Urunler
@@ -130,6 +134,8 @@ namespace Tasarim.Areas.Admin.Controllers
             var llSonuclari = llSonuclariSorgusu.ToList();
             var tumArtilar = new List<string>();
             var tumEksiler = new List<string>();
+            var tumOneriler = new List<string>(); 
+            var tumSikayetler = new List<string>(); 
 
             // Türkçe JSON çevirileri için
             var jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true };
@@ -149,6 +155,17 @@ namespace Tasarim.Areas.Admin.Controllers
                         var eksiler = JsonSerializer.Deserialize<List<string>>(sonuc.TopEksiler, jsonOptions);
                         if (eksiler != null) tumEksiler.AddRange(eksiler);
                     }
+                    if (!string.IsNullOrWhiteSpace(sonuc.TopOneriler) && sonuc.TopOneriler != "[]")
+                    {
+                        var oneriler = JsonSerializer.Deserialize<List<string>>(sonuc.TopOneriler, jsonOptions);
+                        if (oneriler != null) tumOneriler.AddRange(oneriler);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(sonuc.TopSikayetler) && sonuc.TopSikayetler != "[]")
+                    {
+                        var sikayetler = JsonSerializer.Deserialize<List<string>>(sonuc.TopSikayetler, jsonOptions);
+                        if (sikayetler != null) tumSikayetler.AddRange(sikayetler);
+                    }
                 }
                 catch (JsonException)
                 {
@@ -165,6 +182,16 @@ namespace Tasarim.Areas.Admin.Controllers
                                           .OrderByDescending(g => g.Count())
                                           .Take(5)
                                           .Select(g => g.Key).ToList();
+
+            model.Top5Oneriler = tumOneriler.GroupBy(x => x)
+                                           .OrderByDescending(g => g.Count())
+                                           .Take(5)
+                                           .Select(g => g.Key).ToList();
+
+            model.Top5Sikayetler = tumSikayetler.GroupBy(x => x)
+                                               .OrderByDescending(g => g.Count())
+                                               .Take(5)
+                                               .Select(g => g.Key).ToList();
 
             // EN POZİTİF VE EN NEGATİF DÖNÜŞ ALAN 5'ER ÜRÜN (Filtreye Dahil Değil)
 

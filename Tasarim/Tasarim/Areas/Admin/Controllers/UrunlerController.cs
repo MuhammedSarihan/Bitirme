@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using odevVb.Utils;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
-using LlmService;
 namespace Tasarim.Areas.Admin.Controllers
 {
     [Area("Admin"), Authorize(Policy = "AdminPolicy")]
@@ -105,10 +104,10 @@ namespace Tasarim.Areas.Admin.Controllers
                 .Include(u => u.Kategori)
                 .Include(u => u.Marka)
                 .Include(u => u.Varyasyonlar)
-                .Include(u => u.Resimler) 
-                .Include(u => u.Yorumlar)        
-        .ThenInclude(y => y.Profil)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(u => u.Resimler)
+                .Include(u => u.Yorumlar.Where(y => y.AnalizEdilirMi == 1 && y.YasakliKelime == false)) //Filtreli yorumlar
+        .ThenInclude(y => y.Profil) 
+        .FirstOrDefaultAsync(u => u.ID == id);
 
             if (urun == null) return NotFound();
 

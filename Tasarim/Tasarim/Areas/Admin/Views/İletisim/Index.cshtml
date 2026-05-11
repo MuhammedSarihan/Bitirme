@@ -1,56 +1,49 @@
-﻿@model IEnumerable<Tasarim.Core.Entities.İletisim>
+﻿@model Tasarim.Areas.Admin.Models.YorumKontroluViewModel
 
 @{
     ViewData["Title"] = "";
 }
 
 <div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="mb-0 text-dark fw-bold">
-                <i class="fa-solid fa-envelope-open text-primary me-2"></i>Bildirimler
-            </h3>
-            <p class="text-muted small mt-1 mb-0">Mağazanız hakkındaki şikayet ve önerileri bu sayfada görüntüleyebilirsiniz.</p>
-        </div>
-    </div>
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-heade d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0"><i class="fas fa-envelope-open-text me-2"></i> Müşteri Mesaj Yönetimi</h5>
-            <span class="badge bg-warning text-dark">Toplam @Model.Count() Mesaj</span>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-header bg-white border-bottom border-light d-flex justify-content-between align-items-center py-3 rounded-top-4">
+            <h5 class="mb-0 font-playfair fw-bold"><i class="fas fa-envelope-open-text text-gold me-2"></i> Müşteri Mesaj Yönetimi</h5>
+            <span class="badge bg-dark text-white px-3 py-2 rounded-pill shadow-sm">Toplam @Model.Mesajlar.Count() Mesaj</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="mesajlarTablosu">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0 w-100" style="border-collapse: collapse;" id="mesajlarTablosu">
+                    <thead class="bg-dark text-white">
                         <tr>
-                            <th class="text-secondary fw-semibold py-3 ps-4" style="width: 100px;">Durum</th>
-                            <th class="text-secondary fw-semibold">Tarih</th>
-                            <th class="text-secondary fw-semibold">Gönderen</th>
-                            <th class="text-secondary fw-semibold">Konu</th>
-                            <th class="text-secondary fw-semibold">Mesaj Özeti</th>
-                            <th class="text-secondary fw-semibold text-end pe-4" style="width: 150px;">İşlemler</th>
+                            <th class="fw-semibold py-3 ps-4 rounded-top-start text-uppercase small letter-spacing-1" style="width: 100px;">Durum</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1">Tarih</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1">Gönderen</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1">Konu</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1">Mesaj Özeti</th>
+                            <th class="fw-semibold text-end pe-4 rounded-top-end text-uppercase small letter-spacing-1" style="width: 150px;">İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.Mesajlar)
                         {
-                            <tr class="@(item.OkunduMu ? "opacity-75" : "fw-bold")">
+                            <tr class="@(item.OkunduMu ? "opacity-75 bg-light" : "fw-bold bg-white")">
                                 <td class="ps-4">
                                     @if (item.OkunduMu)
                                     {
-                                        <span class="badge rounded-pill bg-light text-secondary border px-3">Okundu</span>
+                                        <span class="badge rounded-pill bg-white text-secondary border px-3 shadow-sm">Okundu</span>
                                     }
                                     else
                                     {
-                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3 pulse">Yeni!</span>
+                                        <span class="badge rounded-pill bg-danger px-3 shadow-sm pulse text-white">Yeni!</span>
                                     }
                                 </td>
-                                <td class="small text-muted">@item.MesajTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="small text-muted"><i class="fa-regular fa-clock me-1 opacity-50"></i> @item.MesajTarihi.ToString("dd.MM.yyyy HH:mm")</td>
                                 <td>
-                                    <div class="text-dark">@item.AdSoyad</div>
-                                    <small class="text-muted" style="font-size: 0.75rem;">@item.Email</small>
+                                    <div class="text-dark fw-bold">@item.AdSoyad</div>
+                                    <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-at me-1 opacity-50"></i>@item.Email</small>
                                 </td>
-                                <td><span class="text-primary small">#</span> @item.Konu</td>
+                                <td><span class="text-gold fw-bold small me-1">#</span> @item.Konu</td>
                                 <td style="max-width: 200px;" class="text-truncate text-secondary">
                                     @item.Mesaj
                                 </td>
@@ -60,13 +53,13 @@
                                         @if (!item.OkunduMu)
                                         {
                                             <a asp-controller="İletisim" asp-action="OkunduYap" asp-route-id="@item.Id"
-                                                   class="btn btn-sm btn-outline-success" title="Okundu Olarak İşaretle">
+                                               class="btn btn-sm btn-outline-dark hover-gold-bg transition-300" title="Okundu Olarak İşaretle">
                                                 <i class="fas fa-check"></i>
                                             </a>
                                         }
 
-                                        @* DETAY GÖR (Alert ile mesajı açar) *@
-                                        <button class="btn btn-sm btn-outline-info"
+                                        @* DETAY GÖR BUTONU *@
+                                        <button class="btn btn-sm btn-outline-dark hover-gold-bg transition-300"
                                                 title="Mesajın Tamamını Gör"
                                                 data-mesaj="@item.Mesaj"
                                                 onclick="mesajGoster(this)">
@@ -75,9 +68,9 @@
 
                                         @* SİL BUTONU *@
                                         <a asp-controller="İletisim" asp-action="Sil" asp-route-id="@item.Id"
-                                               class="btn btn-sm btn-outline-danger"
-                                               onclick="return confirm('Bu mesajı kalıcı olarak silmek istediğinize emin misiniz?')"
-                                               title="Sil">
+                                           class="btn btn-sm btn-outline-danger transition-300"
+                                           onclick="return confirm('Bu mesajı kalıcı olarak silmek istediğinize emin misiniz?')"
+                                           title="Sil">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -88,11 +81,79 @@
                 </table>
             </div>
 
-            @if (!Model.Any())
+            @if (!Model.Mesajlar.Any())
             {
-                <div class="text-center py-5">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">Görüntülenecek mesaj bulunamadı.</p>
+                <div class="text-center py-5 bg-light rounded-bottom-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3 opacity-50"></i>
+                    <p class="text-muted fw-semibold letter-spacing-1 text-uppercase small">Görüntülenecek mesaj bulunamadı.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-danger bg-opacity-10 border-0 d-flex justify-content-between align-items-center py-3 rounded-top-4">
+            <h5 class="mb-0 text-danger font-playfair fw-bold"><i class="fas fa-comment-slash me-2"></i> İnceleme Bekleyen Yorumlar</h5>
+            <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm">Toplam @Model.YasakliYorumlar.Count() Yorum</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 w-100" style="border-collapse: collapse;">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th class="fw-semibold py-3 ps-4 text-uppercase small letter-spacing-1">Yorum İçeriği</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1 text-center">Profil ID</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1 text-center">Ürün ID</th>
+                            <th class="fw-semibold text-end pe-4 text-uppercase small letter-spacing-1" style="width: 250px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.YasakliYorumlar.Any())
+                        {
+                            foreach (var yorum in Model.YasakliYorumlar)
+                            {
+                                <tr>
+                                    <td class="ps-4 text-dark fw-medium" style="max-width: 400px;">
+                                        <i class="fa-solid fa-quote-left text-muted opacity-50 me-2"></i>@yorum.YorumIcerik
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm"><i class="fa-solid fa-user text-gold me-1"></i> @yorum.ProfilID</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm"><i class="fa-solid fa-box text-gold me-1"></i> @yorum.UrunID</span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-inline-flex gap-2">
+                                            @* KABUL ET BUTONU *@
+                                            <a asp-controller="İletisim" asp-action="YorumKabulEt" asp-route-id="@yorum.ID"
+                                               class="btn btn-sm btn-outline-dark hover-gold-bg transition-300 fw-bold" 
+                                               onclick="return confirm('Bu yorumu onaylayıp yayına almak istediğinize emin misiniz?')"
+                                               title="Kabul Et ve Yayınla">
+                                                <i class="fas fa-check me-1"></i> Kabul Et
+                                            </a>
+
+                                            @* SİL BUTONU *@
+                                            <a asp-controller="İletisim" asp-action="YorumSil" asp-route-id="@yorum.ID"
+                                               class="btn btn-sm btn-outline-danger transition-300 fw-bold"
+                                               onclick="return confirm('Bu yorumu kalıcı olarak silmek istediğinize emin misiniz?')"
+                                               title="Sil">
+                                                <i class="fas fa-trash me-1"></i> Sil
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (ViewBag.YasakliYorumSayisi == 0)
+            {
+                <div class="text-center py-5 bg-light rounded-bottom-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3 opacity-50"></i>
+                    <p class="text-muted fw-semibold letter-spacing-1 text-uppercase small">İncelenmesi gereken yasaklı yorum bulunmamaktadır.</p>
                 </div>
             }
         </div>
@@ -100,6 +161,14 @@
 </div>
 
 <style>
+    /* Ortak Stil ve Temalar */
+    .text-gold { color: #D4AF37 !important; }
+    .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .transition-300 { transition: all 0.3s ease; }
+
+    /* Bildirim Pulse Animasyonu */
     .pulse {
         animation: pulse-red 2s infinite;
     }
@@ -110,6 +179,7 @@
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
 </style>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function mesajGoster(buton) {
@@ -122,7 +192,10 @@
             icon: 'info',
             iconColor: '#D4AF37',
             confirmButtonText: 'Kapat',
-            confirmButtonColor: '#D4AF37' // Buton rengi
+            confirmButtonColor: '#212529', // Dark tema buton rengine uyarlandı
+            customClass: {
+                confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm'
+            }
         });
     }
 </script>

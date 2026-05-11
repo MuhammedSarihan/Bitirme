@@ -1,27 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Security.Claims;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 using Tasarim.ExtensionMethods;
-using System.Linq;
-using Tasarim.Service.Abstract; 
+using Tasarim.Service.Abstract;
+using Tasarim.Service.Concrete.LLM;
 namespace Tasarim.Controllers
 {
     public class UrunlerController : Controller
     {
         private readonly DatabaseContext _context;
+        private readonly KumelemeYoneticisi _kumelemeYoneticisi;
         // goruntu isleme icin eklendi
         private readonly IGeminiProvider _geminiProvider;
-        public UrunlerController(DatabaseContext context, IGeminiProvider geminiProvider)  // Burayı güncelledim
+        public UrunlerController(DatabaseContext context,KumelemeYoneticisi kumelemeYoneticisi, IGeminiProvider geminiProvider)
         {
             _context = context;
+            _kumelemeYoneticisi = kumelemeYoneticisi;
             _geminiProvider = geminiProvider; 
         }
 
         public async Task<IActionResult> Index(string q = "")
         {
-            //  Sorguyu başlatırken UrunOzellikleri tablosunu da dahil ediyoruz
             var query = _context.Urunler
                 .Where(p => p.AktifMi)
                 .Include(u => u.Kategori)
@@ -56,33 +58,9 @@ namespace Tasarim.Controllers
                                             (u.UrunOzellikleri?.Stil.ToLower().Contains(kelimeler[0]) == true ? 2 : 0))
                     .ToList();
             }
-            // ... kampanya döngün aynı kalsın ...
             return View(urunlerListesi);
         }
 
-
-        //onceki index metodu 
-
-        /* public async Task<IActionResult> Index(string q = "")
-         {
-             var databaseContext = _context.Urunler.Where(p => p.AktifMi && p.Baslik.Contains(q) || p.Aciklama.Contains(q) || p.ModelKodu.Contains(q))
-                 .Include(u => u.Kategori)
-                 .Include(u => u.Marka)
-                 .Include(u => u.KampanyaUrunleri)
-                     .ThenInclude(ku => ku.Kampanya);
-             var urunlerListesi = await databaseContext.ToListAsync();
-
-
-             foreach (var urun in urunlerListesi)
-             {
-                 var aktifKampanyalar = urun.KampanyaUrunleri
-                     .Where(ku => ku.Kampanya != null && ku.Kampanya.KampanyaAktifMi)
-                     .Select(ku => ku.Kampanya);
-             }
-
-
-             return View(urunlerListesi);
-         } */
         // URL: /Urunler/Details/1
         public async Task<IActionResult> Details(int? id)
         {
@@ -91,7 +69,7 @@ namespace Tasarim.Controllers
                 return RedirectToAction("Index", "Home"); // ID yoksa ana sayfaya at
             }
 
-            // 1. Ürünü ve içindeki Resim, Varyasyon (Beden), Kategori ve Marka listelerini çekiyoruz
+            // Ürünü ve içindeki Resim, Varyasyon (Beden), Kategori ve Marka listelerini çekiyoruz
             var urun = await _context.Urunler
                 .Include(u => u.Kategori)
                 .Include(u => u.Marka)
@@ -99,7 +77,7 @@ namespace Tasarim.Controllers
                 .Include(u => u.Varyasyonlar)
                 .Include(u => u.KampanyaUrunleri)
                     .ThenInclude(ku => ku.Kampanya)
-                 .Include(u => u.Yorumlar)
+                .Include(u => u.Yorumlar.Where(y => y.AnalizEdilirMi == 1 && y.YasakliKelime == false)) //Filtreli yorumlar
                     .ThenInclude(y => y.Profil)
                 .FirstOrDefaultAsync(u => u.ID == id);
 
@@ -203,6 +181,8 @@ namespace Tasarim.Controllers
             {
                 _context.Set<Yorum>().Remove(silinecekYorum);
                 await _context.SaveChangesAsync();
+
+                await _kumelemeYoneticisi.UrunleriKumeleVeAnalizEtAsync(); //Ürün silindikten sonra LLSonuclarinin güncellenmesi için
             }
 
             // 5. Ürün detay sayfasına geri dön

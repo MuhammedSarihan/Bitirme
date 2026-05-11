@@ -4,6 +4,8 @@
 //JSON'daki alan adlarıyla eşleşmesi için JsonPropertyName özniteliğini kullanıyoruz.
 public class LlmAnalizSonucu
 {
+    [JsonPropertyName("toksiklik")]
+    public bool Toksik { get; set; }
     [JsonPropertyName("duygu")]
     public string Duygu { get; set; } = string.Empty;
 

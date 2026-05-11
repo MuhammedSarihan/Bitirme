@@ -1,4 +1,15 @@
-﻿<div id="layoutSidenav_nav">
+﻿@using Tasarim.Data
+@inject DatabaseContext _context
+
+@{
+    // Bildirimler için sayaç yapımı
+    int okunmayanMesajSayisi = _context.İletisimler.Count(m => m.OkunduMu == false);   
+    int yasakliYorumSayisi = _context.Yorumlar.Count(y => y.YasakliKelime == true && y.AnalizEdilirMi == 2);
+    int toplamBildirim = okunmayanMesajSayisi + yasakliYorumSayisi;
+}
+
+
+<div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion" style="background-color: #001a33 !important;">
         <div class="sb-sidenav-menu">
             <div class="nav">
@@ -6,6 +17,18 @@
                 <a class="nav-link" asp-area="Admin" asp-controller="Main" asp-action="Index">
                     <div class="sb-nav-link-icon"><i class="fas fa-house"></i></div>
                     Ana Ekran
+                </a>
+                <a class="nav-link d-flex align-items-center" asp-area="Admin" asp-controller="İletisim" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-envelope-open"></i></div>
+    
+                    <span>Bildirimler</span>
+    
+                    @if (toplamBildirim > 0)
+                    {
+                        <span class="badge bg-danger rounded-pill shadow-sm ms-2" style="font-size: 0.75rem;">
+                            @toplamBildirim
+                        </span>
+                    }
                 </a>
                 <a class="nav-link" asp-area="Admin" asp-controller="Siparis" asp-action="Index">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-list"></i></div>
@@ -15,17 +38,9 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                     Profil Yönetimi
                 </a>
-                <a class="nav-link" asp-area="Admin" asp-controller="Kategoriler" asp-action="Index">
-                    <div class="sb-nav-link-icon"><i class="fas fa-swatchbook"></i></div>
-                    Kategori Yönetimi
-                </a>
                 <a class="nav-link" asp-area="Admin" asp-controller="Urunler" asp-action="Index">
                     <div class="sb-nav-link-icon"><i class="fas fa-barcode"></i></div>
                     Ürün Yönetimi
-                </a>
-                <a class="nav-link" asp-area="Admin" asp-controller="Markalar" asp-action="Index">
-                    <div class="sb-nav-link-icon"><i class="fas fa-copyright"></i></div>
-                    Marka Yönetimi
                 </a>
                 <a class="nav-link" asp-area="Admin" asp-controller="Kampanyalar" asp-action="Index">
                     <div class="sb-nav-link-icon"><i class="fas fa-bullhorn"></i></div>
@@ -35,9 +50,13 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-images"></i></div>
                     Slider Yönetimi
                 </a>
-                <a class="nav-link" asp-area="Admin" asp-controller="İletisim" asp-action="Index">
-                    <div class="sb-nav-link-icon"><i class="fas fa-envelope-open"></i></div>
-                    Bildirimler
+                <a class="nav-link" asp-area="Admin" asp-controller="Kategoriler" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-swatchbook"></i></div>
+                    Kategori Yönetimi
+                </a>
+                <a class="nav-link" asp-area="Admin" asp-controller="Markalar" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-copyright"></i></div>
+                    Marka Yönetimi
                 </a>
 
             </div>

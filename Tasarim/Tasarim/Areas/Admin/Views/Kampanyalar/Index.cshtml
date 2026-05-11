@@ -5,51 +5,57 @@
 }
 
 <div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h3 class="mb-0 text-dark fw-bold">
-                <i class="fa-solid fa-bullhorn text-primary me-2"></i>Kampanya Yönetimi
+            <h3 class="mb-0 text-dark fw-bold font-playfair">
+                <i class="fa-solid fa-bullhorn text-gold me-2"></i>Kampanya Yönetimi
             </h3>
-            <p class="text-muted small mt-1 mb-0">Mağazanızdaki tüm kampanya ve duyuruları buradan yönetebilir ve hızlıca arayabilirsiniz.</p>
+            <p class="text-muted small mt-1 mb-0 letter-spacing-1 text-uppercase">
+                Mağazanızdaki tüm kampanya ve duyuruları buradan yönetebilir ve hızlıca arayabilirsiniz.
+            </p>
         </div>
 
-        <div class="d-flex gap-3 align-items-center">
-
-            <div class="input-group shadow-sm rounded-pill overflow-hidden" style="min-width: 300px; border: 1px solid #dee2e6;">
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden bg-white" style="min-width: 300px; border: 1px solid #dee2e6;">
                 <span class="input-group-text bg-white border-0 text-muted ps-3">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </span>
                 <input type="text" id="kampanyaArama" class="form-control border-0 shadow-none" placeholder="Kampanya veya açıklama ara...">
             </div>
 
-            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
-                <i class="fa-solid fa-plus me-1"></i> Yeni Oluştur
+            <a asp-action="Create" class="btn btn-dark rounded-pill px-4 shadow-sm text-nowrap fw-bold letter-spacing-1 hover-gold-bg transition-300">
+                <i class="fa-solid fa-plus text-gold me-1 transition-inherit"></i> Yeni Oluştur
             </a>
         </div>
     </div>
-    <div class="card border-0 shadow-sm rounded-4">
+    
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-header bg-white border-bottom border-light d-flex justify-content-between align-items-center py-3 rounded-top-4">
+            <h5 class="mb-0 font-playfair fw-bold"><i class="fas fa-list text-gold me-2"></i> Aktif ve Pasif Kampanyalar</h5>
+            <span class="badge bg-dark text-white px-3 py-2 rounded-pill shadow-sm">Toplam @Model.Count() Kayıt</span>
+        </div>
         <div class="card-body p-4">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 w-100" id="kampanyalarTablosu">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0 w-100" style="border-collapse: collapse;" id="kampanyalarTablosu">
+                    <thead class="bg-dark text-white">
                         <tr>
-                            <th class="text-secondary fw-semibold">Kampanya Resmi</th>
-                            <th class="text-secondary fw-semibold">Kampanya Adı</th>
-                            <th class="text-secondary fw-semibold">Açıklama</th>
-                            <th class="text-secondary fw-semibold">Durum</th>
-                            <th class="text-secondary fw-semibold">Kampanya Ürünleri</th>
-                            <th class="text-secondary fw-semibold" style="width: 150px;">İşlemler</th>
+                            <th class="ps-4 fw-semibold py-3 text-uppercase small letter-spacing-1 rounded-top-start">Kampanya Resmi</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1">Kampanya Adı</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1">Açıklama</th>
+                            <th class="text-center fw-semibold text-uppercase small letter-spacing-1">Durum</th>
+                            <th class="text-center fw-semibold text-uppercase small letter-spacing-1">Kampanya Ürünleri</th>
+                            <th class="text-end pe-4 fw-semibold text-uppercase small letter-spacing-1 rounded-top-end" style="width: 150px;">İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            <tr>
+                            <tr class="bg-white">
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center gap-3">
                                         @if (!string.IsNullOrEmpty(item.KampanyaResmi))
                                         {
-                                            <img src="/img/@item.KampanyaResmi" alt="@item.KampanyaAd" class="rounded-3 shadow-sm bg-light p-1" style="width: 60px; height: 60px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                            <img src="/img/@item.KampanyaResmi" alt="@item.KampanyaAd" class="rounded-3 shadow-sm bg-light p-1 border border-light" style="width: 60px; height: 60px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
                                             <div class="bg-light rounded-3 justify-content-center align-items-center text-muted shadow-sm" style="width: 60px; height: 60px; display: none !important;">
                                                 <i class="fa-solid fa-image fs-5"></i>
                                             </div>
@@ -63,37 +69,39 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold text-dark fs-6 mb-1">@item.KampanyaAd</div>
+                                    <div class="fw-bold text-dark fs-6 mb-1 font-playfair">@item.KampanyaAd</div>
                                 </td>
 
-                                <td>
-                                    <div class="small fw-medium text-dark"><i class="fa-solid fa-bullhorn text-muted me-2 opacity-75"></i>@item.Aciklama</div>
+                                <td style="max-width: 250px;">
+                                    <div class="small fw-medium text-secondary text-truncate" title="@item.Aciklama">
+                                        <i class="fa-solid fa-quote-left text-gold me-2 opacity-75"></i>@item.Aciklama
+                                    </div>
                                 </td>
 
                                 <td class="text-center">
                                     @if (item.KampanyaAktifMi)
                                     {
-                                        <span class="badge rounded-pill bg-success bg-opacity-75 px-3 shadow-sm">Aktif</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill shadow-sm">Aktif</span>
                                     }
                                     else
                                     {
-                                        <span class="badge rounded-pill bg-danger bg-opacity-75 px-3 shadow-sm">Pasif</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill shadow-sm">Pasif</span>
                                     }
                                 </td>
-                                <td>
-                                    <a asp-action="UrunAta" asp-route-id="@item.ID" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Ürünleri Yönet">
-                                        <i class="fa-solid fa-toggle-on me-1"></i> Ürünleri Yönet
+                                <td class="text-center">
+                                    <a asp-action="UrunAta" asp-route-id="@item.ID" class="btn btn-sm btn-outline-dark hover-gold-bg transition-300 rounded-pill px-3 fw-bold small letter-spacing-1" title="Ürünleri Yönet">
+                                        <i class="fa-solid fa-boxes-stacked me-1"></i> Ürünleri Yönet
                                     </a>
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="d-inline-flex gap-1">
-                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-primary " title="Düzenle">
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-outline-dark hover-gold-bg transition-300" title="Düzenle">
                                             <i class="fa-solid fa-pen"></i>
                                         </a>
-                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-outline-info " title="Detaylar">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary hover-gold-bg transition-300" title="Detaylar">
+                                            <i class="fa-solid fa-list-check"></i>
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-danger " title="Sil">
+                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-danger transition-300" title="Sil">
                                             <i class="fa-solid fa-trash"></i>
                                         </a>
                                     </div>
@@ -103,9 +111,44 @@
                     </tbody>
                 </table>
             </div>
+            
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 bg-light rounded-bottom-4 border border-dashed mt-3">
+                    <i class="fas fa-bullhorn fa-3x text-muted mb-3 opacity-25"></i>
+                    <p class="text-muted fw-semibold letter-spacing-1 text-uppercase small mb-0">Gösterilecek kampanya bulunamadı.</p>
+                </div>
+            }
         </div>
     </div>
 </div>
+
+<style>
+    /* Tasarım Sistemi Renkleri ve Sınıfları */
+    .text-gold { color: #D4AF37 !important; }
+    .bg-gold { background-color: #D4AF37 !important; }
+    .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+    .hover-gold-bg:hover .text-gold { color: white !important; }
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .transition-300 { transition: all 0.3s ease; }
+    .transition-inherit { transition: inherit; }
+
+    /* DataTables Özel Tasarım Optimizasyonları */
+    .dataTables_wrapper .dataTables_length select {
+        border-radius: 50rem;
+        border: 1px solid #dee2e6;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: #212529 !important;
+        border-color: #212529 !important;
+        color: white !important;
+        border-radius: 0.5rem;
+    }
+</style>
 
 @section Scripts {
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
@@ -114,46 +157,22 @@
 
     <script>
         $(document).ready(function () {
-            $('#kampanyalarTablosu').DataTable({
+            // DataTables Başlatma
+            var table = $('#kampanyalarTablosu').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json',
                 },
                 lengthMenu: [10, 25, 50, 100],
+                // dom: 'lrtip' -> DataTables'ın varsayılan sağ üstteki arama çubuğunu gizler. 
+                // Çünkü biz kendi tasarımımıza uygun olan sol üstteki arama çubuğunu kullanacağız.
+                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
             });
-        });
-    </script>
 
-    <style>
-        .dataTables_filter input {
-            border-radius: 0.5rem;
-            border: 1px solid #dee2e6;
-            padding: 0.375rem 0.75rem;
-        }
-
-            .dataTables_filter input:focus {
-                border-color: #86b7fe;
-                outline: 0;
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const aramaKutusu = document.getElementById('kampanyaArama');
-            
-            aramaKutusu.addEventListener('keyup', function () {
-                let filtre = this.value.toLowerCase();
-                // HTML'deki tablo ID'si ile eşleşmeli
-                let satirlar = document.querySelectorAll('#kampanyalarTablosu tbody tr'); 
-
-                satirlar.forEach(function (satir) {
-                    let satirMetni = satir.textContent.toLowerCase();
-                    if (satirMetni.includes(filtre)) {
-                        satir.style.display = '';
-                    } else {
-                        satir.style.display = 'none';
-                    }
-                });
+            // Bizim özel arama kutumuzu DataTables'a bağlıyoruz
+            $('#kampanyaArama').on('keyup', function () {
+                table.search(this.value).draw();
             });
         });
     </script>

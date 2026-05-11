@@ -1,15 +1,21 @@
 ﻿using LlmService;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web; //Türkçe Alfabe için
 using System.Text.Json;
+using System.Text.Unicode; //Türkçe Alfabe için
 using Tasarim.Core.Entities;
 using Tasarim.Data;
-using System.Text.Encodings.Web; //Türkçe Alfabe için
-using System.Text.Unicode; //Türkçe Alfabe için
 public class YorumAnalizYoneticisi
 {
     private readonly DatabaseContext _context;
     private readonly ILlmProvider _llmProvider;
 
+    //Türkçe karakterlerin işlenmesi ve büyük/küçük harf duyarlılığının esnetilmesi için JsonSerialize ayarları
+    private static readonly JsonSerializerOptions _jsonAyarlari = new()
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        PropertyNameCaseInsensitive = true 
+    };
     public YorumAnalizYoneticisi(DatabaseContext context, ILlmProvider llmProvider)
     {
         _context = context;
@@ -20,86 +26,107 @@ public class YorumAnalizYoneticisi
     {
         //YorumAnalizleri tablosunda YorumID'si BULUNMAYAN yorumları çek
         var bekleyenYorumlar = await _context.Yorumlar
-            .Where(y => !_context.YorumAnalizleri.Any(ya => ya.YorumID == y.ID))
-            .ToListAsync(ct);
+                    .Where(y => (y.AnalizEdilirMi == 0 || y.AnalizEdilirMi == 1 || y.AnalizEdilirMi == 3)
+                             && !_context.YorumAnalizleri.Any(ya => ya.YorumID == y.ID))
+                    .ToListAsync(ct);
 
-        if (!bekleyenYorumlar.Any())
+        if (bekleyenYorumlar.Count == 0)
             return;
+
+        // Prompt şablonu belleği yormamak için döngü dışında sabit tutulur.
+
+        string promptSablonu = @"Sen bir e-ticaret müşteri yorumu analiz sistemisin. Görevin, verilen yorumu analiz ederek SADECE belirtilen formatta geçerli bir JSON döndürmektir. Başka hiçbir giriş cümlesi veya açıklama yazma.
+
+KURALLAR:
+1. TOKSİK İÇERİK KONTROLÜ: Eğer yorumda açıkça veya sansürlenmiş/yıldızlı (örn: s*keyim, a*k, a.k. vb.) küfürler, hakaretler veya 'rezil', 'iğrenç', 'berbat', 'çöp' gibi kelimeler tespit edersen, ""toksiklik"": true yap. Diğer metin alanlarını ""Nötr"", tüm liste alanlarını ise [] yapıp analizi bitir.2. ÇEVİRİ: Yorum hangi dilde yazılmış olursa olsun, JSON içindeki tüm veriler kesinlikle Türkçe olmalıdır.
+3. DUYGU KISITLAMASI: ""duygu"" değeri SADECE şu üç kelimeden biri olabilir: ""Pozitif"", ""Negatif"", ""Nötr"".
+4. BOŞ DEĞERLER: Yorumda karşılığı olmayan özellik, şikayet veya öneri kategorileri için sadece boş liste [] döndür.
+
+ÇIKTI ŞABLONU:
+{{
+  ""toksiklik"": false,
+  ""duygu"": ""Pozitif"",
+  ""artilar"": [""iyi özellik 1""],
+  ""eksiler"": [""kötü özellik 1""],
+  ""sikayetler"": [],
+  ""oneriler"": []
+}}
+
+ANALİZ EDİLECEK YORUM:
+""{0}""";
 
         foreach (var yorum in bekleyenYorumlar)
         {
-            //Prompt
-            var prompt = $@"Profesyonel bir e-ticaret veri analizi asistanısınız. Size gönderilen müşteri yorumlarını analiz edin ve sonuçları SADECE aşağıdaki JSON formatında döndürün.
-
-KURALLAR:
-- Yorum hangi dilde olursa olsun, sonucu Türkçe olarak döndürün.
-- ""duygu"" için SADECE şu seçeneklerden birini kullanın: ""Pozitif"", ""Negatif"" veya ""Nötr"". Asla ""Karışık"" veya başka bir kelime yazmayın.
-- Yorumda belirli bir kategoriye ait bilgi yoksa, o alanı boş bırakın ( [] ).
-- Asla fazladan bir açıklama veya giriş cümlesi yazmayın; yalnızca JSON nesnesini döndürün.
-
-Analiz Formatı:
-{{
-""duygu"": ""Pozitif/ Negatif/ Nötr"",
-""artilar"": [""ürünün iyi özellikleri""],
-""eksiler"": [""ürünün kötü özellikleri""],
-""sikayetler"": [""ürünün geliştirilmesi gereken yönleri""],
-""oneriler"": [""ürünü alacak müşterilere tavsiyeler""]
-}}
-
-Analiz Edilecek Yorum:
-""{yorum.YorumIcerik}""";
-
+            bool adminManuelOnayladi = (yorum.AnalizEdilirMi == 1);
             try
             {
-                // Çalıştırma isteğini göönder (Groq/Ollama hangisi enjekte edildiyse o çalışır)
+                // Şablonun içindeki {0} alanına o anki yorumu yerleştiriyoruz
+                var prompt = string.Format(promptSablonu, yorum.YorumIcerik);
+
+                await Task.Delay(2000, ct);
+
                 var jsonYanit = await _llmProvider.AnalyzeAsync(prompt, ct);
+
+                jsonYanit = jsonYanit.Replace("```json", "").Replace("```", "").Trim();
+
                 int baslangic = jsonYanit.IndexOf('{');
                 int bitis = jsonYanit.LastIndexOf('}');
 
-                if (baslangic >= 0 && bitis >= baslangic)
+                if (baslangic >= 0 && bitis > baslangic)
                 {
-                    // Sadece JSON kısmını çekip alıyoruz
                     jsonYanit = jsonYanit.Substring(baslangic, bitis - baslangic + 1);
                 }
                 else
                 {
-                    // Eğer metinde hiç süslü parantez yoksa, model tamamen saçmalamış demektir.
-                    throw new Exception("LLM geçerli bir JSON formatı döndürmedi. Gelen Yanıt: " + jsonYanit);
+                    throw new FormatException("LLM geçerli bir JSON formatı döndürmedi. Gelen Yanıt: " + jsonYanit);
                 }
-                // ========================================
 
-                var analizVerisi = JsonSerializer.Deserialize<LlmAnalizSonucu>(jsonYanit);
+                // LlmAnalizSonucu kullanarak JSON'ı C# nesnesine çeviriyoruz
+                var analizVerisi = JsonSerializer.Deserialize<LlmAnalizSonucu>(jsonYanit, _jsonAyarlari);
 
                 if (analizVerisi != null)
                 {
-                    // TÜRKÇE KARAKTER İZNİ VEREN AYAR:
-                    var jsonAyarlari = new JsonSerializerOptions
+                    if (analizVerisi.Toksik && !adminManuelOnayladi)
                     {
-                        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
-                    };
-
-                    var yeniAnaliz = new YorumAnaliz
+                        yorum.YasakliKelime = true;
+                        yorum.AnalizEdilirMi = 2;  // Admin onaylamadıysa ve toksikse 2 yap
+                    }
+                    else
                     {
-                        YorumID = yorum.ID,
-                        Duygu = analizVerisi.Duygu,
+                        yorum.YasakliKelime = false;
+                        yorum.AnalizEdilirMi = 1; // Yasaklı değilse VEYA admin onayladıysa 1 yap
 
-                        // jsonAyarlari
-                        Artilar = JsonSerializer.Serialize(analizVerisi.Artilar, jsonAyarlari),
-                        Eksiler = JsonSerializer.Serialize(analizVerisi.Eksiler, jsonAyarlari),
-                        Sikayetler = JsonSerializer.Serialize(analizVerisi.Sikayetler, jsonAyarlari),
-                        Oneriler = JsonSerializer.Serialize(analizVerisi.Oneriler, jsonAyarlari)
-                    };
+                        var yeniAnaliz = new YorumAnaliz
+                        {
+                            YorumID = yorum.ID,
+                            Duygu = analizVerisi.Duygu,
+                            Artilar = JsonSerializer.Serialize(analizVerisi.Artilar ?? new List<string>(), _jsonAyarlari),
+                            Eksiler = JsonSerializer.Serialize(analizVerisi.Eksiler ?? new List<string>(), _jsonAyarlari),
+                            Sikayetler = JsonSerializer.Serialize(analizVerisi.Sikayetler ?? new List<string>(), _jsonAyarlari),
+                            Oneriler = JsonSerializer.Serialize(analizVerisi.Oneriler ?? new List<string>(), _jsonAyarlari)
+                        };
 
-                    _context.YorumAnalizleri.Add(yeniAnaliz);
+                        _context.YorumAnalizleri.Add(yeniAnaliz);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Yorum {yorum.ID} analiz edilemedi: {ex.Message}");
+                yorum.AnalizEdilirMi = 3; //Kafan karıştıysa 3 olarak işaretle
+                Console.WriteLine($"ID: {yorum.ID} - Hata Mesajı: {ex.Message}");
             }
         }
 
-        //Döngü bittiğinde tüm yeni analizleri tek seferde veritabanına kaydet
-        await _context.SaveChangesAsync(ct);
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (Exception dbEx)
+        {
+            Console.WriteLine("Veritabanı toplu kayıt hatası: " + dbEx.Message);
+        }
     }
 }
+
+
+

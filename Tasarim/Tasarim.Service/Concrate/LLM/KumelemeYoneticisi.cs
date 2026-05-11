@@ -35,19 +35,30 @@ namespace Tasarim.Service.Concrete.LLM
                 .AsNoTracking()
                 .ToDictionaryAsync(l => l.UrunID, l => l.ToplamYorum, ct);
 
-            var tumYorumGruplari = await _context.YorumAnalizleri
-                .Include(ya => ya.Yorum)
-                .GroupBy(ya => ya.Yorum.UrunID)
-                .Select(g => new
-                {
-                    UrunID = g.Key,
-                    GuncelYorumSayisi = g.Count(),
-                    Artilar = g.Select(x => x.Artilar ?? "").ToList(),
-                    Eksiler = g.Select(x => x.Eksiler ?? "").ToList(),
-                    Sikayetler = g.Select(x => x.Sikayetler ?? "").ToList(),
-                    Oneriler = g.Select(x => x.Oneriler ?? "").ToList()
-                })
-                .ToListAsync(ct);
+            var hamAnalizler = await _context.YorumAnalizleri
+                    .Include(ya => ya.Yorum)
+                    .Select(ya => new
+                    {
+                        UrunID = ya.Yorum.UrunID,
+                        Artilar = ya.Artilar,
+                        Eksiler = ya.Eksiler,
+                        Sikayetler = ya.Sikayetler,
+                        Oneriler = ya.Oneriler
+                    })
+                    .ToListAsync(ct);
+
+            var tumYorumGruplari = hamAnalizler
+        .GroupBy(ya => ya.UrunID)
+        .Select(g => new
+        {
+            UrunID = g.Key,
+            GuncelYorumSayisi = g.Count(),
+            Artilar = g.Select(x => x.Artilar ?? "").ToList(),
+            Eksiler = g.Select(x => x.Eksiler ?? "").ToList(),
+            Sikayetler = g.Select(x => x.Sikayetler ?? "").ToList(),
+            Oneriler = g.Select(x => x.Oneriler ?? "").ToList()
+        })
+        .ToList();
 
             var islenecekVeriListesi = new List<YorumVerisi>();
             var islenecekUrunIdleri = new List<int>();
@@ -74,18 +85,25 @@ namespace Tasarim.Service.Concrete.LLM
             }
 
             if (!islenecekVeriListesi.Any()) return;
+            var tumVeriListesi = tumYorumGruplari.Select(grup => new YorumVerisi
+            {
+                UrunID = grup.UrunID,
+                BirlesikYorum = string.Join(" ", grup.Artilar) + " " + string.Join(" ", grup.Eksiler) + " " +
+                    string.Join(" ", grup.Sikayetler) + " " + string.Join(" ", grup.Oneriler),
+                ToplamYorumSayisi = grup.GuncelYorumSayisi
+            }).ToList();
 
+            int dinamikKumeSayisi = Math.Max(1, Math.Min(tumVeriListesi.Count, 3));
             var mlContext = new MLContext(seed: 42);
-            var veriView = mlContext.Data.LoadFromEnumerable(islenecekVeriListesi);
 
-            int dinamikKumeSayisi = Math.Min(islenecekVeriListesi.Count, 3);
-
+            var egitimVeriView = mlContext.Data.LoadFromEnumerable(tumVeriListesi);
             var pipeline = mlContext.Transforms.Text.FeaturizeText("Features", nameof(YorumVerisi.BirlesikYorum))
                 .Append(mlContext.Clustering.Trainers.KMeans("Features", numberOfClusters: dinamikKumeSayisi));
 
-            var model = pipeline.Fit(veriView);
+            var model = pipeline.Fit(egitimVeriView);
 
-            var transformedData = model.Transform(veriView);
+            var tahminVeriView = mlContext.Data.LoadFromEnumerable(islenecekVeriListesi);
+            var transformedData = model.Transform(tahminVeriView);
             var predictions = mlContext.Data.CreateEnumerable<KumeTahmini>(transformedData, reuseRowObject: false).ToList();
 
             var guncellenecekKayitlar = await _context.LLSonuclari

@@ -1,93 +1,100 @@
 ﻿@model Tasarim.Areas.Admin.Models.GostergePaneliViewModel
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h3 class="mb-0 text-dark fw-bold">
-                <i class="fa-solid fa-chart-pie text-primary me-2"></i>Mağaza Özeti ve Geribildirim Analizi
-            </h3>
-            <p class="text-muted small mt-1 mb-0">
-                Gösterilen Veri: <strong class="text-dark">@(string.IsNullOrEmpty(Model.SeciliUrunAd) ? "Tüm Mağaza Genel Görünümü" : Model.SeciliUrunAd + " İstatistikleri")</strong>
-            </p>
-        </div>
-
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-
-            @*Yorum Analiz Butonu ve Yorum Sayısı sadece ana ekranda olcak şekilde filtrelendi*@
-            @if (!Model.SeciliUrunId.HasValue)
-            {
-  
-                <div class="card border-0 shadow-sm rounded-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
-                    <div class="card-body p-3 d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-25 text-warning rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 50px; height: 50px;">
-                            <i class="fa-solid fa-hourglass-half fs-5"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-dark fw-bold">Analiz Bekleyen Yorum Sayısı</h6>
-                            <span class="fs-4 fw-bold text-warning">@Model.BekleyenYorumSayisi</span>
-                            <span class="text-muted small ms-1">Adet</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex gap-2">
-                    @* Butonları yan yana tutmak için kapsayıcı *@
-                    <form asp-controller="Main" asp-action="BekleyenleriAnalizEt" method="post" class="m-0">
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
-                            <i class="fa-solid fa-robot me-1"></i> Analizi Güncelle
-                        </button>
-                    </form>
-                    <button type="button" id="btnTopluGorselAnaliz" class="btn btn-primary rounded-pill px-4 shadow-sm text-nowrap fw-medium">
-                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Görselleri Analiz Et
-                    </button>
-
-                </div>
-            }
-
-            @*Dropdown ile Ürünler Listesi*@
-            <form method="get" class="d-flex align-items-center m-0" style="min-width: 250px;">
-                <select name="urunId" class="form-select shadow-sm" id="urunSecici" onchange="this.form.submit()">
-                    <option value="">-- Tüm Mağazayı Göster --</option>
-                    @if (Model.UrunlerListesi != null)
-                    {
-                        foreach (var urun in Model.UrunlerListesi)
-                        {
-                            <option value="@urun.Value" selected="@(Model.SeciliUrunId.ToString() == urun.Value ? "selected" : null)">
-                                @urun.Text
-                            </option>
-                        }
-                    }
-                </select>
-            </form>
-        </div>
+<div class="row align-items-start mb-5 border-bottom border-light pb-4">
+    
+    <div class="col-xl-4 col-lg-12 mb-4 mb-xl-0">
+        <h3 class="mb-0 text-dark fw-bold font-playfair">
+            <i class="fa-solid fa-chart-pie text-gold me-2"></i>Mağaza Özeti ve Analiz
+        </h3>
+        <p class="text-muted small mt-2 mb-0 letter-spacing-1 text-uppercase">
+            Gösterilen Veri: <strong class="text-dark border-bottom border-gold pb-1">@(string.IsNullOrEmpty(Model.SeciliUrunAd) ? "Tüm Mağaza Genel Görünümü" : Model.SeciliUrunAd + " İstatistikleri")</strong>
+        </p>
     </div>
 
+<div class="col-xl-4 col-lg-6 mb-4 mb-xl-0 d-flex justify-content-xl-center justify-content-start align-items-start pt-1">
+        <form method="get" class="m-0 w-100" style="max-width: 350px;">
+            <select name="urunId" class="form-select shadow-sm rounded-pill border-dark border-opacity-25 fw-medium px-4 py-2" id="urunSecici" onchange="this.form.submit()">
+                <option value="">-- Tüm Mağazayı Göster --</option>
+                @if (Model.UrunlerListesi != null)
+                {
+                    foreach (var urun in Model.UrunlerListesi)
+                    {
+                        <option value="@urun.Value" selected="@(Model.SeciliUrunId.ToString() == urun.Value ? "selected" : null)">
+                            @urun.Text
+                        </option>
+                    }
+                }
+            </select>
+        </form>
+    </div>
+
+    <div class="col-xl-4 col-lg-6 d-flex justify-content-xl-end justify-content-start gap-3">
+        @if (!Model.SeciliUrunId.HasValue)
+        {
+            <div class="d-flex flex-column align-items-center" style="min-width: 200px;">
+                <form asp-controller="Main" asp-action="BekleyenleriAnalizEt" method="post" class="m-0 w-100">
+                    <button type="submit" id="btnAnalizGuncelle" class="btn btn-dark rounded-pill shadow-sm w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 py-2">
+                        <i class="fa-solid fa-robot text-gold me-2 transition-inherit"></i> Yorumları Analiz Et
+                    </button>
+                </form>
+                <div class="mt-2 text-center w-100">
+                    @if(Model.BekleyenYorumSayisi > 0) {
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                            <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true" style="width: 0.4rem; height: 0.4rem;"></span>
+                            @Model.BekleyenYorumSayisi Bekleyen Yorum
+                        </span>
+                    } else {
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                            <i class="fa-solid fa-check me-2"></i> 0 Bekleyen Yorum
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex flex-column align-items-center" style="min-width: 200px;">
+                <button type="button" id="btnTopluGorselAnaliz" class="btn btn-outline-dark rounded-pill shadow-sm w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 py-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-gold me-2 transition-inherit"></i> Görselleri Analiz Et
+                </button>
+                <div class="mt-2 text-center w-100">
+                    @if(Model.BekleyenGorselSayisi > 0) {
+                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                            <span class="spinner-grow spinner-grow-sm text-warning me-2" role="status" aria-hidden="true" style="width: 0.4rem; height: 0.4rem;"></span>
+                            @Model.BekleyenGorselSayisi Bekleyen Görsel
+                        </span>
+                    } else {
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                            <i class="fa-solid fa-check me-2"></i> 0 Bekleyen Görsel
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
     @*--------------------- ÜRÜN SEÇİLMEDİĞİNDE GÖSTERİLECEK BÖLÜM (ANA EKRAN) ---------------------*@
-
-    @*Siparişler Tablosu*@
     @if (!Model.SeciliUrunId.HasValue)
     {
-
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 text-dark fw-bold">
-                                <i class="fa-solid fa-shopping-bag text-primary me-2"></i>Son Siparişler
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-light">
+                            <h5 class="mb-0 text-dark fw-bold font-playfair">
+                                <i class="fa-solid fa-shopping-bag text-gold me-2"></i>Son Siparişler
                             </h5>
-                            <span class="badge bg-light text-dark border">Son 10 İşlem</span>
+                            <span class="badge bg-dark text-white px-3 py-2 rounded-pill shadow-sm">Son 10 İşlem</span>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
+                            <table class="table table-hover align-middle mb-0 w-100" style="border-collapse: collapse;">
+                                <thead class="bg-dark text-white">
                                     <tr>
-                                        <th class="ps-3 text-secondary fw-semibold">Sipariş No</th>
-                                        <th class="text-secondary fw-semibold">Müşteri</th>
-                                        <th class="text-secondary fw-semibold">Tarih</th>
-                                        <th class="text-secondary fw-semibold">Tutar</th>
-                                        <th class="text-secondary fw-semibold">Durum</th>
-                                        <th class="text-end pe-3 text-secondary fw-semibold">İşlem</th>
+                                        <th class="ps-4 fw-semibold py-3 text-uppercase small letter-spacing-1">Sipariş No</th>
+                                        <th class="fw-semibold text-uppercase small letter-spacing-1">Müşteri</th>
+                                        <th class="fw-semibold text-uppercase small letter-spacing-1">Tarih</th>
+                                        <th class="fw-semibold text-uppercase small letter-spacing-1">Tutar</th>
+                                        <th class="fw-semibold text-uppercase small letter-spacing-1">Durum</th>
+                                        <th class="text-end pe-4 fw-semibold text-uppercase small letter-spacing-1">İşlem</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -96,21 +103,21 @@
                                         foreach (var siparis in Model.SonSiparisler)
                                         {
                                             <tr>
-                                                <td class="ps-3 fw-bold text-primary">#@siparis.SiparisNo</td>
-                                                <td class="text-dark">@siparis.Kullanici?.KullaniciAd</td>
-                                                <td class="text-muted small">@siparis.SiparisTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                                                <td class="fw-bold">@siparis.ToplamTutar.ToString("C2")</td>
+                                                <td class="ps-4 fw-bold text-dark"><span class="text-gold me-1">#</span>@siparis.SiparisNo</td>
+                                                <td class="text-dark fw-medium"><i class="fa-solid fa-user me-2 opacity-50 text-gold"></i>@siparis.Kullanici?.KullaniciAd</td>
+                                                <td class="text-muted small"><i class="fa-regular fa-clock me-1 opacity-50"></i>@siparis.SiparisTarihi.ToString("dd.MM.yyyy HH:mm")</td>
                                                 <td>
-                                                    @{
-                                                        var statusClass = siparis.SiparisDurumuID == 1 ? "warning" : siparis.SiparisDurumuID == 2 ? "info" : "success";
-                                                    }
-                                                    <span class="badge bg-@statusClass bg-opacity-10 text-@statusClass border border-@statusClass px-3 py-1 rounded-pill">
+                                                    <span class="badge bg-light text-dark border px-3 py-2 fs-6 shadow-sm">@siparis.ToplamTutar.ToString("C2")</span>
+                                                </td>
+                                                <td>
+                                                    @{ var statusClass = siparis.SiparisDurumuID == 1 ? "warning" : siparis.SiparisDurumuID == 2 ? "info" : "success"; }
+                                                    <span class="badge bg-@statusClass bg-opacity-10 text-@statusClass border border-@statusClass px-3 py-2 rounded-pill shadow-sm">
                                                         @siparis.SiparisDurumu?.DurumAd
                                                     </span>
                                                 </td>
-                                                <td class="text-end pe-3">
-                                                    <a href="/Admin/Siparis/Detay/@siparis.ID" class="btn btn-sm btn-outline-secondary rounded-pill">
-                                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                                <td class="text-end pe-4">
+                                                    <a href="/Admin/Siparis/Detay/@siparis.ID" class="btn btn-sm btn-outline-dark hover-gold-bg transition-300 rounded-pill px-3" title="Sipariş Detayı">
+                                                        <i class="fa-solid fa-magnifying-glass me-1"></i> İncele
                                                     </a>
                                                 </td>
                                             </tr>
@@ -119,7 +126,10 @@
                                     else
                                     {
                                         <tr>
-                                            <td colspan="6" class="text-center py-4 text-muted fst-italic">Henüz bir sipariş bulunmuyor.</td>
+                                            <td colspan="6" class="text-center py-5 text-muted bg-light rounded-bottom-4">
+                                                <i class="fa-solid fa-box-open fa-2x mb-3 opacity-50"></i>
+                                                <p class="mb-0 fw-semibold letter-spacing-1 text-uppercase small">Henüz bir sipariş bulunmuyor.</p>
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -130,25 +140,22 @@
             </div>
         </div>
 
-        // Alt Grafikler: En Pozitif ve En Negatif Dönüş Alan Ürünler
         <div class="row g-4 mb-4">
             <div class="col-xl-6">
                 <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
-                        <h5 class="mb-4 text-dark fw-bold">
+                        <h5 class="mb-4 text-dark fw-bold font-playfair border-bottom pb-3">
                             <i class="fa-solid fa-trophy text-success me-2"></i>En Pozitif Dönüş Alan Ürünler
                         </h5>
                         @if (Model.EnPozitifUrunAdlari != null && Model.EnPozitifUrunAdlari.Any())
                         {
-                            <div style="height: 300px; width: 100%;">
-                                <canvas id="topProductsChart"></canvas>
-                            </div>
+                            <div style="height: 300px; width: 100%;"><canvas id="topProductsChart"></canvas></div>
                         }
                         else
                         {
-                            <div class="d-flex flex-column justify-content-center align-items-center text-muted bg-light rounded-4" style="height: 300px;">
+                            <div class="d-flex flex-column justify-content-center align-items-center text-muted bg-light rounded-4 border border-dashed" style="height: 300px;">
                                 <i class="fa-solid fa-chart-bar fs-1 mb-3 opacity-25"></i>
-                                <span class="small fw-medium">Pozitif ürün eşleşmesi bulunamadı.</span>
+                                <span class="small fw-medium letter-spacing-1 text-uppercase">Pozitif ürün eşleşmesi bulunamadı.</span>
                             </div>
                         }
                     </div>
@@ -158,20 +165,18 @@
             <div class="col-xl-6">
                 <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
-                        <h5 class="mb-4 text-dark fw-bold">
+                        <h5 class="mb-4 text-dark fw-bold font-playfair border-bottom pb-3">
                             <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>Müdahale Gerektiren Ürünler
                         </h5>
                         @if (Model.EnNegatifUrunAdlari != null && Model.EnNegatifUrunAdlari.Any())
                         {
-                            <div style="height: 300px; width: 100%;">
-                                <canvas id="negativeProductsChart"></canvas>
-                            </div>
+                            <div style="height: 300px; width: 100%;"><canvas id="negativeProductsChart"></canvas></div>
                         }
                         else
                         {
-                            <div class="d-flex flex-column justify-content-center align-items-center text-muted bg-light rounded-4" style="height: 300px;">
+                            <div class="d-flex flex-column justify-content-center align-items-center text-muted bg-light rounded-4 border border-dashed" style="height: 300px;">
                                 <i class="fa-solid fa-chart-line fs-1 mb-3 opacity-25"></i>
-                                <span class="small fw-medium">Negatif ürün eşleşmesi bulunamadı.</span>
+                                <span class="small fw-medium letter-spacing-1 text-uppercase">Negatif ürün eşleşmesi bulunamadı.</span>
                             </div>
                         }
                     </div>
@@ -180,24 +185,20 @@
         </div>
     }
 
-    // ---------------------ÜRÜN SEÇİLDİĞİNDE GÖSTERİLECEK BÖLÜM----------------------
+    @*--------------------- ÜRÜN SEÇİLDİĞİNDE GÖSTERİLECEK BÖLÜM ----------------------*@
     else
     {
-
-        // Duygu Dağılımı Grafiği
         <div class="row mb-4 g-4">
             <div class="col-xl-6">
                 <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 text-dark fw-bold">
-                                <i class="fa-solid fa-brain text-primary me-2"></i>Duygu Dağılımı
+                        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                            <h5 class="mb-0 text-dark fw-bold font-playfair">
+                                <i class="fa-solid fa-brain text-gold me-2"></i>Duygu Dağılımı
                             </h5>
-                            <span class="badge bg-dark bg-opacity-10 text-dark border px-3 py-2 rounded-pill fs-6">
-                                Toplam @Model.ToplamYorum Yorum
-                            </span>
+                            <span class="badge bg-dark text-white px-3 py-2 rounded-pill shadow-sm">Toplam @Model.ToplamYorum Yorum</span>
                         </div>
-                        <div class="row align-items-center">
+                        <div class="row align-items-center mt-4">
                             <div class="col-md-5 text-center mb-4 mb-md-0">
                                 <div style="position: relative; height: 160px; width: 160px; margin: auto;">
                                     <canvas id="sentimentChart"></canvas>
@@ -206,28 +207,28 @@
                             <div class="col-md-7">
                                 <div class="mb-4">
                                     <div class="d-flex justify-content-between small mb-2">
-                                        <span class="fw-medium text-dark"><i class="fa-solid fa-circle text-success small me-2"></i>Pozitif (@Model.ToplamPozitif)</span>
+                                        <span class="fw-bold text-dark letter-spacing-1"><i class="fa-solid fa-circle text-success small me-2"></i>POZİTİF (@Model.ToplamPozitif)</span>
                                         <span class="fw-bold text-success">%@Model.PozitifYuzde</span>
                                     </div>
-                                    <div class="progress rounded-pill bg-success bg-opacity-10" style="height: 8px;">
+                                    <div class="progress rounded-pill bg-success bg-opacity-10 shadow-sm" style="height: 8px;">
                                         <div class="progress-bar bg-success rounded-pill" style="width: @(Model.PozitifYuzde)%;"></div>
                                     </div>
                                 </div>
                                 <div class="mb-4">
                                     <div class="d-flex justify-content-between small mb-2">
-                                        <span class="fw-medium text-dark"><i class="fa-solid fa-circle text-secondary small me-2"></i>Nötr (@Model.ToplamNotr)</span>
+                                        <span class="fw-bold text-dark letter-spacing-1"><i class="fa-solid fa-circle text-secondary small me-2"></i>NÖTR (@Model.ToplamNotr)</span>
                                         <span class="fw-bold text-secondary">%@Model.NotrYuzde</span>
                                     </div>
-                                    <div class="progress rounded-pill bg-secondary bg-opacity-10" style="height: 8px;">
+                                    <div class="progress rounded-pill bg-secondary bg-opacity-10 shadow-sm" style="height: 8px;">
                                         <div class="progress-bar bg-secondary rounded-pill" style="width: @(Model.NotrYuzde)%;"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="d-flex justify-content-between small mb-2">
-                                        <span class="fw-medium text-dark"><i class="fa-solid fa-circle text-danger small me-2"></i>Negatif (@Model.ToplamNegatif)</span>
+                                        <span class="fw-bold text-dark letter-spacing-1"><i class="fa-solid fa-circle text-danger small me-2"></i>NEGATİF (@Model.ToplamNegatif)</span>
                                         <span class="fw-bold text-danger">%@Model.NegatifYuzde</span>
                                     </div>
-                                    <div class="progress rounded-pill bg-danger bg-opacity-10" style="height: 8px;">
+                                    <div class="progress rounded-pill bg-danger bg-opacity-10 shadow-sm" style="height: 8px;">
                                         <div class="progress-bar bg-danger rounded-pill" style="width: @(Model.NegatifYuzde)%;"></div>
                                     </div>
                                 </div>
@@ -237,64 +238,75 @@
                 </div>
             </div>
 
-
-            @*Öne Çıkan Geri Bildirimler*@
             <div class="col-xl-6">
                 <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
-                        <h5 class="mb-4 text-dark fw-bold">
-                            <i class="fa-solid fa-list-check text-primary me-2"></i>Öne Çıkan Geri Bildirimler
+                        <h5 class="mb-4 text-dark fw-bold font-playfair border-bottom pb-3">
+                            <i class="fa-solid fa-list-check text-gold me-2"></i>Öne Çıkan Geri Bildirimler
                         </h5>
-                        <div class="row">
+                        
+                        <div class="row mt-4">
                             <div class="col-md-6 mb-4 mb-md-0">
-                                <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
-                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px;">
-                                        <i class="fa-solid fa-plus small"></i>
-                                    </div>
-                                    <span class="fw-bold text-success">Müşterilerin Sevdiği</span>
+                                <div class="d-flex align-items-center mb-3 pb-2">
+                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex justify-content-center align-items-center me-2 shadow-sm" style="width: 32px; height: 32px;"><i class="fa-solid fa-plus small"></i></div>
+                                    <span class="fw-bold text-success letter-spacing-1 text-uppercase small">Müşterilerin Sevdiği</span>
                                 </div>
                                 <ul class="list-unstyled mb-0 ps-1">
-                                    @if (Model.Top5Artilar != null && Model.Top5Artilar.Any())
-                                    {
-                                        foreach (var arti in Model.Top5Artilar)
-                                        {
-                                            <li class="mb-3 d-flex align-items-center">
-                                                <i class="fa-solid fa-check text-success opacity-75 me-2"></i>
-                                                <span class="text-dark small fw-medium">@arti</span>
-                                            </li>
+                                    @if (Model.Top5Artilar != null && Model.Top5Artilar.Any()) {
+                                        foreach (var arti in Model.Top5Artilar) {
+                                            <li class="mb-3 d-flex align-items-start"><i class="fa-solid fa-check text-success mt-1 me-2"></i><span class="text-dark small fw-medium">@arti</span></li>
                                         }
-                                    }
-                                    else
-                                    {
-                                        <li class="text-muted small fst-italic"><i class="fa-solid fa-circle-info me-1"></i>Veri bulunamadı.</li>
-                                    }
+                                    } else { <li class="text-muted small fst-italic bg-light p-2 rounded-3 text-center border border-dashed"><i class="fa-solid fa-circle-info me-1"></i>Veri bulunamadı.</li> }
                                 </ul>
                             </div>
+                            
                             <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
-                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px;">
-                                        <i class="fa-solid fa-minus small"></i>
-                                    </div>
-                                    <span class="fw-bold text-danger">Gelişim Alanları</span>
+                                <div class="d-flex align-items-center mb-3 pb-2">
+                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex justify-content-center align-items-center me-2 shadow-sm" style="width: 32px; height: 32px;"><i class="fa-solid fa-minus small"></i></div>
+                                    <span class="fw-bold text-danger letter-spacing-1 text-uppercase small">Gelişim Alanları</span>
                                 </div>
                                 <ul class="list-unstyled mb-0 ps-1">
-                                    @if (Model.Top5Eksiler != null && Model.Top5Eksiler.Any())
-                                    {
-                                        foreach (var eksi in Model.Top5Eksiler)
-                                        {
-                                            <li class="mb-3 d-flex align-items-center">
-                                                <i class="fa-solid fa-xmark text-danger opacity-75 me-2"></i>
-                                                <span class="text-dark small fw-medium">@eksi</span>
-                                            </li>
+                                    @if (Model.Top5Eksiler != null && Model.Top5Eksiler.Any()) {
+                                        foreach (var eksi in Model.Top5Eksiler) {
+                                            <li class="mb-3 d-flex align-items-start"><i class="fa-solid fa-xmark text-danger mt-1 me-2"></i><span class="text-dark small fw-medium">@eksi</span></li>
                                         }
-                                    }
-                                    else
-                                    {
-                                        <li class="text-muted small fst-italic"><i class="fa-solid fa-circle-info me-1"></i>Veri bulunamadı.</li>
-                                    }
+                                    } else { <li class="text-muted small fst-italic bg-light p-2 rounded-3 text-center border border-dashed"><i class="fa-solid fa-circle-info me-1"></i>Veri bulunamadı.</li> }
                                 </ul>
                             </div>
                         </div>
+
+                        <hr class="my-4 border-light" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <div class="d-flex align-items-center mb-3 pb-2">
+                                    <div class="bg-warning bg-opacity-10 text-gold rounded-circle d-flex justify-content-center align-items-center me-2 shadow-sm" style="width: 32px; height: 32px;"><i class="fa-solid fa-lightbulb small"></i></div>
+                                    <span class="fw-bold text-gold letter-spacing-1 text-uppercase small">Öne Çıkan Öneriler</span>
+                                </div>
+                                <ul class="list-unstyled mb-0 ps-1">
+                                    @if (Model.Top5Oneriler != null && Model.Top5Oneriler.Any()) {
+                                        foreach (var oneri in Model.Top5Oneriler) {
+                                            <li class="mb-3 d-flex align-items-start"><i class="fa-solid fa-arrow-right text-gold mt-1 me-2 opacity-75"></i><span class="text-dark small fw-medium">@oneri</span></li>
+                                        }
+                                    } else { <li class="text-muted small fst-italic bg-light p-2 rounded-3 text-center border border-dashed"><i class="fa-solid fa-circle-info me-1"></i>Veri bulunamadı.</li> }
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3 pb-2">
+                                    <div class="bg-dark bg-opacity-10 text-dark rounded-circle d-flex justify-content-center align-items-center me-2 shadow-sm" style="width: 32px; height: 32px;"><i class="fa-solid fa-bullhorn small"></i></div>
+                                    <span class="fw-bold text-dark letter-spacing-1 text-uppercase small">Başlıca Şikayetler</span>
+                                </div>
+                                <ul class="list-unstyled mb-0 ps-1">
+                                    @if (Model.Top5Sikayetler != null && Model.Top5Sikayetler.Any()) {
+                                        foreach (var sikayet in Model.Top5Sikayetler) {
+                                            <li class="mb-3 d-flex align-items-start"><i class="fa-solid fa-circle-exclamation text-dark mt-1 me-2 opacity-75"></i><span class="text-dark small fw-medium">@sikayet</span></li>
+                                        }
+                                    } else { <li class="text-muted small fst-italic bg-light p-2 rounded-3 text-center border border-dashed"><i class="fa-solid fa-circle-info me-1"></i>Veri bulunamadı.</li> }
+                                </ul>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -302,125 +314,164 @@
     }
 </div>
 
+<style>
+    .text-gold { color: #D4AF37 !important; }
+    .bg-gold { background-color: #D4AF37 !important; }
+    .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
+    .hover-gold-bg:hover .text-gold { color: white !important; }
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .transition-300 { transition: all 0.3s ease; }
+    .transition-inherit { transition: inherit; }
+    /* Dropdown için Elips Görünüm Ayarı */
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 50rem !important; 
+        padding: 0.375rem 1.2rem !important;
+        border-color: rgba(33, 37, 41, 0.25) !important;
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+</style>
+
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @* SweetAlert kütüphanesini garantiye alıyoruz *@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             
-        // 1. Select2 Başlatma
-        if ($.fn.select2) {
-        $('#urunSecici').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Ürün ara veya seç...',
-        width: '100%',
-        language: { noResults: () => "Ürün bulunamadı" }
+            // 1. Select2 Başlatma
+            if ($.fn.select2) {
+                $('#urunSecici').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Ürün ara veya seç...',
+                    width: '100%',
+                    language: { noResults: () => "Ürün bulunamadı" }
+                });
+            }
+
+            // 2. Bar Grafik Çizici Fonksiyonu
+            function initBarChart(canvasId, labels, data, bgColor, borderColor, labelName) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas || labels.length === 0) return;
+
+                new Chart(canvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: labelName, data: data, backgroundColor: bgColor, borderColor: borderColor, borderWidth: 1, borderRadius: 6 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } } }
+                    }
+                });
+            }
+
+            // 3. Pasta Grafiği
+            const ctxSentiment = document.getElementById('sentimentChart');
+            if (ctxSentiment) {
+                new Chart(ctxSentiment.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pozitif', 'Nötr', 'Negatif'],
+                        datasets: [{
+                            data: [@Model.ToplamPozitif, @Model.ToplamNotr, @Model.ToplamNegatif],
+                            backgroundColor: ['#198754', '#6c757d', '#dc3545'],
+                            borderWidth: 2, borderColor: '#ffffff', cutout: '75%', hoverOffset: 4
+                        }]
+                    },
+                    options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // 4. Grafikleri Veriyle Doldurma (Yardımcı fonksiyon ile temizlendi)
+            const parseJson = (raw) => JSON.parse(raw || '[]');
+            
+            initBarChart('topProductsChart', 
+                parseJson('@Html.Raw(Json.Serialize(Model.EnPozitifUrunAdlari))'), 
+                parseJson('@Html.Raw(Json.Serialize(Model.EnPozitifUrunSkorlari))'), 
+                'rgba(25, 135, 84, 0.8)', 'rgba(25, 135, 84, 1)', 'Pozitif Yorum');
+
+            initBarChart('negativeProductsChart', 
+                parseJson('@Html.Raw(Json.Serialize(Model.EnNegatifUrunAdlari))'), 
+                parseJson('@Html.Raw(Json.Serialize(Model.EnNegatifUrunSkorlari))'), 
+                'rgba(220, 53, 69, 0.8)', 'rgba(220, 53, 69, 1)', 'Negatif Yorum');
+
+            // 5. MERKEZİ SWEETALERT FONKSİYONU (Optimizasyonun Kalbi)
+            function swalOnayVeYukle(ayar, islemCallback) {
+                Swal.fire({
+                    title: ayar.baslik,
+                    text: ayar.metin,
+                    icon: ayar.icon || 'info',
+                    iconColor: '#D4AF37',
+                    showCancelButton: true,
+                    confirmButtonText: ayar.onayButonAdi || 'Başlat',
+                    cancelButtonText: 'İptal',
+                    customClass: {
+                        confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm',
+                        cancelButton: 'btn btn-outline-secondary rounded-pill px-4 shadow-sm ms-2'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: ayar.yukleniyorBaslik || 'İşlem Sürüyor...',
+                            text: 'Lütfen sayfayı kapatmayın.',
+                            allowOutsideClick: false,
+                            didOpen: () => { Swal.showLoading(); }
+                        });
+                        islemCallback(); // Onaylanırsa asıl işlemi başlat
+                    }
+                });
+            }
+
+            // 6. Aksiyon Tetikleyiciler (Temiz ve DRY - Kendini Tekrar Etmeyen Yapı)
+            const btnGorselAnaliz = document.getElementById('btnTopluGorselAnaliz');
+            if (btnGorselAnaliz) {
+                btnGorselAnaliz.onclick = function (e) {
+                    e.preventDefault();
+                    swalOnayVeYukle({
+                        baslik: 'Toplu Analiz Başlatılıyor',
+                        metin: 'Henüz analiz edilmemiş ürün görselleri taranıyor.',
+                        yukleniyorBaslik: 'Analiz Sürüyor...'
+                    }, function () {
+                        fetch('/Admin/Main/TopluGorselAnalizEt', { method: 'POST' })
+                            .then(response => response.json())
+                            .then(data => {
+                                Swal.fire({
+                                    title: data.success ? 'Tamamlandı!' : 'Hata',
+                                    text: data.message,
+                                    icon: data.success ? 'success' : 'error',
+                                    customClass: { confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm' },
+                                    buttonsStyling: false
+                                }).then(() => { if(data.success) location.reload(); });
+                            }).catch(() => {
+                                Swal.fire({ title: 'Hata', text: 'Sistem hatası oluştu.', icon: 'error', customClass: { confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm' }, buttonsStyling: false });
+                            });
+                    });
+                };
+            }
+
+            const btnAnalizGuncelle = document.getElementById('btnAnalizGuncelle');
+            if (btnAnalizGuncelle) {
+                btnAnalizGuncelle.onclick = function (e) {
+                    e.preventDefault(); // Gizli Bug Çözümü: Formun onaydan önce gönderilmesini engeller
+                    swalOnayVeYukle({
+                        baslik: 'Analiz Güncellensin mi?',
+                        metin: 'Bekleyen ürünlerin analizi yeniden oluşturulacak.',
+                        onayButonAdi: 'Güncelle',
+                        yukleniyorBaslik: 'Analiz Güncelleniyor...'
+                    }, function () {
+                        btnAnalizGuncelle.closest('form').submit();
+                    });
+                };
+            }
+
         });
-        }
-
-        // 2. Bar Grafik Çizici Fonksiyonu
-        function initBarChart(canvasId, labels, data, bgColor, borderColor, labelName) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas || labels.length === 0) return;
-
-        new Chart(canvas.getContext('2d'), {
-        type: 'bar',
-        data: {
-        labels: labels,
-        datasets: [{
-        label: labelName,
-        data: data,
-        backgroundColor: bgColor,
-        borderColor: borderColor,
-        borderWidth: 1,
-        borderRadius: 6
-        }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-        y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } }
-        }
-        }
-        });
-        }
-
-        // 3. Pasta Grafiği
-        const ctxSentiment = document.getElementById('sentimentChart');
-        if (ctxSentiment) {
-        new Chart(ctxSentiment.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-        labels: ['Pozitif', 'Nötr', 'Negatif'],
-        datasets: [{
-        data: [@Model.ToplamPozitif, @Model.ToplamNotr, @Model.ToplamNegatif],
-        backgroundColor: ['#198754', '#6c757d', '#dc3545'],
-        borderWidth: 2, borderColor: '#ffffff', cutout: '75%', hoverOffset: 4
-        }]
-        },
-        options: {
-        plugins: { legend: { display: false } },
-        responsive: true, maintainAspectRatio: false
-        }
-        });
-        }
-
-        // 4. Grafikleri Veriyle Doldurma
-        const topNames = JSON.parse('@Html.Raw(Json.Serialize(Model.EnPozitifUrunAdlari ?? new List<string>()))');
-        const topScores = JSON.parse('@Html.Raw(Json.Serialize(Model.EnPozitifUrunSkorlari ?? new List<int>()))');
-        initBarChart('topProductsChart', topNames, topScores, 'rgba(25, 135, 84, 0.8)', 'rgba(25, 135, 84, 1)', 'Pozitif Yorum');
-
-        const negativeNames = JSON.parse('@Html.Raw(Json.Serialize(Model.EnNegatifUrunAdlari ?? new List<string>()))');
-        const negativeScores = JSON.parse('@Html.Raw(Json.Serialize(Model.EnNegatifUrunSkorlari ?? new List<int>()))');
-        initBarChart('negativeProductsChart', negativeNames, negativeScores, 'rgba(220, 53, 69, 0.8)', 'rgba(220, 53, 69, 1)', 'Negatif Yorum');
-
-        // 5. --- GÖRSEL ANALİZ TETİKLEYİCİ ---
-        const btnGorselAnaliz = document.getElementById('btnTopluGorselAnaliz');
-        if (btnGorselAnaliz) {
-        btnGorselAnaliz.onclick = function (e) {
-        e.preventDefault();
-        Swal.fire({
-        title: 'Toplu Analiz Başlatılıyor',
-        text: 'Henüz analiz edilmemiş ürün görselleri taranıyor.',
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'Başlat',
-        cancelButtonText: 'İptal'
-        }).then((result) => {
-        if (result.isConfirmed) {
-        Swal.fire({
-        title: 'Analiz Sürüyor...',
-        text: 'Lütfen sayfayı kapatmayın.',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-        });
-
-        fetch('/Admin/Main/TopluGorselAnalizEt', { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-        if (data.success) {
-        Swal.fire('Tamamlandı!', data.message, 'success').then(() => {
-        location.reload();
-        });
-        } else {
-        Swal.fire('Hata', data.message, 'error');
-        }
-        })
-        .catch(error => {
-        Swal.fire('Hata', 'Sistem hatası oluştu.', 'error');
-        });
-        }
-        });
-        };
-        }
-
-        }); // DOMContentLoaded kapanış parantezi burasıydı, sende eksik olan bu!
     </script>
 }

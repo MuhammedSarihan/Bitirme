@@ -17,7 +17,8 @@ namespace Tasarim.Core.Entities
         public Profil Profil { get; set; }
         public int UrunID { get; set; }
         public Urun Urun { get; set; }
-
+        public int AnalizEdilirMi { get; set; } = 0;
+        public bool YasakliKelime { get; set; } = false;
         public YorumAnaliz? YorumAnaliz { get; set; }
     }
 }
