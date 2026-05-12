@@ -24,6 +24,7 @@ namespace Tasarim.Controllers
                 .Where(p => p.AktifMi)
                 .Include(u => u.KampanyaUrunleri)
                     .ThenInclude(ku => ku.Kampanya)
+                .Include(u => u.Yorumlar.Where(y => y.AnalizEdilirMi == 1 && y.YasakliKelime == false))
                 .ToListAsync();
             foreach (var urun in urunler)
             {

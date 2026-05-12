@@ -79,6 +79,7 @@ namespace Tasarim.Controllers
                     .ThenInclude(ku => ku.Kampanya)
                 .Include(u => u.Yorumlar.Where(y => y.AnalizEdilirMi == 1 && y.YasakliKelime == false)) //Filtreli yorumlar
                     .ThenInclude(y => y.Profil)
+                .Include(u => u.LLSonuc)
                 .FirstOrDefaultAsync(u => u.ID == id);
 
             if (urun == null || !urun.AktifMi)
