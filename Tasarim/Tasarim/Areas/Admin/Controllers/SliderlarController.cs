@@ -17,16 +17,14 @@ namespace Tasarim.Areas.Admin.Controllers
             _context = context;
         }
 
-        // 1. ANA SAYFA: Sadece listeyi getirir
+
         public async Task<IActionResult> Index()
         {
             var sliderlar = await _context.Sliders.OrderBy(s => s.SiraNo).ToListAsync();
             return View(sliderlar);
         }
 
-        // --- BUNDAN SONRASI AJAX (MODAL) İŞLEMLERİ İÇİNDİR ---
 
-        // 2. GETİR: Modal açıldığında düzenlenecek veriyi getirir
         [HttpGet]
         public async Task<IActionResult> GetSlider(int id)
         {
@@ -35,7 +33,6 @@ namespace Tasarim.Areas.Admin.Controllers
             return Json(slider);
         }
 
-        // 3. KAYDET VEYA GÜNCELLE (Form Submit)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Save(Slider model, IFormFile? resimDosyasi)
@@ -66,11 +63,9 @@ namespace Tasarim.Areas.Admin.Controllers
                             FileHelper.FileRemover(mevcutSlider.SliderResim);
                         }
 
-                        // YENİ RESMİ YÜKLE
                         mevcutSlider.SliderResim = await FileHelper.FileLoaderAsync(resimDosyasi);
                     }
 
-                    // Diğer bilgileri güncelle
                     mevcutSlider.Baslik = model.Baslik;
                     mevcutSlider.SliderAciklama = model.SliderAciklama;
                     mevcutSlider.Link = model.Link;
@@ -87,8 +82,6 @@ namespace Tasarim.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Bir hata oluştu: " + ex.Message });
             }
         }
-
-        // 4. SİL (Senin Hassas Noktan: Görsel de silinecek)
         [HttpPost]
         public async Task<IActionResult> DeleteSlider(int id)
         {

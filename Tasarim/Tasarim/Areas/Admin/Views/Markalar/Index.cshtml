@@ -2,79 +2,89 @@
 @{
 }
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 mb-5">
     <!-- Sayfa Başlığı ve Yeni Ekle Butonu -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="font-playfair fw-bold text-dark mb-1">Marka Yönetimi</h2>
             <p class="text-muted small text-uppercase letter-spacing-1 mb-0">Mağazanızdaki Ürün Markaları</p>
 
             <div class="form-check form-switch mt-2">
-            <input class="form-check-input cursor-pointer border-dark" type="checkbox" id="chkSadeceAktif">
-            <label class="form-check-label small fw-bold text-muted cursor-pointer" for="chkSadeceAktif">Sadece Aktif Olanları Göster</label>
-        </div>
+                <input class="form-check-input cursor-pointer border-dark" type="checkbox" id="chkSadeceAktif">
+                <label class="form-check-label small fw-bold text-muted cursor-pointer" for="chkSadeceAktif">Sadece Aktif Olanları Göster</label>
+            </div>
         </div>
         <button class="btn btn-dark rounded-0 px-4 py-2 text-uppercase letter-spacing-1 fw-bold hover-gold-bg transition-300" onclick="openMarkaModal()">
             <i class="fa-solid fa-plus me-2"></i> Yeni Marka
         </button>
     </div>
 
-    <!-- Marka Listesi -->
-    <div class="card border-dark-subtle rounded-0 shadow-sm">
-        <div class="card-header bg-light border-bottom border-dark-subtle py-3 d-none d-md-flex fw-bold text-uppercase small text-muted letter-spacing-1 align-items-center">
-            <div class="col-2 ps-3 text-center">Logo</div>
-            <div class="col-5">Marka Adı</div>
-            <div class="col-3 text-center">Durum</div>
-            <div class="col-2 text-end pe-4">İşlemler</div>
-        </div>
-        
-        <div class="card-body p-0">
-            @if (!Model.Any())
-            {
-                <div class="text-center py-5 text-muted">
-                    <i class="fa-solid fa-copyright fs-1 mb-3 opacity-50"></i>
-                    <h5 class="font-playfair">Henüz hiç marka eklenmemiş.</h5>
-                </div>
-            }
+    <!-- Marka Listesi (Mobil Uyumlu Tablo) -->
+    <div class="card border-0 shadow-sm rounded-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 w-100 luvia-mobile-table">
+                <thead class="bg-dark text-white text-uppercase small letter-spacing-1">
+                    <tr>
+                        <th class="ps-4 py-3 text-center" style="width: 15%;">Logo</th>
+                        <th class="py-3" style="width: 45%;">Marka Adı</th>
+                        <th class="py-3 text-center" style="width: 20%;">Durum</th>
+                        <th class="pe-4 py-3 text-end" style="width: 20%;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-copyright fs-1 mb-3 opacity-50"></i>
+                                <h5 class="font-playfair">Henüz hiç marka eklenmemiş.</h5>
+                            </td>
+                        </tr>
+                    }
 
-            @foreach (var marka in Model.OrderByDescending(m => m.ID))
-            {
-                <div class="d-flex align-items-center py-3 border-bottom border-light transition-300 row-hover bg-white filterable-row" data-aktif="@marka.AktifMi.ToString().ToLower()">
-                    <!-- Logo Sütunu -->
-                    <div class="col-2 text-center ps-3">
-                        @if (!string.IsNullOrEmpty(marka.Logo))
-                        {
-                            <img src="~/img/@marka.Logo" alt="@marka.MarkaAd" class="img-fluid border p-1 bg-light" style="max-height: 40px; object-fit: contain;" />
-                        }
-                        else
-                        {
-                            <span class="text-muted small fst-italic">-</span>
-                        }
-                    </div>
-                    
-                    <!-- Ad Sütunu -->
-                    <div class="col-5">
-                        <span class="font-playfair fw-bold fs-6 text-dark">@marka.MarkaAd</span>
-                    </div>
-                    
-                    <!-- Durum Sütunu -->
-                    <div class="col-3 text-center">
-                        <span class="badge border border-dark rounded-0 px-3 py-1 @(marka.AktifMi ? "text-dark" : "text-muted opacity-50 text-decoration-line-through")">
-                            @(marka.AktifMi ? "Aktif" : "Pasif")
-                        </span>
-                    </div>
-                    
-                    <!-- İşlemler Sütunu -->
-                    <div class="col-2 text-end pe-4">
-                        <button class="btn btn-sm btn-outline-dark rounded-0 px-3" onclick="openMarkaModal(@marka.ID, '@marka.MarkaAd', @marka.AktifMi.ToString().ToLower(), '@(marka.Logo ?? "")')">Düzenle</button>
-                    </div>
-                </div>
-            }
+                    @foreach (var marka in Model.OrderByDescending(m => m.ID))
+                    {
+                        <tr class="filterable-row transition-300" data-aktif="@marka.AktifMi.ToString().ToLower()">
+                            <!-- Logo Sütunu -->
+                            <td data-label="Logo" class="text-md-center ps-md-4">
+                                @if (!string.IsNullOrEmpty(marka.Logo))
+                                {
+                                    <img src="~/img/@marka.Logo" alt="@marka.MarkaAd" class="img-fluid border p-1 bg-light" style="max-height: 40px; min-width: 40px; object-fit: contain;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted small fst-italic">Logosuz</span>
+                                }
+                            </td>
+
+                            <!-- Ad Sütunu -->
+                            <td data-label="Marka Adı">
+                                <span class="font-playfair fw-bold fs-6 text-dark">@marka.MarkaAd</span>
+                            </td>
+
+                            <!-- Durum Sütunu -->
+                            <td data-label="Durum" class="text-md-center">
+                                <span class="badge border border-dark rounded-0 px-3 py-1 @(marka.AktifMi ? "text-dark" : "text-muted opacity-50 text-decoration-line-through")">
+                                    @(marka.AktifMi ? "Aktif" : "Pasif")
+                                </span>
+                            </td>
+
+                            <!-- İşlemler Sütunu -->
+                            <td data-label="İşlemler" class="pe-md-4 text-md-end">
+                                <button class="btn btn-sm btn-outline-dark rounded-0 px-3 w-100 w-md-auto" 
+                                        onclick="openMarkaModal(@marka.ID, '@marka.MarkaAd', @marka.AktifMi.ToString().ToLower(), '@(marka.Logo ?? "")')">
+                                    Düzenle
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- MARKA EKLE/DÜZENLE MODAL (Pop-up Form) -->
+<!-- MODAL KISMI (Değişmedi, modal zaten mobili destekler) -->
 <div class="modal fade" id="markaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-0 shadow-lg">
@@ -83,7 +93,6 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <!-- DİKKAT: Dosya yükleme için enctype eklendi -->
             <form asp-action="Kaydet" method="post" enctype="multipart/form-data">
                 <div class="modal-body p-4">
                     <input type="hidden" name="ID" id="mrk_ID" value="0" />
@@ -93,7 +102,6 @@
                         <input type="text" name="MarkaAd" id="mrk_Ad" class="form-control rounded-0 border-dark-subtle fw-bold" required />
                     </div>
 
-                    <!-- Mevcut Logo Önizleme ve Silme Alanı (Sadece Düzenlemede Görünür) -->
                     <div id="mevcutLogoAlani" class="mb-4 d-none p-3 bg-light border border-dark-subtle text-center">
                         <p class="small text-muted text-uppercase letter-spacing-1 mb-2">Mevcut Logo</p>
                         <img id="mrk_MevcutLogo" src="" class="img-fluid mb-3 bg-white border p-2" style="max-height: 80px;" />
@@ -106,7 +114,6 @@
                     <div class="mb-4">
                         <label class="form-label small text-uppercase letter-spacing-1 fw-bold text-muted">Logo Yükle / Değiştir</label>
                         <input type="file" name="YuklenenLogo" id="mrk_Dosya" class="form-control rounded-0 border-dark-subtle" accept="image/*" />
-                        <small class="text-muted" style="font-size: 0.75rem;">Sadece yeni logo yüklemek istiyorsanız dosya seçin.</small>
                     </div>
 
                     <div class="d-flex gap-4 border-top border-dark-subtle pt-3 mt-4">
@@ -132,21 +139,55 @@
         .font-playfair { font-family: 'Playfair Display', serif; }
         .letter-spacing-1 { letter-spacing: 1px; }
         .text-gold { color: #D4AF37 !important; }
-        .hover-gold:hover { color: #D4AF37 !important; transition: 0.3s; }
         .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; border-color: #D4AF37 !important; }
         .transition-300 { transition: all 0.3s ease; }
-        .row-hover:hover { background-color: #f8f9fa !important; }
         .form-switch .form-check-input:checked { background-color: #000; border-color: #000; }
+
+        /* =========================================
+           MOBİL KART GÖRÜNÜMÜ CSS 
+           ========================================= */
+        @@media (max-width: 768px) {
+            .luvia-mobile-table thead { display: none; }
+            
+            .luvia-mobile-table tbody tr {
+                display: block;
+                border: 1px solid #dee2e6;
+                margin-bottom: 20px;
+                background-color: #fff;
+                padding: 10px 5px;
+            }
+
+            .luvia-mobile-table tbody td {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                border-bottom: 1px solid #f8f9fa;
+                padding: 12px 15px;
+                text-align: left;
+                gap: 5px;
+            }
+
+            .luvia-mobile-table tbody td:last-child { border-bottom: none; }
+
+            .luvia-mobile-table tbody td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #D4AF37; /* LUVİA GOLD */
+                display: block;
+                width: 100%;
+            }
+        }
     </style>
 
     <script>
     function openMarkaModal(id = 0, ad = '', aktif = true, logo = '') {
         document.getElementById('modalTitle').innerText = id === 0 ? "Yeni Marka Ekle" : "Markayı Düzenle";
-        
         document.getElementById('mrk_ID').value = id;
         document.getElementById('mrk_Ad').value = ad;
         document.getElementById('mrk_Aktif').checked = aktif;
-        
         document.getElementById('mrk_Dosya').value = "";
         document.getElementById('mrk_LogoSil').checked = false;
 
@@ -166,31 +207,26 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         const chkSadeceAktif = document.getElementById('chkSadeceAktif');
-        
         if (chkSadeceAktif) {
             const sayfaAnahtari = 'filtre_aktif_' + window.location.pathname;
             const kaydedilmisAyar = localStorage.getItem(sayfaAnahtari);
-
             chkSadeceAktif.checked = kaydedilmisAyar !== null ? (kaydedilmisAyar === 'true') : true;
 
             function tabloyuFiltrele() {
                 const sadeceAktifler = chkSadeceAktif.checked;
                 localStorage.setItem(sayfaAnahtari, sadeceAktifler);
-
                 document.querySelectorAll('.filterable-row').forEach(satir => {
                     const aktifMi = satir.getAttribute('data-aktif') === 'true';
-                    
                     if (sadeceAktifler && !aktifMi) {
-                        satir.classList.add('d-none');
+                        satir.style.display = 'none'; // d-none bazen tablo yapısını bozabilir, style.display daha güvenli
                     } else {
-                        satir.classList.remove('d-none');
+                        satir.style.display = '';
                     }
                 });
             }
-
             tabloyuFiltrele();
             chkSadeceAktif.addEventListener('change', tabloyuFiltrele);
         }
     });
-</script>
+    </script>
 }

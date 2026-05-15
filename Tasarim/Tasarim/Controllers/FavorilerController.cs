@@ -26,11 +26,15 @@ namespace Tasarim.Controllers
                 int kullaniciId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
                 var favorilerDb = await _context.Favoriler
-                    .Include(f => f.Urun) // Ürünün resim ve fiyat bilgilerini çekiyoruz
-                    .ThenInclude(u => u.KampanyaUrunleri)
-                    .ThenInclude(ku => ku.Kampanya)
-                    .Where(f => f.KullaniciID == kullaniciId)
-                    .ToListAsync();
+             .Where(f => f.KullaniciID == kullaniciId)
+             .Include(f => f.Urun)
+                 .ThenInclude(u => u.KampanyaUrunleri)
+                     .ThenInclude(ku => ku.Kampanya)
+             .Include(f => f.Urun)
+                 .ThenInclude(u => u.Varyasyonlar) // Stok (Tükendi) hesabı için
+             .Include(f => f.Urun)
+                 .ThenInclude(u => u.Yorumlar)     // Yıldız değerlendirmeleri için
+             .ToListAsync();
 
                 // View'a sadece Urun listesi göndermek için dönüştürüyoruz
                 favoriUrunler = favorilerDb.Select(f => f.Urun).ToList();

@@ -19,23 +19,26 @@
 
     <!-- Slider Tablosu -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 w-100">
+        <div>
+            <!-- Tabloya 'luvia-mobile-table' sınıfını ekledik -->
+            <table class="table table-hover align-middle mb-0 w-100 luvia-mobile-table">
                 <thead class="bg-dark text-white text-uppercase small letter-spacing-1">
                     <tr>
-                        <th class="ps-4 py-3" style="width: 10%;">Sıra</th>
+                        <th class="ps-md-4 py-3" style="width: 10%;">Sıra</th>
                         <th class="py-3" style="width: 15%;">Görsel</th>
                         <th class="py-3" style="width: 25%;">Başlık</th>
                         <th class="py-3" style="width: 35%;">Açıklama / Link</th>
-                        <th class="pe-4 py-3 text-end" style="width: 15%;">İşlemler</th>
+                        <th class="pe-md-4 py-3 text-md-end" style="width: 15%;">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
                     @foreach (var item in Model.OrderBy(x => x.SiraNo))
                     {
                         <tr id="row_@item.ID">
-                            <td class="ps-4 fw-bold fs-5 text-dark">@item.SiraNo</td>
-                            <td>
+                            <!-- Her td içine data-label ekledik, bu sayede mobilde başlıklar otomatik çıkacak -->
+                            <td data-label="Sıra No" class="ps-md-4 fw-bold fs-5 text-dark">@item.SiraNo</td>
+                            
+                            <td data-label="Slayt Görseli">
                                 @if(!string.IsNullOrEmpty(item.SliderResim))
                                 {
                                     <img src="/img/@item.SliderResim" class="rounded-3 shadow-sm border" style="width: 80px; height: 50px; object-fit: cover;" />
@@ -47,18 +50,23 @@
                                     </div>
                                 }
                             </td>
-                            <td class="fw-medium text-dark">@item.Baslik</td>
-                            <td>
+                            
+                            <td data-label="Başlık" class="fw-medium text-dark">@item.Baslik</td>
+                            
+                            <td data-label="Açıklama & Link">
                                 <div class="small text-muted mb-1 text-truncate" style="max-width: 300px;"><i class="fa-solid fa-align-left me-1 opacity-50"></i>@item.SliderAciklama</div>
                                 @if(!string.IsNullOrEmpty(item.Link)){ <div class="small text-primary text-truncate" style="max-width: 300px;"><i class="fa-solid fa-link me-1"></i>@item.Link</div> }
                             </td>
-                            <td class="pe-4 text-end">
-                                <button onclick="openModal(@item.ID)" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1" title="Düzenle">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button onclick="deleteSlider(@item.ID)" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Kalıcı Olarak Sil">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                            
+                            <td data-label="İşlemler" class="pe-md-4 text-md-end">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <button onclick="openModal(@item.ID)" class="btn btn-sm btn-outline-dark rounded-pill px-3" title="Düzenle">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button onclick="deleteSlider(@item.ID)" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Kalıcı Olarak Sil">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -153,17 +161,75 @@
         .font-playfair { font-family: 'Playfair Display', serif; }
         .letter-spacing-1 { letter-spacing: 1px; }
         .transition-300 { transition: all 0.3s ease; }
+
+           /* =========================================
+           MOBİL KART GÖRÜNÜMÜ CSS KODLARI 
+           ========================================= */
+        @@media (max-width: 768px) {
+            /* Üst başlıkları mobilde tamamen gizle */
+            .luvia-mobile-table thead {
+                display: none;
+            }
+            
+            /* Her bir satırı (tr) birer karta çevir */
+            .luvia-mobile-table tbody tr {
+                display: block;
+                border: 1px solid #dee2e6;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                background-color: #fff;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+                padding: 10px 5px;
+            }
+
+            /* Sütunları (td) ALTA ALTA dizecek şekilde ayarla */
+            .luvia-mobile-table tbody td {
+                display: flex;
+                flex-direction: column; /* YAN YANA DEĞİL, ALT ALTA */
+                align-items: flex-start;
+                border-bottom: 1px solid #f8f9fa;
+                padding: 12px 15px;
+                text-align: left;
+                gap: 8px; /* Başlık ile içerik arasına boşluk */
+            }
+
+            .luvia-mobile-table tbody td:last-child {
+                border-bottom: none;
+            }
+
+            /* Sütun başlıkları (Luvia Gold Rengi) */
+            .luvia-mobile-table tbody td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #D4AF37; /* LUVİA GOLD */
+                display: block;
+                width: 100%;
+            }
+
+            /* Uzun linklerin veya resimlerin dışarı taşmasını KESİN engelle */
+            .luvia-mobile-table tbody td > * {
+                max-width: 100%;
+                word-wrap: break-word;
+                white-space: normal;
+            }
+            
+            /* Mobilde butonları sağa değil sola yasla */
+            .luvia-mobile-table tbody td .d-flex.justify-content-end {
+                justify-content: flex-start !important;
+            }
+        }
     </style>
 
     <script>
         let modal = new bootstrap.Modal(document.getElementById('sliderModal'));
 
-        // MODAL AÇMA (Ekleme = 0, Düzenleme = ID)
         function openModal(id) {
             document.getElementById('sliderForm').reset();
             document.getElementById('sliderId').value = id;
             
-            // Önizlemeyi sıfırla
             document.getElementById('previewImg').style.display = 'none';
             document.getElementById('previewImg').src = '';
             document.getElementById('uploadIcon').style.display = 'block';
@@ -174,7 +240,6 @@
             } else {
                 document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-gold me-2"></i>Slaytı Düzenle';
                 
-                // Düzenlenecek veriyi veritabanından çek (AJAX)
                 fetch('/Admin/Sliderlar/GetSlider/' + id)
                     .then(response => response.json())
                     .then(data => {
@@ -183,7 +248,6 @@
                         document.getElementById('aciklama').value = data.sliderAciklama || '';
                         document.getElementById('link').value = data.link || '';
                         
-                        // Mevcut resmi önizlemede göster
                         if(data.sliderResim) {
                             document.getElementById('previewImg').src = '/img/' + data.sliderResim;
                             document.getElementById('previewImg').style.display = 'block';
@@ -194,7 +258,6 @@
             }
         }
 
-        // ANLIK RESİM ÖNİZLEME (Mükemmel LUVİA Deneyimi)
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -208,7 +271,6 @@
             }
         }
 
-        // KAYDET (Sayfa yenilenmeden arka planda veriyi yollar)
         function saveSlider(e) {
             e.preventDefault();
             const formData = new FormData(document.getElementById('sliderForm'));
@@ -222,21 +284,14 @@
                 if(data.success) {
                     modal.hide();
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Başarılı!',
-                        text: 'Slayt bilgileri başarıyla kaydedildi.',
-                        confirmButtonColor: '#000',
-                        timer: 1500
-                    }).then(() => {
-                        window.location.reload(); // Tabloyu güncellemek için sayfayı tazele
-                    });
+                        icon: 'success', title: 'Başarılı!', text: 'Slayt bilgileri başarıyla kaydedildi.', confirmButtonColor: '#000', timer: 1500
+                    }).then(() => { window.location.reload(); });
                 } else {
                     Swal.fire('Hata', data.message, 'error');
                 }
             });
         }
 
-        // SİLME İŞLEMİ (Eski o uzun detaylı Delete sayfasının şık pop-up hali)
         function deleteSlider(id) {
             Swal.fire({
                 title: 'Emin misiniz?',
@@ -254,9 +309,7 @@
                     .then(data => {
                         if(data.success) {
                             document.getElementById('row_' + id).remove();
-                            Swal.fire({
-                                icon: 'success', title: 'Silindi', text: 'Slayt ve görseli sunucudan temizlendi.', confirmButtonColor: '#000', timer: 1500
-                            });
+                            Swal.fire({ icon: 'success', title: 'Silindi', text: 'Slayt ve görseli sunucudan temizlendi.', confirmButtonColor: '#000', timer: 1500 });
                         }
                     });
                 }

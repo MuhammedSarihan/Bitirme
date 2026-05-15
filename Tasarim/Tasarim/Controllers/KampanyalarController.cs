@@ -33,11 +33,21 @@ namespace Tasarim.Controllers
 
             // 2. ÖNCE KAMPANYAYI BUL: Böyle bir kampanya gerçekten var mı?
             var kampanya = await _context.Kampanyalar
-                    .Include(k => k.KampanyaUrunleri)     // Önce köprü tablosunu dahil et
-                        .ThenInclude(ku => ku.Urun)       // Sonra o köprü üzerinden Ürünlere ulaş
-                            .ThenInclude(u => u.KampanyaUrunleri)
-                                .ThenInclude(uku => uku.Kampanya)
-                    .FirstOrDefaultAsync(m => m.ID == id);
+
+    .Include(k => k.KampanyaUrunleri)
+        .ThenInclude(ku => ku.Urun)
+            .ThenInclude(u => u.KampanyaUrunleri)
+                .ThenInclude(uku => uku.Kampanya)
+
+    .Include(k => k.KampanyaUrunleri)
+        .ThenInclude(ku => ku.Urun)
+            .ThenInclude(u => u.Varyasyonlar)
+
+    .Include(k => k.KampanyaUrunleri)
+        .ThenInclude(ku => ku.Urun)
+            .ThenInclude(u => u.Yorumlar)
+
+    .FirstOrDefaultAsync(m => m.ID == id);
 
             if (kampanya == null)
             {

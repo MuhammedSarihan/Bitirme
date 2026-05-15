@@ -16,16 +16,37 @@
 
     // Yıldızları ekranda boyamak için ortalamayı en yakın tam sayıya yuvarlıyoruz (Örn: 4.3 -> 4 yıldız, 4.6 -> 5 yıldız)
     int yildizSayisi = (int)Math.Round(ortalamaPuan);
+
+    // EKLENEN KISIM: Stok Hesaplaması
+    int toplamStok = Model.Varyasyonlar?.Sum(v => v.StokAdedi) ?? 0;
+    bool tukendiMi = toplamStok <= 0;
 }
 
 <div class="col mb-5 ">
-    <div class="card h-100 border-0 rounded-0 product-card bg-transparent">
-
+    <div class="card h-100 border-0 rounded-0 product-card bg-transparent @(tukendiMi ? "opacity-75" : "")">
+        @if (ViewData["IsFavoriSayfasi"] as bool? == true)
+        {
+            <form asp-action="Remove" asp-controller="Favoriler" method="post" class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
+                <input type="hidden" name="UrunID" value="@Model.ID" />
+                <button type="submit" class="btn btn-light bg-white rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Favorilerden Kaldır">
+                    <i class="fa-solid fa-xmark text-dark"></i>
+                </button>
+            </form>
+        }
         <a href="/Urunler/Details/@Model.ID" class="overflow-hidden d-block bg-light position-relative">
             <img class="card-img-top rounded-0 product-img transition-300"
                  src="~/img/@Model.AnaResim"
                  alt="@Model.Baslik"
-                 style="height: 450px; object-fit: cover; object-position: top; width: 100%;">
+                 style="height: 450px; object-fit: cover; object-position: top; width: 100%; @(tukendiMi ? "filter: grayscale(40%) brightness(0.8);" : "")">
+                 
+            @if (tukendiMi)
+            {
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0,0,0,0.2); pointer-events: none;">
+                    <span class="badge bg-dark text-white rounded-0 py-2 px-4 fs-6 letter-spacing-2 text-uppercase shadow-lg border border-secondary">
+                        Tükendi
+                    </span>
+                </div>
+            }
         </a>
 
         <div class="card-body px-0 text-center pb-0 mt-3">
@@ -77,9 +98,19 @@
                     <span class="text-muted ms-2 small letter-spacing-1">(@yorumSayisi)</span>
                 }
             </div>
-            <a class="btn btn-outline-dark w-100 rounded-0 py-2 text-uppercase fw-semibold letter-spacing-1 transition-300" href="/Urunler/Details/@Model.ID">
-                Detaylı İncele
-            </a>
+            
+            @if (tukendiMi)
+            {
+                <a class="btn btn-outline-secondary w-100 rounded-0 py-2 text-uppercase fw-semibold letter-spacing-1" href="/Urunler/Details/@Model.ID">
+                    İncele
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-outline-dark w-100 rounded-0 py-2 text-uppercase fw-semibold letter-spacing-1 transition-300" href="/Urunler/Details/@Model.ID">
+                    Detaylı İncele
+                </a>
+            }
         </div>
 
     </div>

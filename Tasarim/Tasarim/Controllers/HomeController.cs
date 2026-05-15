@@ -22,6 +22,7 @@ namespace Tasarim.Controllers
             // 1. Ürünleri çekerken kampanya ilişkilerini de dahil ediyoruz (Include)
             var urunler = await _context.Urunler
                 .Where(p => p.AktifMi)
+                .Include(u => u.Varyasyonlar)
                 .Include(u => u.KampanyaUrunleri)
                     .ThenInclude(ku => ku.Kampanya)
                 .Include(u => u.Yorumlar.Where(y => y.AnalizEdilirMi == 1 && y.YasakliKelime == false))
