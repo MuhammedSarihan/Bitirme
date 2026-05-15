@@ -15,6 +15,7 @@ namespace Tasarim.Controllers
         {
             _context = context;
         }
+        [HttpGet]
 
         public async Task<IActionResult> IndexAsync()
         {

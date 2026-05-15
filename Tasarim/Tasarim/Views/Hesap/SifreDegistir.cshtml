@@ -1,0 +1,57 @@
+﻿@model ChangePasswordViewModel
+
+<div class="container py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm p-4">
+                <div class="text-center mb-4">
+                    <h2 class="font-playfair fw-bold text-dark">Şifremi Değiştir</h2>
+                    <div style="width: 40px; height: 2px; background-color: #D4AF37; margin: 0 auto;" class="mt-2"></div>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success rounded-0 border-0 mb-4 small">
+                        <i class="fa-solid fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                <form asp-action="SifreDegistir" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase fw-bold letter-spacing-1">Mevcut Şifre</label>
+                        <input asp-for="OldPassword" class="form-control rounded-0 border-light-subtle py-2" placeholder="••••••" />
+                        <span asp-validation-for="OldPassword" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase fw-bold letter-spacing-1">Yeni Şifre</label>
+                        <input asp-for="NewPassword" class="form-control rounded-0 border-light-subtle py-2" placeholder="••••••" />
+                        <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase fw-bold letter-spacing-1">Yeni Şifre Tekrar</label>
+                        <input asp-for="ConfirmPassword" class="form-control rounded-0 border-light-subtle py-2" placeholder="••••••" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 rounded-0 py-3 text-uppercase fw-bold letter-spacing-1 transition-300 hover-gold-bg border-0">
+                        Şifreyi Güncelle
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <a href="/Hesap/Index" class="text-decoration-none text-muted small hover-gold">< Vazgeç</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .hover-gold-bg:hover { background-color: #D4AF37 !important; color: #fff !important; }
+    .form-control:focus { border-color: #D4AF37; box-shadow: none; }
+</style>

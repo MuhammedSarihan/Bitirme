@@ -91,5 +91,6 @@ namespace Tasarim.Service.Concrete
         {
             _dbSet.Update(entity);
         }
+
     }
 }

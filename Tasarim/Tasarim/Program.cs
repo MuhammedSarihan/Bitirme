@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Tasarim.Data;
+using Tasarim.Models;
 using Tasarim.Service.Abstract;
 using Tasarim.Service.Concrate;
 using Tasarim.Service.Concrete;
@@ -32,8 +33,7 @@ builder.Services.AddScoped<KumelemeYoneticisi>();
 builder.Services.AddScoped<IGeminiProvider, GeminiLlmProvider>();
 builder.Services.AddScoped<UrunGorselYoneticisi>();
 
-
-
+builder.Services.AddScoped<IKullaniciService, KullaniciService>();
 // sepet
 builder.Services.AddScoped<ISepetService, SepetService>();
 

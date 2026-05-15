@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Tasarim.Core.Entities;
 //using Tasarim.Core.Entities;
 
 namespace Tasarim.Service.Abstract

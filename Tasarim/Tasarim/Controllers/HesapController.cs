@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies; // SignInAsync şeması için gerekli
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Tasarim.Core.Entities;
+using Tasarim.Models;
 using Tasarim.Models.Hesap;
 using Tasarim.Service.Abstract;
 
@@ -10,15 +12,14 @@ namespace Tasarim.Controllers
 {
     public class HesapController : Controller
     {
-        private readonly IService<Kullanici> _service;
+        private readonly IKullaniciService _kullaniciService;
         private readonly IService<Profil> _profilService;
 
-        public HesapController(IService<Kullanici> service, IService<Profil> profilService)
+        public HesapController(IService<Profil> profilService, IKullaniciService kullaniciService)
         {
-            _service = service;
             _profilService = profilService;
+            _kullaniciService = kullaniciService;
         }
-
         public async Task<IActionResult> Index()
         {
             // Giriş yapmamışsa doğrudan Login sayfasına at
@@ -56,14 +57,15 @@ namespace Tasarim.Controllers
         {
             if (ModelState.IsValid)
             {
-                var hesap = await _service.GetAsync(x => x.KullaniciAd == model.KullaniciAd && x.Sifre == model.Sifre);
+                var hesap = await _kullaniciService.GetAsync(x => x.KullaniciAd == model.KullaniciAd);
 
-                if (hesap == null)
+
+                if (hesap == null || !BCrypt.Net.BCrypt.Verify(model.Sifre, hesap.Sifre))
                 {
                     ModelState.AddModelError("", "Kullanıcı adı veya şifre hatalı!");
-                    return View(model); // Hata varsa hemen sayfayı döndür
+                    return View(model);
                 }
-               
+
                 if (hesap.AktifMi == false)
                 {
                     ModelState.AddModelError("", "⚠️ Hesabınız sistem yöneticisi tarafından askıya alınmıştır. Lütfen bizimle iletişime geçiniz.");
@@ -98,13 +100,13 @@ namespace Tasarim.Controllers
             if (ModelState.IsValid)
             {
                 // EKLEME 1: Kullanıcı adı daha önce alınmış mı kontrolü
-                var mevcutKullanici = await _service.GetAsync(x => x.KullaniciAd == model.KullaniciAd);
+                var mevcutKullanici = await _kullaniciService.GetAsync(x => x.KullaniciAd == model.KullaniciAd);
                 if (mevcutKullanici != null)
                 {
                     ModelState.AddModelError("KullaniciAd", "Bu kullanıcı adı zaten kullanılıyor. Lütfen başka bir tane seçin.");
                     return View(model);
                 }
-
+                string hashlendi = BCrypt.Net.BCrypt.HashPassword(model.Sifre);
                 var profil = new Profil
                 {
                     Ad = model.Ad,
@@ -119,7 +121,7 @@ namespace Tasarim.Controllers
                     Kullanici = new Kullanici
                     {
                         KullaniciAd = model.KullaniciAd,
-                        Sifre = model.Sifre,
+                        Sifre = hashlendi,
                         AdminMi = false,
                         AktifMi = true
                     }
@@ -170,8 +172,6 @@ namespace Tasarim.Controllers
             int kullaniciId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var mevcutProfil = await _profilService.GetAsync(p => p.Kullanici.ID == kullaniciId);
 
-            // ÇÖZÜM BURADA: Formdan "Kullanici" tablosu (şifre vb.) gelmeyeceği için 
-            // sistemin bunu hata olarak görüp işlemi iptal etmesini engelliyoruz.
             ModelState.Remove("Kullanici");
 
             if (mevcutProfil != null && ModelState.IsValid)
@@ -198,6 +198,32 @@ namespace Tasarim.Controllers
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("SignIn");
+        }
+        // Şifre değiştirme
+        [Authorize]
+        public IActionResult SifreDegistir()
+        {
+            return View();
+        }
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SifreDegistir(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var sonuc = await _kullaniciService.ChangePasswordAsync(userId, model.OldPassword, model.NewPassword);
+
+            if (sonuc)
+            {
+                TempData["SuccessMessage"] = "Şifreniz başarıyla güncellendi.";
+                return RedirectToAction("Index", "Hesap");
+            }
+
+            ModelState.AddModelError("OldPassword", "Mevcut şifreniz hatalı.");
+            return View(model);
         }
     }
 }
