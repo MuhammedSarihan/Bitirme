@@ -101,9 +101,12 @@
                                         <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary hover-gold-bg transition-300" title="Detaylar">
                                             <i class="fa-solid fa-list-check"></i>
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-danger transition-300" title="Sil">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </a>
+
+                                        <form id="deleteForm_@item.ID" asp-area="Admin" asp-controller="Kampanyalar" asp-action="Sil" asp-route-id="@item.ID" method="post" style="display:none;"></form>
+
+                                        <button type="button" onclick="kampanyaSil(@item.ID)" class="btn btn-outline-danger btn-sm rounded-0 fw-bold letter-spacing-1" title="Sil">
+                                              <i class="fa-solid fa-trash-can"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -154,7 +157,7 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
             // DataTables Başlatma
@@ -175,5 +178,29 @@
                 table.search(this.value).draw();
             });
         });
+
+        // GÜNCELLENEN AJAXSİZ SİLME FONKSİYONU
+        function kampanyaSil(id) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu kampanya, görseli ve içindeki tüm ürün atamaları kalıcı olarak silinecek. Bu işlem geri alınamaz!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#111',       // LUVİA siyahı
+                cancelButtonColor: '#D4AF37',     // LUVİA altını
+                confirmButtonText: 'Evet, Kalıcı Olarak Sil',
+                cancelButtonText: 'Vazgeç',
+                customClass: {
+                    popup: 'rounded-0', // Köşeleri keskinleştir
+                    confirmButton: 'rounded-0 letter-spacing-1 text-uppercase',
+                    cancelButton: 'rounded-0 letter-spacing-1 text-uppercase'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Kullanıcı evet derse gizli formu submit ediyoruz
+                    document.getElementById('deleteForm_' + id).submit();
+                }
+            });
+        }
     </script>
 }

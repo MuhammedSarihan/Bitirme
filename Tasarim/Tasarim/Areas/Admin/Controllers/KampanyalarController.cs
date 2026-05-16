@@ -124,38 +124,34 @@ namespace Tasarim.Areas.Admin.Controllers
             }
             return View(kampanya);
         }
-
-        // GET: Admin/Kampanyalar/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var kampanya = await _context.Kampanyalar
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (kampanya == null)
-            {
-                return NotFound();
-            }
-
-            return View(kampanya);
-        }
-
-        // POST: Admin/Kampanyalar/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Sil(int id)
         {
-            var kampanya = await _context.Kampanyalar.FindAsync(id);
+            var kampanya = await _context.Kampanyalar
+                .Include(k => k.KampanyaUrunleri)
+                .FirstOrDefaultAsync(m => m.ID == id);
+
             if (kampanya != null)
             {
-                if (!string.IsNullOrEmpty(kampanya.KampanyaResmi)) FileHelper.FileRemover(kampanya.KampanyaResmi);
+                // Varsa köprü tablosunu sil
+                if (kampanya.KampanyaUrunleri != null && kampanya.KampanyaUrunleri.Any())
+                {
+                    _context.KampanyaUrunleri.RemoveRange(kampanya.KampanyaUrunleri);
+                }
+
+                // Varsa resmi sil
+                if (!string.IsNullOrEmpty(kampanya.KampanyaResmi))
+                {
+                    FileHelper.FileRemover(kampanya.KampanyaResmi);
+                }
+
+                // Kampanyayı sil
                 _context.Kampanyalar.Remove(kampanya);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
+            // İşlem bitince listeye geri dön
             return RedirectToAction(nameof(Index));
         }
 
