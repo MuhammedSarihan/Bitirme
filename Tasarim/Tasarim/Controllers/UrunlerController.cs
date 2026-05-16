@@ -15,49 +15,142 @@ namespace Tasarim.Controllers
         private readonly KumelemeYoneticisi _kumelemeYoneticisi;
         // goruntu isleme icin eklendi
         private readonly IGeminiProvider _geminiProvider;
-        public UrunlerController(DatabaseContext context,KumelemeYoneticisi kumelemeYoneticisi, IGeminiProvider geminiProvider)
+        public UrunlerController(DatabaseContext context, KumelemeYoneticisi kumelemeYoneticisi, IGeminiProvider geminiProvider)
         {
             _context = context;
             _kumelemeYoneticisi = kumelemeYoneticisi;
-            _geminiProvider = geminiProvider; 
+            _geminiProvider = geminiProvider;
         }
 
         public async Task<IActionResult> Index(string q = "")
         {
             var query = _context.Urunler
                 .Where(p => p.AktifMi)
+                .Include(u => u.Varyasyonlar)
+                .Include(u => u.Yorumlar.Where(y => y.AnalizEdilirMi == 1 && y.YasakliKelime == false))
                 .Include(u => u.Kategori)
                 .Include(u => u.Marka)
-                .Include(u => u.UrunOzellikleri) //  Teknik özellikleri de getir
+                .Include(u => u.UrunOzellikleri)
                 .Include(u => u.KampanyaUrunleri)
                     .ThenInclude(ku => ku.Kampanya)
                 .AsQueryable();
+
+            Func<string, string> temizle = (text) =>
+            {
+                if (string.IsNullOrEmpty(text)) return "";
+                return text.ToLower()
+                           .Replace("ı", "i").Replace("ğ", "g").Replace("ü", "u")
+                           .Replace("ş", "s").Replace("ö", "o").Replace("ç", "c")
+                           .Replace("i̇", "i").Replace(" ", "").Trim();
+            };
+
+            string bulunanArananKategori = ""; // Sıralamada kullanmak için dışarıda tanımlıyoruz
 
             if (!string.IsNullOrEmpty(q))
             {
                 var kelimeler = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                // Her kelimeyi şart koşuyoruz (AND mantığı)
-                foreach (var kelime in kelimeler)
+                // --- 1. ADIM: DİNAMİK KATEGORİ TESPİTİ ---
+                var sistemdekiKategoriler = new List<string> { "jean", "pantolon", "sort", "etek", "elbise", "abiye", "bluz", "gomlek", "tisort", "kazak", "canta", "ayakkabi", "kolye", "kupe", "bilezik", "taki", "ustgiyim" };
+
+                bulunanArananKategori = kelimeler
+                    .Select(k => k.ToLower().Replace("ı", "i").Replace("ç", "c").Replace("ş", "s").Replace(" ", ""))
+                    .FirstOrDefault(k => sistemdekiKategoriler.Contains(k) || k == "kot");
+
+                if (bulunanArananKategori == "kot") bulunanArananKategori = "jean";
+
+                // --- 2. ADIM: KATEGORİ GÜVENLİK DUVARI (YENİLENDİ!) ---
+                if (!string.IsNullOrEmpty(bulunanArananKategori))
                 {
-                    query = query.Where(p => p.Baslik.Contains(kelime) ||
-                                             p.Aciklama.Contains(kelime) ||
-                                             (p.UrunOzellikleri != null && (
-                                                 p.UrunOzellikleri.Stil.Contains(kelime) ||
-                                                 p.UrunOzellikleri.Detaylar.Contains(kelime)
-                                             )));
+                    // EĞER ARANAN "JEAN" İSE: Sadece Jean veya Kot olanlar sızabilir. Kumaş pantolonlar elenir!
+                    if (bulunanArananKategori == "jean")
+                    {
+                        query = query.Where(p => p.UrunOzellikleri != null &&
+                                                (p.UrunOzellikleri.AnaKategori.ToLower().Contains("jean") ||
+                                                 p.Baslik.ToLower().Contains("jean")));
+                    }
+                    // EĞER ARANAN KUMAŞ "PANTOLON" İSE: İçinde jean/kot geçen her şeyi bıçak gibi keser!
+                    else if (bulunanArananKategori == "pantolon")
+                    {
+                        query = query.Where(p => p.UrunOzellikleri != null &&
+                                                p.UrunOzellikleri.AnaKategori.ToLower().Contains("pantolon") &&
+                                                !p.UrunOzellikleri.AnaKategori.ToLower().Contains("jean") &&
+                                                !p.Baslik.ToLower().Contains("jean"));
+                    }
+                    // EĞER ARANAN "GOMLEK" VEYA "BLUZ" İSE: Birbirlerinin alanlarına sızmalarını engeller!
+                    else if (bulunanArananKategori == "gomlek" || bulunanArananKategori == "bluz")
+                    {
+                        query = query.Where(p => p.UrunOzellikleri != null &&
+                                                (p.UrunOzellikleri.AnaKategori.ToLower().Contains(bulunanArananKategori) ||
+                                                 p.Baslik.ToLower().Contains(bulunanArananKategori)));
+                    }
+                    // DİĞER EVRENSEL KATEGORİLER (Elbise, Abiye, Çanta vb.)
+                    else
+                    {
+                        query = query.Where(p => p.UrunOzellikleri != null &&
+                                                (p.UrunOzellikleri.AnaKategori.ToLower().Contains(bulunanArananKategori) ||
+                                                 p.Baslik.ToLower().Contains(bulunanArananKategori)));
+                    }
                 }
+
+                // --- 3. ADIM: KATEGORİ İÇİNDE ESNEK OR ARAMASI ---
+                query = query.Where(p => kelimeler.Any(kelime =>
+                    p.Baslik.ToLower().Contains(kelime.ToLower()) ||
+                    p.Aciklama.ToLower().Contains(kelime.ToLower()) ||
+                    (p.UrunOzellikleri != null && (
+                        p.UrunOzellikleri.AnaRenk.ToLower().Contains(kelime.ToLower()) ||
+                        p.UrunOzellikleri.Stil.ToLower().Contains(kelime.ToLower()) ||
+                        p.UrunOzellikleri.Detaylar.ToLower().Contains(kelime.ToLower())
+                    ))
+                ));
             }
 
             var urunlerListesi = await query.ToListAsync();
+
             if (!string.IsNullOrEmpty(q))
             {
-                var kelimeler = q.ToLower().Split(' ');
+                var kelimeler = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                // --- 4. ADIM: AKILLI PUANLAMA VE SIRALAMA  ---
                 urunlerListesi = urunlerListesi
-                    .OrderByDescending(u => kelimeler.Count(k => u.Baslik.ToLower().Contains(k)) +
-                                            (u.UrunOzellikleri?.Stil.ToLower().Contains(kelimeler[0]) == true ? 2 : 0))
+                    .OrderByDescending(u =>
+                    {
+                        int puan = 0;
+                        string baslik = temizle(u.Baslik);
+                        string kategori = temizle(u.UrunOzellikleri?.AnaKategori);
+                        string renk = temizle(u.UrunOzellikleri?.AnaRenk);
+                        string stil = temizle(u.UrunOzellikleri?.Stil);
+                        string detaylar = temizle(u.UrunOzellikleri?.Detaylar);
+
+                        // --- ALTIN KURAL: KATEGORİ TAMAMEN TUTUYORSA DEV BONUS PUAN (+5000 PUAN) ---
+                        // Böylece aranan kategoriyle %100 uyuşan ürünler askeri nizamda en üst sıraya dizilir!
+                        if (!string.IsNullOrEmpty(bulunanArananKategori))
+                        {
+                            bool kategoriTamEslesti = kategori.Contains(bulunanArananKategori) || baslik.Contains(bulunanArananKategori);
+                            if (kategoriTamEslesti) puan += 5000;
+                        }
+
+                        foreach (var k in kelimeler)
+                        {
+                            string temizKelime = temizle(k);
+
+                            // 1. Öncelik: Belirgin Stil / Teknik Özellik (Drape, Halter yaka, İspanyol paça) -> +100 Puan
+                            if (stil.Contains(temizKelime) || detaylar.Contains(temizKelime) || temizKelime.Contains(stil) || temizKelime.Contains(detaylar))
+                                puan += 100;
+
+                            // 2. Öncelik: Renk Birebir Eşleşiyorsa -> +50 Puan
+                            if (renk.Contains(temizKelime) || baslik.Contains(temizKelime))
+                                puan += 50;
+
+                            // 3. Öncelik: Genel Başlık Kelimeleri -> +20 Puan
+                            if (baslik.Contains(temizKelime))
+                                puan += 20;
+                        }
+                        return puan;
+                    })
                     .ToList();
             }
+
             return View(urunlerListesi);
         }
 
@@ -205,18 +298,24 @@ namespace Tasarim.Controllers
                 }
 
                 // PROMPT
-                string prompt = @"Sen profesyonel bir e-ticaret arama uzmanısın.
-                Görevin: Görseldeki ürünü analiz etmek ve veritabanında en doğru eşleşmeyi bulmak için SADECE 2 veya 3 anahtar kelime döndürmektir.
+                string prompt = @"Sen profesyonel bir e-ticaret arama uzmanısın. 
+Görevin: Görseldeki ürünü analiz etmek ve veritabanında en doğru eşleşmeyi bulmak için SADECE 2 veya 3 anahtar kelime döndürmektir.
 
-                KRİTİK KURALLAR:
-                1. FORMÜL: [Belirgin Renk] + [En Ayırıcı Teknik Özellik] + [Ürün Cinsi]
-                2. AYIRICI ÖZELLİK ÖNCELİĞİ: 
-                  - Pantolon ise paça tipi (İspanyol Paça, Skinny, Slouchy).
-                  - Elbise ise kesim veya yaka tipi (Abiye, Mini, V Yaka, Şifon).
-                  - Çanta ise askı veya doku tipi (Zincirli, El Çantası, Baget).
-                  - Ayakkabı ise topuk veya burun tipi (Stiletto, Babet, Dolgu Topuk).
-                3. YASAKLAR: Asla cümle kurma, açıklama yapma, 'Bu bir...' gibi ifadeler kullanma.
-                4. SADECE arama kutusuna yazılacak net kelimeleri döndür. (Örn: 'Siyah İspanyol Paça Pantolon' veya 'Bej Zincirli Çanta')";
+KRİTİK KURALLAR:
+1. FORMÜL: [Belirgin Renk] + [En Ayırıcı Teknik Özellik] + [Kategori Adı]
+
+2. KATEGORİ ADI KURALI (Sadece ve sadece bu kelimelerden birini seçebilirsin, asla başka kelime uydurma):
+   - Ürün bir kadın bluzu ise kesinlikle 'Bluz' yaz.
+   - Ürün yakalı/düğmeli gömlek ise kesinlikle 'Gömlek' yaz.
+   - Kot pantolon ise kesinlikle 'Jean' yaz.
+   - Kumaş/Kargo/Keten pantolon ise kesinlikle 'Pantolon' yaz.
+   - Diğer net kelimeler: 'Elbise', 'Abiye', 'Şort', 'Etek', 'Çanta', 'Ayakkabı', 'Takı'.
+
+3. AYIRICI ÖZELLİK ÖNCELİĞİ:
+   - Kesim, yaka veya doku detayını yakala (Örn: 'Taşlı', 'Drape', 'Halter Yaka', 'İspanyol Paça', 'Simli', 'Düşük Omuz').
+
+YASAKLAR: Asla açıklama yapma, cümle kurma. Sadece arama kutusuna yazılacak kelimeleri dön.
+Örn: 'Siyah Taşlı Abiye' veya 'Mavi İspanyol Paça Jean' veya 'Kahverengi Drape Bluz'";
 
                 var analizSonucu = await _geminiProvider.AnalyzeImageAsync(prompt, imageBytes);
 
