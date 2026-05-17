@@ -25,7 +25,7 @@ public class YorumAPIProvider : IYorumProvider
         // Groq'a gönderilecek istek formatı
         var requestBody = new
         {
-            model = "qwen/qwen3-32b", //groq modelimiz
+            model = "llama-3.3-70b-versatile", //groq modelimiz
             messages = new[]
             {
                 new { role = "user", content = prompt }

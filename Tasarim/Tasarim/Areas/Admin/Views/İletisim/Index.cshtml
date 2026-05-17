@@ -103,8 +103,8 @@
                     <thead class="bg-dark text-white">
                         <tr>
                             <th class="fw-semibold py-3 ps-4 text-uppercase small letter-spacing-1">Yorum İçeriği</th>
-                            <th class="fw-semibold text-uppercase small letter-spacing-1 text-center">Profil ID</th>
-                            <th class="fw-semibold text-uppercase small letter-spacing-1 text-center">Ürün ID</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1 text-center">Yorum Sahibi</th>
+                            <th class="fw-semibold text-uppercase small letter-spacing-1 text-center">Ürün Kod</th>
                             <th class="fw-semibold text-end pe-4 text-uppercase small letter-spacing-1" style="width: 250px;">İşlemler</th>
                         </tr>
                     </thead>
@@ -118,10 +118,10 @@
                                         <i class="fa-solid fa-quote-left text-muted opacity-50 me-2"></i>@yorum.YorumIcerik
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm"><i class="fa-solid fa-user text-gold me-1"></i> @yorum.ProfilID</span>
+                                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm"><i class="fa-solid fa-user text-gold me-1"></i> @yorum.Profil.Ad @yorum.Profil.Soyad</span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm"><i class="fa-solid fa-box text-gold me-1"></i> @yorum.UrunID</span>
+                                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm"><i class="fa-solid fa-box text-gold me-1"></i> @yorum.Urun.UrunKod</span>
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-inline-flex gap-2">

@@ -19,10 +19,10 @@ builder.Services.AddHttpClient();
 // YORUM ANALİZİ
 
 //YEREL YORUM ANALİZİ İÇİN OLLAMA MODELİ
-//builder.Services.AddScoped<IYorumProvider, YorumYerelProvider>();
+builder.Services.AddScoped<IYorumProvider, YorumYerelProvider>();
 
 //GROQ API
-builder.Services.AddScoped<IYorumProvider, YorumAPIProvider>();
+//builder.Services.AddScoped<IYorumProvider, YorumAPIProvider>();
 
 //GORUNTU ANALİZİ
 
@@ -40,7 +40,6 @@ builder.Services.AddScoped<YorumAnalizYoneticisi>();
 builder.Services.AddScoped<KumelemeYoneticisi>();
 
 // Gemini SERVİS KAYITLARI BURAYA 
-builder.Services.AddScoped<IGoruntuProvider, GoruntuAPIProvider>();
 builder.Services.AddScoped<UrunGorselYoneticisi>();
 
 builder.Services.AddScoped<IKullaniciService, KullaniciService>();

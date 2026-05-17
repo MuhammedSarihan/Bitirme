@@ -23,10 +23,17 @@ namespace Tasarim.Areas.Admin.Controllers
         }
 
         // Admin tarafında mesajları listeleme
+        // Admin tarafında mesajları listeleme
         public async Task<IActionResult> Index()
         {
             var mesajlar = await _context.İletisimler.OrderByDescending(x => x.MesajTarihi).ToListAsync();
-            var yasakliYorumlar = await _context.Yorumlar.Where(y => y.AnalizEdilirMi == 2 || y.AnalizEdilirMi == 3).ToListAsync();
+
+            // Yorumları çekerken Profil ve Urun tablolarını da sorguya dahil (Include) ediyoruz
+            var yasakliYorumlar = await _context.Yorumlar
+                .Include(y => y.Profil) // Profil tablosundaki Ad, Soyad vb. veriler için
+                .Include(y => y.Urun)   // Urun tablosundaki UrunKod vb. veriler için
+                .Where(y => y.AnalizEdilirMi == 2 || y.AnalizEdilirMi == 3)
+                .ToListAsync();
 
             var model = new YorumKontroluViewModel
             {
