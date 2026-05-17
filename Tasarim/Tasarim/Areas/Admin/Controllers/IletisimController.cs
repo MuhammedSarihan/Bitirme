@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
 using Tasarim.Areas.Admin.Models;
-using Tasarim.Service.Concrete.LLM;
+using Tasarim.Service.Concrate.LLM;
 
 namespace Tasarim.Areas.Admin.Controllers
 {

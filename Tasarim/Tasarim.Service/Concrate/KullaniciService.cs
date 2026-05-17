@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
-using Tasarim.Service.Concrete;
+using Tasarim.Service.Concrate;
 
 public class KullaniciService : Service<Kullanici>, IKullaniciService
 {

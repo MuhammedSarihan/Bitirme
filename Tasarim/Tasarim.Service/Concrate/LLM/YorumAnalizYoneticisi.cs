@@ -1,14 +1,17 @@
-﻿using LlmService;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Text.Encodings.Web; //Türkçe Alfabe için
 using System.Text.Json;
 using System.Text.Unicode; //Türkçe Alfabe için
 using Tasarim.Core.Entities;
 using Tasarim.Data;
+using Tasarim.Service.Abstract;
+
+namespace Tasarim.Service.Concrate.LLM;
+
 public class YorumAnalizYoneticisi
 {
     private readonly DatabaseContext _context;
-    private readonly ILlmProvider _llmProvider;
+    private readonly IYorumProvider _llmProvider;
 
     //Türkçe karakterlerin işlenmesi ve büyük/küçük harf duyarlılığının esnetilmesi için JsonSerialize ayarları
     private static readonly JsonSerializerOptions _jsonAyarlari = new()
@@ -16,7 +19,7 @@ public class YorumAnalizYoneticisi
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
         PropertyNameCaseInsensitive = true 
     };
-    public YorumAnalizYoneticisi(DatabaseContext context, ILlmProvider llmProvider)
+    public YorumAnalizYoneticisi(DatabaseContext context, IYorumProvider llmProvider)
     {
         _context = context;
         _llmProvider = llmProvider;

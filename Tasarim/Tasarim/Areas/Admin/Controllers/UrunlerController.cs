@@ -1,27 +1,23 @@
-﻿using LlmService;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using odevVb.Utils;
 using Tasarim.Core.Entities;
 using Tasarim.Data;
+using Tasarim.Service.Concrate.LLM;
+
 namespace Tasarim.Areas.Admin.Controllers
 {
     [Area("Admin"), Authorize(Policy = "AdminPolicy")]
     public class UrunlerController : Controller
     {
         private readonly DatabaseContext _context;
-
-        //  SERVİSİ BURAYA EKLE (BEN EKLEDIM) 
         private readonly UrunGorselYoneticisi _urunGorselYoneticisi;
         
-
-        // Constructor'a yeni parametreyi ekliyoruz (BEN EKLEDIM)
         public UrunlerController(DatabaseContext context, UrunGorselYoneticisi urunGorselYoneticisi) 
         {
             _context = context;
-            // SERVİSİ BURADA EŞİTLE (BEN EKLEDIM) 
             _urunGorselYoneticisi = urunGorselYoneticisi;
             
         }

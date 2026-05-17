@@ -1,12 +1,11 @@
-﻿using LlmService;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Tasarim.Areas.Admin.Models;
 using Tasarim.Data;
-using Tasarim.Service.Concrete.LLM;
+using Tasarim.Service.Concrate.LLM;
 
 namespace Tasarim.Areas.Admin.Controllers
 {
@@ -50,7 +49,7 @@ namespace Tasarim.Areas.Admin.Controllers
         {
             try
             {
-                int adet = await _urunGorselYoneticisi.AnalizEdilmemisGorselleriTopluAnalizEt();
+                int adet = await _urunGorselYoneticisi.AnalizEdilmemisGorselleriTopluAnalizEtAsync();
                 return Json(new { success = true, message = $"{adet} yeni ürün başarıyla analiz edildi." });
             }
             catch (Exception ex)

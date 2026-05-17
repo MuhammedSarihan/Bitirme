@@ -3,7 +3,7 @@ using Tasarim.Service.Abstract;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Tasarim.Service.Concrete
+namespace Tasarim.Service.Concrate
 {
     public class Service<T> : IService<T> where T : class, new()
     {

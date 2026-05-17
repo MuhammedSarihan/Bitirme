@@ -1,5 +1,3 @@
-
-using LlmService;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -7,8 +5,7 @@ using Tasarim.Data;
 using Tasarim.Models;
 using Tasarim.Service.Abstract;
 using Tasarim.Service.Concrate;
-using Tasarim.Service.Concrete;
-using Tasarim.Service.Concrete.LLM;
+using Tasarim.Service.Concrate.LLM;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,18 +16,31 @@ builder.Services.AddHttpClient();
 
 // Hangi LLM'i kullanmak istiyorsan onun başındaki yorum satırını kaldır. 
 
-//YEREL
-//builder.Services.AddScoped<ILlmProvider, OllamaLlmProvider>();
+// YORUM ANALİZİ
+
+//YEREL YORUM ANALİZİ İÇİN OLLAMA MODELİ
+//builder.Services.AddScoped<IYorumProvider, YorumYerelProvider>();
 
 //GROQ API
-builder.Services.AddScoped<ILlmProvider, GroqLlmProvider>();
+builder.Services.AddScoped<IYorumProvider, YorumAPIProvider>();
+
+//GORUNTU ANALİZİ
+
+// OPEN ROUTER API  
+// builder.Services.AddScoped<IGoruntuProvider, GoruntuAPIProvider>();
+
+// YEREL GÖRÜNTÜ ANALİZİ İÇİN OLLAMA MODELİ
+builder.Services.AddScoped<IGoruntuProvider, GoruntuYerelProvider>();
+
+
+
 
 // LLM Yöneticilerini sisteme kaydediyoruz
 builder.Services.AddScoped<YorumAnalizYoneticisi>();
 builder.Services.AddScoped<KumelemeYoneticisi>();
 
 // Gemini SERVİS KAYITLARI BURAYA 
-builder.Services.AddScoped<IGeminiProvider, GeminiLlmProvider>();
+builder.Services.AddScoped<IGoruntuProvider, GoruntuAPIProvider>();
 builder.Services.AddScoped<UrunGorselYoneticisi>();
 
 builder.Services.AddScoped<IKullaniciService, KullaniciService>();

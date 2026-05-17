@@ -1,155 +1,134 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web; // Türkçe Alfabe için
+using System.Text.Json;
+using System.Text.Unicode; // Türkçe Alfabe için
 using Tasarim.Core.Entities;
-using Tasarim.Service.Abstract;
 using Tasarim.Data; // DatabaseContext için
+using Tasarim.Service.Abstract;
 using Microsoft.EntityFrameworkCore;
 
-namespace LlmService
+namespace Tasarim.Service.Concrate.LLM;
+
+public class UrunGorselYoneticisi
 {
-    public class UrunGorselYoneticisi
+    private readonly IGoruntuProvider _goruntuProvider;
+    private readonly DatabaseContext _context;
+
+    // Yorum analizindeki gibi Türkçe karakterlerin işlenmesi ve esnek JSON ayarları
+    private static readonly JsonSerializerOptions _jsonAyarlari = new()
     {
-        private readonly IGeminiProvider _geminiProvider;
-        private readonly DatabaseContext _context; // Veritabanı bağlantısı eklendi
-        public UrunGorselYoneticisi(IGeminiProvider geminiProvider, DatabaseContext context)
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        PropertyNameCaseInsensitive = true,
+        AllowTrailingCommas = true // LLM fazladan virgül koyarsa çökmemesi için
+    };
+
+    public UrunGorselYoneticisi(IGoruntuProvider goruntuProvider, DatabaseContext context)
+    {
+        _goruntuProvider = goruntuProvider;
+        _context = context;
+    }
+
+    public async Task<int> AnalizEdilmemisGorselleriTopluAnalizEtAsync(CancellationToken ct = default)
+    {
+        // SADECE AnalizTablosunda HİÇ kaydı olmayanları getir
+        var bekleyenler = await _context.Urunler
+            .Where(u => !string.IsNullOrEmpty(u.AnaResim))
+            .Where(u => !_context.Set<UrunOzellikleri>().Any(o => o.UrunID == u.ID))
+            .ToListAsync(ct);
+
+        if (bekleyenler.Count == 0)
+            return 0;
+
+        int basariliSayisi = 0;
+        string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+        // Prompt şablonu belleği yormamak için döngü dışında sabit tutulur.
+        string promptSablonu = @"Sen teknik bir veri ayıklama robotusun. Görevin: Görseli analiz et ve verileri SADECE belirtilen JSON formatında döndür.
+
+KRİTİK KURALLAR:
+1. ÇIKTI DİLİ: Tüm veriler kesinlikle Türkçe olmalıdır.
+2. JSON DIŞI METİN: JSON dışında tek bir kelime bile yazma.
+3. BOŞ DEĞERLER: Değerler boş olamaz; 'Bilinmiyor' veya en yakın tahmini yaz.
+
+ÇIKTI ŞABLONU:
+{
+  ""AnaKategori"": ""Kategori adı"",
+  ""AnaRenk"": ""Baskın renk"",
+  ""Materyal"": ""Malzeme tipi"",
+  ""Stil"": ""Tarz örneği"",
+  ""Detaylar"": ""SEO uyumlu kısa açıklama""
+}";
+
+        // Bütün işlemleri tıpkı yorum analizindeki gibi tek döngüde yapıyoruz
+        foreach (var urun in bekleyenler)
         {
-            _geminiProvider = geminiProvider;
-            _context = context;
-        }
-
-        public async Task<int> AnalizEdilmemisGorselleriTopluAnalizEt()
-        {
-            // SADECE AnalizTablosunda HİÇ kaydı olmayanları getir (Böylece eskiden analiz edilen 5 taneye dokunmaz)
-            var bekleyenler = await _context.Urunler
-                .Where(u => !string.IsNullOrEmpty(u.AnaResim))
-                .Where(u => !_context.Set<UrunOzellikleri>().Any(o => o.UrunID == u.ID))
-                .ToListAsync();
-
-            int basariliSayisi = 0;
-            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-            foreach (var urun in bekleyenler)
-            {
-                try
-                {
-                    // Veritabanındaki ismi temizle
-                    string sadeceDosyaAdi = Path.GetFileName(urun.AnaResim).Trim();
-
-                    // SENİN KLASÖRÜN: Resimlerin 'img' klasöründe olduğunu gördüm
-                    string yol1 = Path.Combine(wwwroot, "img", sadeceDosyaAdi);
-                    string yol2 = Path.Combine(wwwroot, urun.AnaResim.Replace("/", "\\").TrimStart('\\'));
-
-                    // Hangi yol doluysa onu al
-                    string gercekYol = File.Exists(yol1) ? yol1 : (File.Exists(yol2) ? yol2 : null);
-
-                    if (gercekYol == null)
-                    {
-                        // Buraya hata kaydetmiyoruz ki "0" görünmesin, sadece dosyayı bulamazsa atlasın
-                        continue;
-                    }
-
-                    byte[] imageBytes = await File.ReadAllBytesAsync(gercekYol);
-                    var sonuc = await GorseliAnalizEt(imageBytes, urun.ID);
-
-                    if (sonuc != null)
-                    {
-                        _context.Set<UrunOzellikleri>().Add(sonuc);
-                        basariliSayisi++;
-                    }
-                }
-                catch { continue; }
-            }
-
-            await _context.SaveChangesAsync();
-            return basariliSayisi;
-        }
-
-
-        public async Task<UrunOzellikleri> GorseliAnalizEt(byte[] imageBytes, int urunId)
-        {
-            string prompt = @"Sen teknik bir veri ayıklama robotusun. 
-           Görevin: Görseli analiz et ve verileri SADECE JSON objesi olarak döndür.
-           KRİTİK KURALLAR:
-           1. JSON dışında tek bir kelime bile yazma.
-           2. Kod blokları (```json ) kullanma, doğrudan '{' ile başla ve '}' ile bitir.
-           3. Değerler boş olamaz; 'Bilinmiyor' veya en yakın tahmini yaz.
-
-          JSON FORMATI:
-          {
-          ""AnaKategori"": ""Kategori adı"",
-          ""AnaRenk"": ""Baskın renk"",
-          ""Materyal"": ""Malzeme tipi"",
-          ""Stil"": ""Tarz örneği"",
-          ""Detaylar"": ""SEO uyumlu kısa açıklama""
-          }";
-
-            string rawResponse = await _geminiProvider.AnalyzeImageAsync(prompt, imageBytes);
-
-            // EĞER GELEN YANIT "Hata" İLE BAŞLIYORSA JSON OLARAK İŞLEME, DOĞRUDAN KAYDET
-            if (rawResponse.StartsWith("Hata"))
-            {
-                return new UrunOzellikleri
-                {
-                    UrunID = urunId,
-                    Detaylar = rawResponse // Hatayı buraya yazdırıyoruz
-                };
-            }
-
-
-            // Daha agresif temizlik: Sadece { ve } arasını al
-            string cleanJson = rawResponse;
-            int start = cleanJson.IndexOf("{");
-            int end = cleanJson.LastIndexOf("}");
-            if (start != -1 && end != -1)
-            {
-                cleanJson = cleanJson.Substring(start, (end - start) + 1);
-            }
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    AllowTrailingCommas = true
-                };
+                string sadeceDosyaAdi = Path.GetFileName(urun.AnaResim).Trim();
+                string yol1 = Path.Combine(wwwroot, "img", sadeceDosyaAdi);
+                string yol2 = Path.Combine(wwwroot, urun.AnaResim.Replace("/", "\\").TrimStart('\\'));
 
-                var result = JsonSerializer.Deserialize<UrunOzellikleri>(cleanJson, options);
+                string gercekYol = File.Exists(yol1) ? yol1 : (File.Exists(yol2) ? yol2 : null);
 
-                if (result != null)
+                if (gercekYol == null)
+                    continue;
+
+                byte[] imageBytes = await File.ReadAllBytesAsync(gercekYol, ct);
+
+                // RTX 3060'ın VRAM'ini ve yerel sunucuyu yormamak için her görsel arası es veriyoruz
+                await Task.Delay(2000, ct);
+
+                string rawResponse = await _goruntuProvider.AnalyzeImageAsync(promptSablonu, imageBytes);
+
+                // API'den veya LLM'den donanımsal/sistemsel bir hata dönerse atla (veritabanını kirletme)
+                if (rawResponse.StartsWith("Hata") || rawResponse.StartsWith("Sistem") || rawResponse.StartsWith("Ollama"))
                 {
-                    result.UrunID = urunId;
-                    if (string.IsNullOrEmpty(result.AnaKategori))
-                    {
-                        result.Detaylar = "Ham Yanit: " + cleanJson.Substring(0, Math.Min(cleanJson.Length, 100));
-                    }
+                    Console.WriteLine($"Urun ID {urun.ID} için Hata: {rawResponse}");
+                    continue;
                 }
-                return result;
-            } // Try burada bitiyor
+
+                // Yorum analizindeki güçlü Markdown/JSON temizlik algoritması
+                string jsonYanit = rawResponse.Replace("```json", "").Replace("```", "").Trim();
+
+                int baslangic = jsonYanit.IndexOf('{');
+                int bitis = jsonYanit.LastIndexOf('}');
+
+                if (baslangic >= 0 && bitis > baslangic)
+                {
+                    jsonYanit = jsonYanit.Substring(baslangic, bitis - baslangic + 1);
+                }
+                else
+                {
+                    throw new FormatException("LLM geçerli bir JSON formatı döndürmedi. Gelen Yanıt: " + rawResponse);
+                }
+
+                // JSON'ı güvenli bir şekilde C# nesnesine çevir (Türkçe karakter kaybı olmadan)
+                var analizVerisi = JsonSerializer.Deserialize<UrunOzellikleri>(jsonYanit, _jsonAyarlari);
+
+                if (analizVerisi != null)
+                {
+                    analizVerisi.UrunID = urun.ID;
+
+                    // Veriyi context'e ekle (henüz veritabanına gitmiyor, hafızada bekliyor)
+                    _context.Set<UrunOzellikleri>().Add(analizVerisi);
+                    basariliSayisi++;
+                }
+            }
             catch (Exception ex)
             {
-                // Hata durumunda burası çalışır
-                return new UrunOzellikleri
-                {
-                    UrunID = urunId,
-                    Detaylar = "Hata oluştu: " + ex.Message
-                };
+                Console.WriteLine($"Urun ID {urun.ID} Görsel Analiz Hatası: {ex.Message}");
             }
         }
 
+        // Döngü bittikten sonra hafızada biriken tüm ürün özellikleri TEK SEFERDE veritabanına kaydedilir
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (Exception dbEx)
+        {
+            Console.WriteLine("Veritabanı toplu kayıt hatası: " + dbEx.Message);
+        }
 
+        return basariliSayisi;
     }
 }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

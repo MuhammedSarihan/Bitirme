@@ -6,7 +6,7 @@ using Tasarim.Core.Entities;
 using Tasarim.Data;
 using Tasarim.ExtensionMethods;
 using Tasarim.Service.Abstract;
-using Tasarim.Service.Concrete.LLM;
+using Tasarim.Service.Concrate.LLM;
 namespace Tasarim.Controllers
 {
     public class UrunlerController : Controller
@@ -14,8 +14,8 @@ namespace Tasarim.Controllers
         private readonly DatabaseContext _context;
         private readonly KumelemeYoneticisi _kumelemeYoneticisi;
         // goruntu isleme icin eklendi
-        private readonly IGeminiProvider _geminiProvider;
-        public UrunlerController(DatabaseContext context, KumelemeYoneticisi kumelemeYoneticisi, IGeminiProvider geminiProvider)
+        private readonly IGoruntuProvider _geminiProvider;
+        public UrunlerController(DatabaseContext context, KumelemeYoneticisi kumelemeYoneticisi, IGoruntuProvider geminiProvider)
         {
             _context = context;
             _kumelemeYoneticisi = kumelemeYoneticisi;

@@ -1,17 +1,18 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Tasarim.Service.Abstract;
 
 
 //Bu sınıfta Groq API'sine istek atıyoruz
-namespace LlmService;
+namespace Tasarim.Service.Concrate.LLM;
 
-public class GroqLlmProvider : ILlmProvider
+public class YorumAPIProvider : IYorumProvider
 {
     private readonly HttpClient _http;
     private readonly string _apiKey;
 
-    public GroqLlmProvider(HttpClient http, IConfiguration config)
+    public YorumAPIProvider(HttpClient http, IConfiguration config)
     {
         _http = http;
         // appsettings.json'dan API key'i oku
