@@ -28,29 +28,28 @@ namespace Tasarim.Areas.Admin.Controllers
 
         //Yapay Zeka işlemlerini sırayla tetikleyen bir aksiyon
         [HttpPost]
-        public async Task<IActionResult> BekleyenleriAnalizEt()
+        public async Task<IActionResult> BekleyenleriAnalizEt(bool isLocal)
         {
             try
             {
-                await _analizYoneticisi.BekleyenYorumlariAnalizEtAsync();
+                await _analizYoneticisi.BekleyenYorumlariAnalizEtAsync(isLocal);
                 await _kumelemeYoneticisi.UrunleriKumeleVeAnalizEtAsync();
-                TempData["Mesaj"] = "Bekleyen tüm yorumlar başarıyla analiz edildi!";
+                return Json(new { success = true, message = "Analiz işlemi başarıyla tamamlandı!" });
             }
             catch (Exception ex)
             {
-                TempData["Hata"] = $"İşlem zincirinde bir hata oluştu: {ex.Message}";
+                return Json(new { success = false, message = "Hata: " + ex.Message });
             }
             return RedirectToAction("Index");
         }
 
-        // --- YENİ EKLEDİĞİMİZ METOT ---
         [HttpPost]
-        public async Task<IActionResult> TopluGorselAnalizEt()
+        public async Task<IActionResult> TopluGorselAnalizEt(bool isLocal)
         {
             try
             {
-                int adet = await _urunGorselYoneticisi.AnalizEdilmemisGorselleriTopluAnalizEtAsync();
-                return Json(new { success = true, message = $"{adet} yeni ürün başarıyla analiz edildi." });
+                int adet = await _urunGorselYoneticisi.AnalizEdilmemisGorselleriTopluAnalizEtAsync(isLocal);
+                return Json(new { success = true, message = $"{adet} ürün başarıyla analiz edildi." });
             }
             catch (Exception ex)
             {

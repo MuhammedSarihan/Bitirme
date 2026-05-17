@@ -28,48 +28,47 @@
         </form>
     </div>
 
-    <div class="col-xl-4 col-lg-6 d-flex justify-content-xl-end justify-content-start gap-3">
-        @if (!Model.SeciliUrunId.HasValue)
-        {
-            <div class="d-flex flex-column align-items-center" style="min-width: 200px;">
-                <form asp-controller="Main" asp-action="BekleyenleriAnalizEt" method="post" class="m-0 w-100">
-                    <button type="submit" id="btnAnalizGuncelle" class="btn btn-dark rounded-pill shadow-sm w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 py-2">
-                        <i class="fa-solid fa-robot text-gold me-2 transition-inherit"></i> Yorumları Analiz Et
-                    </button>
-                </form>
-                <div class="mt-2 text-center w-100">
-                    @if(Model.BekleyenYorumSayisi > 0) {
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
-                            <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true" style="width: 0.4rem; height: 0.4rem;"></span>
-                            @Model.BekleyenYorumSayisi Bekleyen Yorum
-                        </span>
-                    } else {
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
-                            <i class="fa-solid fa-check me-2"></i> 0 Bekleyen Yorum
-                        </span>
-                    }
-                </div>
+<div class="col-xl-4 col-lg-6 d-flex justify-content-xl-end justify-content-start gap-3">
+    @if (!Model.SeciliUrunId.HasValue)
+    {
+        <div class="d-flex flex-column align-items-center" style="min-width: 200px;">
+            <button type="button" id="btnAnalizGuncelle" class="btn btn-dark rounded-pill shadow-sm w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 py-2">
+                <i class="fa-solid fa-robot text-gold me-2 transition-inherit"></i> Yorumları Analiz Et
+            </button>
+            
+            <div class="mt-2 text-center w-100">
+                @if(Model.BekleyenYorumSayisi > 0) {
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                        <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true" style="width: 0.4rem; height: 0.4rem;"></span>
+                        @Model.BekleyenYorumSayisi Bekleyen Yorum
+                    </span>
+                } else {
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                        <i class="fa-solid fa-check me-2"></i> 0 Bekleyen Yorum
+                    </span>
+                }
             </div>
+        </div>
 
-            <div class="d-flex flex-column align-items-center" style="min-width: 200px;">
-                <button type="button" id="btnTopluGorselAnaliz" class="btn btn-outline-dark rounded-pill shadow-sm w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 py-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-gold me-2 transition-inherit"></i> Görselleri Analiz Et
-                </button>
-                <div class="mt-2 text-center w-100">
-                    @if(Model.BekleyenGorselSayisi > 0) {
-                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
-                            <span class="spinner-grow spinner-grow-sm text-warning me-2" role="status" aria-hidden="true" style="width: 0.4rem; height: 0.4rem;"></span>
-                            @Model.BekleyenGorselSayisi Bekleyen Görsel
-                        </span>
-                    } else {
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
-                            <i class="fa-solid fa-check me-2"></i> 0 Bekleyen Görsel
-                        </span>
-                    }
-                </div>
+        <div class="d-flex flex-column align-items-center" style="min-width: 200px;">
+            <button type="button" id="btnTopluGorselAnaliz" class="btn btn-outline-dark rounded-pill shadow-sm w-100 fw-bold letter-spacing-1 hover-gold-bg transition-300 py-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-gold me-2 transition-inherit"></i> Görselleri Analiz Et
+            </button>
+            
+            <div class="mt-2 text-center w-100">
+                @if(Model.BekleyenGorselSayisi > 0) {
+                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                        <span class="spinner-grow spinner-grow-sm text-warning me-2" role="status" aria-hidden="true" style="width: 0.4rem; height: 0.4rem;"></span>
+                        @Model.BekleyenGorselSayisi Bekleyen Görsel
+                    </span>
+                } else {
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center w-100 justify-content-center">
+                        <i class="fa-solid fa-check me-2"></i> 0 Bekleyen Görsel
+                    </span>
+                }
             </div>
-        }
-    </div>
+        </div>
+    }
 </div>
 
     @*--------------------- ÜRÜN SEÇİLMEDİĞİNDE GÖSTERİLECEK BÖLÜM (ANA EKRAN) ---------------------*@
@@ -341,137 +340,142 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
             
-            // 1. Select2 Başlatma
-            if ($.fn.select2) {
-                $('#urunSecici').select2({
-                    theme: 'bootstrap-5',
-                    placeholder: 'Ürün ara veya seç...',
-                    width: '100%',
-                    language: { noResults: () => "Ürün bulunamadı" }
-                });
-            }
-
-            // 2. Bar Grafik Çizici Fonksiyonu
-            function initBarChart(canvasId, labels, data, bgColor, borderColor, labelName) {
-                const canvas = document.getElementById(canvasId);
-                if (!canvas || labels.length === 0) return;
-
-                new Chart(canvas.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{ label: labelName, data: data, backgroundColor: bgColor, borderColor: borderColor, borderWidth: 1, borderRadius: 6 }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } } }
-                    }
-                });
-            }
-
-            // 3. Pasta Grafiği
-            const ctxSentiment = document.getElementById('sentimentChart');
-            if (ctxSentiment) {
-                new Chart(ctxSentiment.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Pozitif', 'Nötr', 'Negatif'],
-                        datasets: [{
-                            data: [@Model.ToplamPozitif, @Model.ToplamNotr, @Model.ToplamNegatif],
-                            backgroundColor: ['#198754', '#6c757d', '#dc3545'],
-                            borderWidth: 2, borderColor: '#ffffff', cutout: '75%', hoverOffset: 4
-                        }]
-                    },
-                    options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
-                });
-            }
-
-            // 4. Grafikleri Veriyle Doldurma (Yardımcı fonksiyon ile temizlendi)
-            const parseJson = (raw) => JSON.parse(raw || '[]');
-            
-            initBarChart('topProductsChart', 
-                parseJson('@Html.Raw(Json.Serialize(Model.EnPozitifUrunAdlari))'), 
-                parseJson('@Html.Raw(Json.Serialize(Model.EnPozitifUrunSkorlari))'), 
-                'rgba(25, 135, 84, 0.8)', 'rgba(25, 135, 84, 1)', 'Pozitif Yorum');
-
-            initBarChart('negativeProductsChart', 
-                parseJson('@Html.Raw(Json.Serialize(Model.EnNegatifUrunAdlari))'), 
-                parseJson('@Html.Raw(Json.Serialize(Model.EnNegatifUrunSkorlari))'), 
-                'rgba(220, 53, 69, 0.8)', 'rgba(220, 53, 69, 1)', 'Negatif Yorum');
-
-            // 5. MERKEZİ SWEETALERT FONKSİYONU (Optimizasyonun Kalbi)
-            function swalOnayVeYukle(ayar, islemCallback) {
-                Swal.fire({
-                    title: ayar.baslik,
-                    text: ayar.metin,
-                    icon: ayar.icon || 'info',
-                    iconColor: '#D4AF37',
-                    showCancelButton: true,
-                    confirmButtonText: ayar.onayButonAdi || 'Başlat',
-                    cancelButtonText: 'İptal',
-                    customClass: {
-                        confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm',
-                        cancelButton: 'btn btn-outline-secondary rounded-pill px-4 shadow-sm ms-2'
-                    },
-                    buttonsStyling: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                            title: ayar.yukleniyorBaslik || 'İşlem Sürüyor...',
-                            text: 'Lütfen sayfayı kapatmayın.',
-                            allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); }
-                        });
-                        islemCallback(); // Onaylanırsa asıl işlemi başlat
-                    }
-                });
-            }
-
-            // 6. Aksiyon Tetikleyiciler (Temiz ve DRY - Kendini Tekrar Etmeyen Yapı)
-            const btnGorselAnaliz = document.getElementById('btnTopluGorselAnaliz');
-            if (btnGorselAnaliz) {
-                btnGorselAnaliz.onclick = function (e) {
-                    e.preventDefault();
-                    swalOnayVeYukle({
-                        baslik: 'Toplu Analiz Başlatılıyor',
-                        metin: 'Henüz analiz edilmemiş ürün görselleri taranıyor.',
-                        yukleniyorBaslik: 'Analiz Sürüyor...'
-                    }, function () {
-                        fetch('/Admin/Main/TopluGorselAnalizEt', { method: 'POST' })
-                            .then(response => response.json())
-                            .then(data => {
-                                Swal.fire({
-                                    title: data.success ? 'Tamamlandı!' : 'Hata',
-                                    text: data.message,
-                                    icon: data.success ? 'success' : 'error',
-                                    customClass: { confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm' },
-                                    buttonsStyling: false
-                                }).then(() => { if(data.success) location.reload(); });
-                            }).catch(() => {
-                                Swal.fire({ title: 'Hata', text: 'Sistem hatası oluştu.', icon: 'error', customClass: { confirmButton: 'btn btn-dark rounded-pill px-4 shadow-sm' }, buttonsStyling: false });
-                            });
-                    });
-                };
-            }
-
-            const btnAnalizGuncelle = document.getElementById('btnAnalizGuncelle');
-            if (btnAnalizGuncelle) {
-                btnAnalizGuncelle.onclick = function (e) {
-                    e.preventDefault(); // Gizli Bug Çözümü: Formun onaydan önce gönderilmesini engeller
-                    swalOnayVeYukle({
-                        baslik: 'Analiz Güncellensin mi?',
-                        metin: 'Bekleyen ürünlerin analizi yeniden oluşturulacak.',
-                        onayButonAdi: 'Güncelle',
-                        yukleniyorBaslik: 'Analiz Güncelleniyor...'
-                    }, function () {
-                        btnAnalizGuncelle.closest('form').submit();
-                    });
-                };
-            }
-
+    // 1. Select2 Başlatma
+    if ($.fn.select2) {
+        $('#urunSecici').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Ürün ara veya seç...',
+            width: '100%',
+            language: { noResults: () => "Ürün bulunamadı" }
         });
+    }
+
+    // 2. Bar Grafik Çizici Fonksiyonu
+    function initBarChart(canvasId, labels, data, bgColor, borderColor, labelName) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || labels.length === 0) return;
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ label: labelName, data: data, backgroundColor: bgColor, borderColor: borderColor, borderWidth: 1, borderRadius: 6 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } } }
+            }
+        });
+    }
+
+    // 3. Pasta Grafiği
+    const ctxSentiment = document.getElementById('sentimentChart');
+    if (ctxSentiment) {
+        new Chart(ctxSentiment.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Pozitif', 'Nötr', 'Negatif'],
+                datasets: [{
+                    data: [@Model.ToplamPozitif, @Model.ToplamNotr, @Model.ToplamNegatif],
+                    backgroundColor: ['#198754', '#6c757d', '#dc3545'],
+                    borderWidth: 2, borderColor: '#ffffff', cutout: '75%', hoverOffset: 4
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // 4. Grafikleri Veriyle Doldurma
+    const parseJson = (raw) => JSON.parse(raw || '[]');
+    
+    initBarChart('topProductsChart', 
+        parseJson('@Html.Raw(Json.Serialize(Model.EnPozitifUrunAdlari))'), 
+        parseJson('@Html.Raw(Json.Serialize(Model.EnPozitifUrunSkorlari))'), 
+        'rgba(25, 135, 84, 0.8)', 'rgba(25, 135, 84, 1)', 'Pozitif Yorum');
+
+    initBarChart('negativeProductsChart', 
+        parseJson('@Html.Raw(Json.Serialize(Model.EnNegatifUrunAdlari))'), 
+        parseJson('@Html.Raw(Json.Serialize(Model.EnNegatifUrunSkorlari))'), 
+        'rgba(220, 53, 69, 0.8)', 'rgba(220, 53, 69, 1)', 'Negatif Yorum');
+
+    // 5. MERKEZİ SWEETALERT VE MOD SEÇİM SİHİRBAZI
+    function swalModSecVeYukle(ayar, urlEndpoint) {
+        Swal.fire({
+            title: ayar.baslik,
+            text: 'Lütfen işlem hacmine göre bir analiz yöntemi seçin.',
+            icon: 'question',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-cloud me-1"></i> Az Ürün (API)',
+            denyButtonText: '<i class="fa-solid fa-desktop me-1"></i> Çok Ürün (Yerel)',
+            cancelButtonText: 'İptal',
+            customClass: {
+                confirmButton: 'btn btn-success rounded-pill px-3 shadow-sm me-2',
+                denyButton: 'btn btn-primary rounded-pill px-3 shadow-sm me-2',
+                cancelButton: 'btn btn-outline-secondary rounded-pill px-3 shadow-sm'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            let isLocal = false;
+            
+            if (result.isConfirmed) {
+                isLocal = false; // API Modu (Az Ürün)
+            } else if (result.isDenied) {
+                isLocal = true;  // Yerel Mod (Çok Ürün)
+            } else {
+                return; // İptal edildi, fonksiyondan çık
+            }
+
+            // Yükleniyor ekranı
+            Swal.fire({ 
+                title: 'Analiz Sürüyor...', 
+                text: 'Yapay zeka çalışıyor, lütfen sayfayı kapatmayın.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            // Seçilen bool değerini Controller'a gönder
+            fetch(`${urlEndpoint}?isLocal=${isLocal}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire({
+                        title: data.success ? 'Başarılı!' : 'Hata',
+                        text: data.message,
+                        icon: data.success ? 'success' : 'error',
+                        customClass: { confirmButton: 'btn btn-dark rounded-pill px-4' },
+                        buttonsStyling: false
+                    }).then(() => { if(data.success) location.reload(); });
+                }).catch(() => {
+                    Swal.fire({
+                        title: 'Hata',
+                        text: 'Sunucuyla iletişim kurulurken bir sorun oluştu.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-dark rounded-pill px-4' },
+                        buttonsStyling: false
+                    });
+                });
+        });
+    }
+
+    // 6. BUTONLARA TIKLAMA OLAYLARI (Temizlenmiş Hali)
+    const btnGorsel = document.getElementById('btnTopluGorselAnaliz');
+    if (btnGorsel) {
+        btnGorsel.addEventListener('click', function(e) {
+            e.preventDefault();
+            swalModSecVeYukle({ baslik: 'Görsel Analiz Modu' }, '/Admin/Main/TopluGorselAnalizEt');
+        });
+    }
+
+    const btnYorum = document.getElementById('btnAnalizGuncelle');
+    if (btnYorum) {
+        btnYorum.addEventListener('click', function(e) {
+            e.preventDefault();
+            swalModSecVeYukle({ baslik: 'Yorum Analiz Modu' }, '/Admin/Main/BekleyenleriAnalizEt');
+        });
+    }
+});
     </script>
 }

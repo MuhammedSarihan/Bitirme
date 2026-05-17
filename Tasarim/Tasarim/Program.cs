@@ -19,18 +19,18 @@ builder.Services.AddHttpClient();
 // YORUM ANALİZİ
 
 //YEREL YORUM ANALİZİ İÇİN OLLAMA MODELİ
-builder.Services.AddScoped<IYorumProvider, YorumYerelProvider>();
+builder.Services.AddScoped<YorumYerelProvider>();
 
 //GROQ API
-//builder.Services.AddScoped<IYorumProvider, YorumAPIProvider>();
+builder.Services.AddScoped<YorumAPIProvider>();
 
 //GORUNTU ANALİZİ
 
 // OPEN ROUTER API  
-// builder.Services.AddScoped<IGoruntuProvider, GoruntuAPIProvider>();
+builder.Services.AddScoped<GoruntuAPIProvider>();
 
 // YEREL GÖRÜNTÜ ANALİZİ İÇİN OLLAMA MODELİ
-builder.Services.AddScoped<IGoruntuProvider, GoruntuYerelProvider>();
+builder.Services.AddScoped<GoruntuYerelProvider>();
 
 
 
@@ -38,9 +38,11 @@ builder.Services.AddScoped<IGoruntuProvider, GoruntuYerelProvider>();
 // LLM Yöneticilerini sisteme kaydediyoruz
 builder.Services.AddScoped<YorumAnalizYoneticisi>();
 builder.Services.AddScoped<KumelemeYoneticisi>();
-
-// Gemini SERVİS KAYITLARI BURAYA 
 builder.Services.AddScoped<UrunGorselYoneticisi>();
+
+builder.Services.AddScoped<IGoruntuProvider>(sp => sp.GetRequiredService<GoruntuAPIProvider>());
+builder.Services.AddScoped<IYorumProvider>(sp => sp.GetRequiredService<YorumAPIProvider>());
+
 
 builder.Services.AddScoped<IKullaniciService, KullaniciService>();
 // sepet

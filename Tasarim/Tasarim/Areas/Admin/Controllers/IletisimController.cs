@@ -94,13 +94,15 @@ namespace Tasarim.Areas.Admin.Controllers
             var yorum = await _context.Yorumlar.FindAsync(id);
             if (yorum != null)
             {
-                yorum.YasakliKelime = false; // Onaylandı, değer false yapıldı
-                yorum.AnalizEdilirMi = 1; // Analiz edilecek olarak işaretlendi
+                yorum.YasakliKelime = false;
+                yorum.AnalizEdilirMi = 1;
 
                 _context.Update(yorum);
                 await _context.SaveChangesAsync();
 
-                await _analizYoneticisi.BekleyenYorumlariAnalizEtAsync();
+                // Tek yorum olduğu için isLocal: false (API) gönderiyoruz!
+                await _analizYoneticisi.BekleyenYorumlariAnalizEtAsync(false);
+
                 await _kumelemeYoneticisi.UrunleriKumeleVeAnalizEtAsync();
                 TempData["Success"] = "Yorum onaylandı ve analiz edildi.";
             }

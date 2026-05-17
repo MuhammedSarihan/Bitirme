@@ -11,7 +11,8 @@ namespace Tasarim.Service.Concrate.LLM;
 public class YorumAnalizYoneticisi
 {
     private readonly DatabaseContext _context;
-    private readonly IYorumProvider _llmProvider;
+    private readonly YorumYerelProvider _yerelProvider;
+    private readonly YorumAPIProvider _apiProvider;
 
     //Türkçe karakterlerin işlenmesi ve büyük/küçük harf duyarlılığının esnetilmesi için JsonSerialize ayarları
     private static readonly JsonSerializerOptions _jsonAyarlari = new()
@@ -19,13 +20,14 @@ public class YorumAnalizYoneticisi
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
         PropertyNameCaseInsensitive = true 
     };
-    public YorumAnalizYoneticisi(DatabaseContext context, IYorumProvider llmProvider)
+    public YorumAnalizYoneticisi(DatabaseContext context, YorumYerelProvider yerelProvider, YorumAPIProvider apiProvider)
     {
         _context = context;
-        _llmProvider = llmProvider;
+        _yerelProvider = yerelProvider;
+        _apiProvider = apiProvider;
     }
 
-    public async Task BekleyenYorumlariAnalizEtAsync(CancellationToken ct = default)
+    public async Task BekleyenYorumlariAnalizEtAsync(bool isLocal, CancellationToken ct = default)
     {
         //YorumAnalizleri tablosunda YorumID'si BULUNMAYAN yorumları çek
         var bekleyenYorumlar = await _context.Yorumlar
@@ -58,6 +60,8 @@ KURALLAR:
 ANALİZ EDİLECEK YORUM:
 ""{0}""";
 
+        IYorumProvider aktifProvider = isLocal ? _yerelProvider : _apiProvider;
+
         foreach (var yorum in bekleyenYorumlar)
         {
             bool adminManuelOnayladi = (yorum.AnalizEdilirMi == 1);
@@ -68,8 +72,7 @@ ANALİZ EDİLECEK YORUM:
 
                 await Task.Delay(2000, ct);
 
-                var jsonYanit = await _llmProvider.AnalyzeAsync(prompt, ct);
-
+                string jsonYanit = await aktifProvider.AnalyzeAsync(prompt, ct);
                 jsonYanit = jsonYanit.Replace("```json", "").Replace("```", "").Trim();
 
                 int baslangic = jsonYanit.IndexOf('{');

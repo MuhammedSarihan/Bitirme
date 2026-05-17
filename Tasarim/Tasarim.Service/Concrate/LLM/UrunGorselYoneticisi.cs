@@ -10,7 +10,8 @@ namespace Tasarim.Service.Concrate.LLM;
 
 public class UrunGorselYoneticisi
 {
-    private readonly IGoruntuProvider _goruntuProvider;
+    private readonly GoruntuYerelProvider _yerelProvider;
+    private readonly GoruntuAPIProvider _apiProvider;
     private readonly DatabaseContext _context;
 
     // Yorum analizindeki gibi Türkçe karakterlerin işlenmesi ve esnek JSON ayarları
@@ -21,13 +22,14 @@ public class UrunGorselYoneticisi
         AllowTrailingCommas = true // LLM fazladan virgül koyarsa çökmemesi için
     };
 
-    public UrunGorselYoneticisi(IGoruntuProvider goruntuProvider, DatabaseContext context)
+    public UrunGorselYoneticisi(GoruntuYerelProvider yerelProvider, GoruntuAPIProvider apiProvider, DatabaseContext context)
     {
-        _goruntuProvider = goruntuProvider;
+        _yerelProvider = yerelProvider;
+        _apiProvider = apiProvider;
         _context = context;
     }
 
-    public async Task<int> AnalizEdilmemisGorselleriTopluAnalizEtAsync(CancellationToken ct = default)
+    public async Task<int> AnalizEdilmemisGorselleriTopluAnalizEtAsync(bool isLocal, CancellationToken ct = default)
     {
         // SADECE AnalizTablosunda HİÇ kaydı olmayanları getir
         var bekleyenler = await _context.Urunler
@@ -58,6 +60,8 @@ KRİTİK KURALLAR:
   ""Detaylar"": ""SEO uyumlu kısa açıklama""
 }";
 
+        IGoruntuProvider aktifProvider = isLocal ? _yerelProvider : _apiProvider;
+
         // Bütün işlemleri tıpkı yorum analizindeki gibi tek döngüde yapıyoruz
         foreach (var urun in bekleyenler)
         {
@@ -77,8 +81,7 @@ KRİTİK KURALLAR:
                 // RTX 3060'ın VRAM'ini ve yerel sunucuyu yormamak için her görsel arası es veriyoruz
                 await Task.Delay(2000, ct);
 
-                string rawResponse = await _goruntuProvider.AnalyzeImageAsync(promptSablonu, imageBytes);
-
+                string rawResponse = await aktifProvider.AnalyzeImageAsync(promptSablonu, imageBytes);
                 // API'den veya LLM'den donanımsal/sistemsel bir hata dönerse atla (veritabanını kirletme)
                 if (rawResponse.StartsWith("Hata") || rawResponse.StartsWith("Sistem") || rawResponse.StartsWith("Ollama"))
                 {
