@@ -101,9 +101,15 @@ namespace Tasarim.Controllers
             {
                 // EKLEME 1: Kullanıcı adı daha önce alınmış mı kontrolü
                 var mevcutKullanici = await _kullaniciService.GetAsync(x => x.KullaniciAd == model.KullaniciAd);
+                var mevcutmail = await _profilService.GetAsync(x => x.Mail == model.Mail);
                 if (mevcutKullanici != null)
                 {
                     ModelState.AddModelError("KullaniciAd", "Bu kullanıcı adı zaten kullanılıyor. Lütfen başka bir tane seçin.");
+                    return View(model);
+                }
+                if (mevcutmail != null)
+                {
+                    ModelState.AddModelError("Mail", "Bu mail zaten kullanılıyor. Lütfen başka bir tane seçin.");
                     return View(model);
                 }
                 string hashlendi = BCrypt.Net.BCrypt.HashPassword(model.Sifre);

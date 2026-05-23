@@ -158,32 +158,50 @@ namespace Tasarim.Areas.Admin.Controllers
         //Kampanyaya Ürünler Atama İşlemi
         public async Task<IActionResult> UrunAta(int id)
         {
-            // Kampanyayı ve içindeki mevcut ürünleri bul
             var kampanya = await _context.Kampanyalar
                 .Include(k => k.KampanyaUrunleri)
                 .FirstOrDefaultAsync(k => k.ID == id);
 
             if (kampanya == null) return NotFound();
 
-            // Sistemdeki TÜM ürünleri getir
-            var butunUrunler = await _context.Urunler.ToListAsync();
+            // DİKKAT: Kategori ve Marka tablolarını da Include ile çekiyoruz
+            var butunUrunler = await _context.Urunler
+                .Include(u => u.Kategori)
+                .Include(u => u.Marka)
+                .ToListAsync();
 
-            // Ekrana göndereceğimiz modeli dolduruyoruz
             var model = new List<KampanyaUrunViewModel>();
+
+            // Filtre dropdownları için benzersiz kategori ve markaları topluyoruz
+            var kategoriler = new List<string>();
+            var markalar = new List<string>();
 
             foreach (var urun in butunUrunler)
             {
+                string katAd = urun.Kategori != null ? urun.Kategori.KategoriAd : "Kategorisiz";
+                string marAd = urun.Marka != null ? urun.Marka.MarkaAd : "Markasız";
+
+                // Dropdown için listeleri dolduruyoruz
+                if (!kategoriler.Contains(katAd)) kategoriler.Add(katAd);
+                if (!markalar.Contains(marAd)) markalar.Add(marAd);
+
                 model.Add(new KampanyaUrunViewModel
                 {
                     UrunID = urun.ID,
                     UrunKod = urun.UrunKod,
-                    // Eğer ürün zaten bu kampanyanın içindeyse, SeciliMi = true olacak
+                    UrunAd = urun.Aciklama,
+                    KategoriAd = katAd,
+                    MarkaAd = marAd,
+                    // Eğer ürünün ana resmi 'AnaResim' gibi bir property ise buraya ekle, yoksa boş bırak
+                    ResimUrl = urun.AnaResim,
                     SeciliMi = kampanya.KampanyaUrunleri.Any(ku => ku.UrunID == urun.ID)
                 });
             }
 
             ViewBag.KampanyaAd = kampanya.KampanyaAd;
             ViewBag.KampanyaID = kampanya.ID;
+            ViewBag.Kategoriler = kategoriler;
+            ViewBag.Markalar = markalar;
 
             return View(model);
         }

@@ -1,58 +1,116 @@
 ﻿@using Tasarim.Areas.Admin.Models
 @model List<KampanyaUrunViewModel>
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+@{
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
         <div>
-            <h3 class="mb-0 text-dark fw-bold">
-                <i class="fa-solid fa-clipboard-list text-primary me-2"></i>@ViewBag.KampanyaAd - Ürün Yönetimi
+            <h3 class="mb-0 text-dark fw-bold font-playfair text-uppercase letter-spacing-1">
+                <i class="fa-solid fa-clipboard-list text-gold me-2"></i>@ViewBag.KampanyaAd
             </h3>
-            <p class="text-muted small mt-1 mb-0">Bu kampanyaya dahil etmek istediğiniz ürünleri seçin veya mevcut ürünleri çıkarın.</p>
+            <div style="width: 50px; height: 2px; background-color: #D4AF37;" class="mt-2"></div>
+            <p class="text-muted small mt-2 mb-0 letter-spacing-1 text-uppercase">
+                Kampanyaya dahil etmek istediğiniz ürünleri filtreleyerek seçin.
+            </p>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-0 shadow-sm rounded-0 mb-4 bg-light">
         <div class="card-body p-4">
-            
-            <div class="mb-4">
-                <div class="input-group shadow-sm rounded-pill overflow-hidden" style="max-width: 400px; border: 1px solid #dee2e6;">
-                    <span class="input-group-text bg-white border-0 text-muted ps-3">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" id="searchInput" class="form-control border-0 shadow-none" placeholder="Ürün koduna göre ara..." autocomplete="off">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small text-uppercase fw-bold letter-spacing-1 text-muted">Arama</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-dark rounded-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="urunArama" class="form-control border-dark rounded-0 shadow-none" placeholder="Ürün Adı veya Kodu...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-uppercase fw-bold letter-spacing-1 text-muted">Kategori Filtresi</label>
+                    <select id="kategoriFiltre" class="form-select border-dark rounded-0 shadow-none">
+                        <option value="">Tüm Kategoriler</option>
+                        @foreach (var kat in ViewBag.Kategoriler)
+                        {
+                            <option value="@kat">@kat</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-uppercase fw-bold letter-spacing-1 text-muted">Marka Filtresi</label>
+                    <select id="markaFiltre" class="form-select border-dark rounded-0 shadow-none">
+                        <option value="">Tüm Markalar</option>
+                        @foreach (var marka in ViewBag.Markalar)
+                        {
+                            <option value="@marka">@marka</option>
+                        }
+                    </select>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <form asp-action="UrunAta" method="post">
+    <div class="card border-0 shadow-sm rounded-0 mb-5">
+        <div class="card-body p-4">
+            <form id="urunAtaForm" asp-action="UrunAta" method="post">
                 <input type="hidden" name="kampanyaId" value="@ViewBag.KampanyaID" />
 
-                <div class="row g-3" id="productList">
-                    @foreach (var item in Model)
-                    {
-                        <div class="col-md-4 col-lg-3 product-item">
-                            <label class="d-block h-100 w-100" style="cursor: pointer;">
-                                <div class="border rounded-4 p-3 bg-light bg-opacity-25 h-100 d-flex align-items-center checkbox-card-hover shadow-sm">
-                                    <input class="form-check-input flex-shrink-0 m-0 me-3 fs-5 shadow-none"
-                                           type="checkbox"
-                                           name="secilenUrunler"
-                                           value="@item.UrunID"
-                                    @(item.SeciliMi ? "checked" : "")>
-                                    
-                                    <span class="fw-bold text-dark mb-0 product-code">
-                                        @item.UrunKod
-                                    </span>
-                                </div>
-                            </label>
-                        </div>
-                    }
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 w-100" id="urunlerTablosu">
+                        <thead class="bg-dark text-white border-bottom border-dark border-2">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">
+                                    <i class="fa-solid fa-check-double text-gold"></i>
+                                </th>
+                                <th class="fw-bold text-uppercase small letter-spacing-1">Görsel</th>
+                                <th class="fw-bold text-uppercase small letter-spacing-1">Ürün Kodu</th>
+                                <th class="fw-bold text-uppercase small letter-spacing-1">Ürün Adı</th>
+                                <th class="fw-bold text-uppercase small letter-spacing-1">Kategori</th>
+                                <th class="fw-bold text-uppercase small letter-spacing-1">Marka</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="bg-white border-bottom">
+                                    <td class="text-center py-3">
+                                        <div class="form-check d-flex justify-content-center m-0">
+                                            <input class="form-check-input border-dark shadow-none p-2 custom-checkbox" 
+                                                   type="checkbox" 
+                                                   name="secilenUrunler" 
+                                                   value="@item.UrunID" 
+                                                   @(item.SeciliMi ? "checked" : "") style="cursor:pointer;">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.ResimUrl))
+                                        {
+                                            <img src="/img/@item.ResimUrl" alt="Urun" class="border" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none';" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light border d-flex justify-content-center align-items-center text-muted" style="width: 50px; height: 50px;">
+                                                <i class="fa-solid fa-image opacity-50"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="fw-bold text-dark font-playfair letter-spacing-1">@item.UrunKod</td>
+                                    <td class="text-muted fw-medium">@item.UrunAd</td>
+                                    <td><span class="badge bg-light text-dark border rounded-0 px-2 py-1">@item.KategoriAd</span></td>
+                                    <td><span class="badge bg-light text-dark border rounded-0 px-2 py-1">@item.MarkaAd</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="mt-5 pt-4 border-top d-flex justify-content-end gap-3">
-                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-medium">
-                        İptal
+                    <a asp-action="Index" class="btn btn-outline-dark rounded-0 px-4 py-2 text-uppercase fw-bold letter-spacing-1 transition-300">
+                        İptal ve Dön
                     </a>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-medium">
-                        <i class="fa-solid fa-check me-1"></i> Değişiklikleri Kaydet
+                    <button type="submit" class="btn btn-dark rounded-0 px-4 py-2 text-uppercase fw-bold letter-spacing-1 transition-300 hover-gold-bg border-0">
+                        Değişiklikleri Kaydet
                     </button>
                 </div>
             </form>
@@ -60,44 +118,80 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Frontend Arama (Filtreleme) Mantığı
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            let filter = this.value.toLowerCase();
-            let items = document.querySelectorAll('.product-item');
+<style>
+    .text-gold { color: #D4AF37 !important; }
+    .hover-gold-bg:hover { background-color: #D4AF37 !important; color: white !important; }
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .transition-300 { transition: all 0.3s ease; }
+    .custom-checkbox:checked { background-color: #D4AF37; border-color: #D4AF37; }
 
-            items.forEach(function(item) {
-                let text = item.querySelector('.product-code').textContent.toLowerCase();
-                if (text.includes(filter)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+    /* DataTables Pagination LUVİA Stili */
+    .dataTables_wrapper .dataTables_length select { border-radius: 0; border: 1px solid #111; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: #111 !important; border-color: #111 !important; color: white !important; border-radius: 0;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: 0 !important; }
+</style>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // NoConflict kullanarak çakışmaları tamamen önlüyoruz
+        var $jq = jQuery.noConflict(true);
+
+        $jq(document).ready(function () {
+            // DataTables Başlatma (Her sayfada 10 kayıt gelecek)
+            var table = $jq('#urunlerTablosu').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+                lengthMenu: [10, 25, 50, 100],
+                pageLength: 10,
+                dom: "<'row mb-3'<'col-sm-12'l>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                columnDefs: [
+                    { orderable: false, targets: 0 }, 
+                    { orderable: false, targets: 1 }  
+                ]
+            });
+
+            // Ürün Arama Çubuğu
+            $jq('#urunArama').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+
+            // Kategori Filtresi (4. sütun)
+            $jq('#kategoriFiltre').on('change', function () {
+                var val = $jq.fn.dataTable.util.escapeRegex($jq(this).val());
+                table.column(4).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+            // Marka Filtresi (5. sütun)
+            $jq('#markaFiltre').on('change', function () {
+                var val = $jq.fn.dataTable.util.escapeRegex($jq(this).val());
+                table.column(5).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+            // Arka sayfalardaki verilerin kaybolmasını engelleyen güvenli submit
+            $jq('#urunAtaForm').on('submit', function (e) {
+                var form = this;
+                table.$('input[type="checkbox"]').each(function () {
+                    if (this.checked) {
+                        if (!$jq.contains(document, this)) {
+                            $jq(form).append(
+                                $jq('<input>').attr('type', 'hidden').attr('name', this.name).val(this.value)
+                            );
+                        }
+                    }
+                });
             });
         });
     </script>
-
-    <style>
-        /* Arama Kutusu Odaklanma Temizliği */
-        #searchInput:focus {
-            box-shadow: none;
-        }
-
-        /* Checkbox Kart Efekti */
-        .checkbox-card-hover {
-            transition: all 0.2s ease-in-out;
-            border-color: #dee2e6 !important;
-        }
-
-            .checkbox-card-hover:hover {
-                border-color: #86b7fe !important;
-                background-color: #f8f9fa !important;
-                transform: translateY(-3px);
-                box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important;
-            }
-
-        /* Bootstrap varsayılan checkbox rengi mavi (primary) olduğu için özel renklendirme kaldırıldı.
-                   Sadece boyutu büyütülüp margin/padding ayarlaması Bootstrap sınıflarıyla (fs-5) yapıldı. */
-    </style>
 }
