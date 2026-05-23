@@ -44,74 +44,34 @@ namespace Tasarim.Controllers
                            .Replace("i̇", "i").Replace(" ", "").Trim();
             };
 
-            string bulunanArananKategori = ""; // Sıralamada kullanmak için dışarıda tanımlıyoruz
-
             if (!string.IsNullOrEmpty(q))
             {
                 var kelimeler = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                // --- 1. ADIM: DİNAMİK KATEGORİ TESPİTİ ---
-                var sistemdekiKategoriler = new List<string> { "jean", "pantolon", "sort", "etek", "elbise", "abiye", "bluz", "gomlek", "tisort", "kazak", "canta", "ayakkabi", "kolye", "kupe", "bilezik", "taki", "ustgiyim" };
-
-                bulunanArananKategori = kelimeler
-                    .Select(k => k.ToLower().Replace("ı", "i").Replace("ç", "c").Replace("ş", "s").Replace(" ", ""))
-                    .FirstOrDefault(k => sistemdekiKategoriler.Contains(k) || k == "kot");
-
-                if (bulunanArananKategori == "kot") bulunanArananKategori = "jean";
-
-                // --- 2. ADIM: KATEGORİ GÜVENLİK DUVARI (YENİLENDİ!) ---
-                if (!string.IsNullOrEmpty(bulunanArananKategori))
-                {
-                    // EĞER ARANAN "JEAN" İSE: Sadece Jean veya Kot olanlar sızabilir. Kumaş pantolonlar elenir!
-                    if (bulunanArananKategori == "jean")
-                    {
-                        query = query.Where(p => p.UrunOzellikleri != null &&
-                                                (p.UrunOzellikleri.AnaKategori.ToLower().Contains("jean") ||
-                                                 p.Baslik.ToLower().Contains("jean")));
-                    }
-                    // EĞER ARANAN KUMAŞ "PANTOLON" İSE: İçinde jean/kot geçen her şeyi bıçak gibi keser!
-                    else if (bulunanArananKategori == "pantolon")
-                    {
-                        query = query.Where(p => p.UrunOzellikleri != null &&
-                                                p.UrunOzellikleri.AnaKategori.ToLower().Contains("pantolon") &&
-                                                !p.UrunOzellikleri.AnaKategori.ToLower().Contains("jean") &&
-                                                !p.Baslik.ToLower().Contains("jean"));
-                    }
-                    // EĞER ARANAN "GOMLEK" VEYA "BLUZ" İSE: Birbirlerinin alanlarına sızmalarını engeller!
-                    else if (bulunanArananKategori == "gomlek" || bulunanArananKategori == "bluz")
-                    {
-                        query = query.Where(p => p.UrunOzellikleri != null &&
-                                                (p.UrunOzellikleri.AnaKategori.ToLower().Contains(bulunanArananKategori) ||
-                                                 p.Baslik.ToLower().Contains(bulunanArananKategori)));
-                    }
-                    // DİĞER EVRENSEL KATEGORİLER (Elbise, Abiye, Çanta vb.)
-                    else
-                    {
-                        query = query.Where(p => p.UrunOzellikleri != null &&
-                                                (p.UrunOzellikleri.AnaKategori.ToLower().Contains(bulunanArananKategori) ||
-                                                 p.Baslik.ToLower().Contains(bulunanArananKategori)));
-                    }
-                }
-
-                // --- 3. ADIM: KATEGORİ İÇİNDE ESNEK OR ARAMASI ---
+                // --- 1. ADIM: GENEL ESNEK HAVUZ OLUŞTURMA (SQL) ---
+                // Arama kelimelerinden herhangi biri başlıkta, açıklamada, renkte veya stilde geçiyorsa SQL'den getir.
+                // Böylece veritabanı aşamasında hiçbir ürün katı kurallarla elenmez, havuzda kalır.
                 query = query.Where(p => kelimeler.Any(kelime =>
                     p.Baslik.ToLower().Contains(kelime.ToLower()) ||
-                    p.Aciklama.ToLower().Contains(kelime.ToLower()) ||
+                    (p.Aciklama != null && p.Aciklama.ToLower().Contains(kelime.ToLower())) ||
                     (p.UrunOzellikleri != null && (
-                        p.UrunOzellikleri.AnaRenk.ToLower().Contains(kelime.ToLower()) ||
-                        p.UrunOzellikleri.Stil.ToLower().Contains(kelime.ToLower()) ||
-                        p.UrunOzellikleri.Detaylar.ToLower().Contains(kelime.ToLower())
+                        (p.UrunOzellikleri.AnaKategori != null && p.UrunOzellikleri.AnaKategori.ToLower().Contains(kelime.ToLower())) ||
+                        (p.UrunOzellikleri.AnaRenk != null && p.UrunOzellikleri.AnaRenk.ToLower().Contains(kelime.ToLower())) ||
+                        (p.UrunOzellikleri.Stil != null && p.UrunOzellikleri.Stil.ToLower().Contains(kelime.ToLower())) ||
+                        (p.UrunOzellikleri.Detaylar != null && p.UrunOzellikleri.Detaylar.ToLower().Contains(kelime.ToLower()))
                     ))
                 ));
             }
 
+            // Verileri SQL'den belleğe çekiyoruz
             var urunlerListesi = await query.ToListAsync();
 
             if (!string.IsNullOrEmpty(q))
             {
                 var kelimeler = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                // --- 4. ADIM: AKILLI PUANLAMA VE SIRALAMA  ---
+                // --- 2. ADIM: DİNAMİK VE AGRESİF BENZERLİK SIRALAMASI (IN-MEMORY) ---
+                // Burada tek bir model ismi bile yok! Sistem tamamen matematiksel eşleşmeye bakar.
                 urunlerListesi = urunlerListesi
                     .OrderByDescending(u =>
                     {
@@ -122,30 +82,40 @@ namespace Tasarim.Controllers
                         string stil = temizle(u.UrunOzellikleri?.Stil);
                         string detaylar = temizle(u.UrunOzellikleri?.Detaylar);
 
-                        // --- ALTIN KURAL: KATEGORİ TAMAMEN TUTUYORSA DEV BONUS PUAN (+5000 PUAN) ---
-                        // Böylece aranan kategoriyle %100 uyuşan ürünler askeri nizamda en üst sıraya dizilir!
-                        if (!string.IsNullOrEmpty(bulunanArananKategori))
-                        {
-                            bool kategoriTamEslesti = kategori.Contains(bulunanArananKategori) || baslik.Contains(bulunanArananKategori);
-                            if (kategoriTamEslesti) puan += 5000;
-                        }
+                        // KURAL 1: ARANAN KELİMELERİN TAMAMI ÜRÜNDE VAR MI? (VIP BONUS) -> +50.000 PUAN
+                        // Eğer kullanıcı "Siyah", "Oversize", "Tişört" yazdıysa ve üründe bu 3 kelime de geçiyorsa direkt zirveye uçar.
+                        bool hepsiVar = kelimeler.All(k =>
+                            baslik.Contains(temizle(k)) ||
+                            kategori.Contains(temizle(k)) ||
+                            renk.Contains(temizle(k)) ||
+                            stil.Contains(temizle(k)) ||
+                            detaylar.Contains(temizle(k))
+                        );
+                        if (hepsiVar) puan += 50000;
 
+                        // KURAL 2: KELİME BAZLI AĞIRLIKLI PUANLAMA
                         foreach (var k in kelimeler)
                         {
                             string temizKelime = temizle(k);
 
-                            // 1. Öncelik: Belirgin Stil / Teknik Özellik (Drape, Halter yaka, İspanyol paça) -> +100 Puan
+                            // A) Kategori Eşleşmesi (Örn: Tişört, Ayakkabı, Jean) -> +10.000 PUAN
+                            if (kategori.Contains(temizKelime))
+                                puan += 10000;
+
+                            // B) Model / Kesim / Stil / Detay Eşleşmesi (Örn: Stiletto, Flare, Oversize) -> +8000 PUAN
+                            // Burası sihirli yer! Stil veya detay kolonundaki kelime eşleştiği an yüksek puan alır.
                             if (stil.Contains(temizKelime) || detaylar.Contains(temizKelime) || temizKelime.Contains(stil) || temizKelime.Contains(detaylar))
-                                puan += 100;
+                                puan += 8000;
 
-                            // 2. Öncelik: Renk Birebir Eşleşiyorsa -> +50 Puan
-                            if (renk.Contains(temizKelime) || baslik.Contains(temizKelime))
-                                puan += 50;
+                            // C) Renk Eşleşmesi (Örn: Siyah, Beyaz, Kahverengi) -> +4000 PUAN
+                            if (renk.Contains(temizKelime))
+                                puan += 4000;
 
-                            // 3. Öncelik: Genel Başlık Kelimeleri -> +20 Puan
+                            // D) Başlıkta Kısmi Geçme Uyumu -> +1000 PUAN
                             if (baslik.Contains(temizKelime))
-                                puan += 20;
+                                puan += 1000;
                         }
+
                         return puan;
                     })
                     .ToList();
