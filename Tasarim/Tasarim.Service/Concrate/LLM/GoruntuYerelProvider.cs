@@ -14,8 +14,8 @@ public class GoruntuYerelProvider : IGoruntuProvider // Eğer arayüzü henüz a
     {
         _http = http;
 
-        // Ollama varsayılan olarak 11434 portunda çalışır
-        _ollamaUrl = config["OllamaConfig:BaseUrl"] ?? "http://localhost:11434/api/generate";
+        var baseUrl = config["Ollama:BaseUrl"] ?? "http://localhost:11434";
+        _ollamaUrl = $"{baseUrl}/api/generate";
     }
 
     public async Task<string> AnalyzeImageAsync(string prompt, byte[] imageBytes)

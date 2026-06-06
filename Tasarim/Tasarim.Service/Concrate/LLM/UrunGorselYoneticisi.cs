@@ -44,27 +44,21 @@ public class UrunGorselYoneticisi
         string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
         // Prompt şablonu belleği yormamak için döngü dışında sabit tutulur.
-        string promptSablonu = @"Sen profesyonel bir e-ticaret arama uzmanısın. 
-Görevin: Görseldeki ürünü analiz etmek ve veritabanında en doğru eşleşmeyi bulmak için SADECE 2 veya 3 anahtar kelime döndürmektir.
+        string promptSablonu = @"Sen teknik bir veri ayıklama robotusun. Görevin: Görseli analiz et ve verileri SADECE belirtilen JSON formatında döndür.
 
 KRİTİK KURALLAR:
-1. FORMÜL: [Belirgin Renk] + [En Ayırıcı Teknik Özellik/Stil/Model] + [Kategori Adı]
-Örnek: 'Siyah Oversize Tişört', 'Kahverengi Stiletto Ayakkabı', 'Mavi Flare Jean'
+1. ÇIKTI DİLİ: Tüm veriler kesinlikle Türkçe olmalıdır.
+2. JSON DIŞI METİN: JSON dışında tek bir kelime bile yazma.
+3. BOŞ DEĞERLER: Değerler boş olamaz; 'Bilinmiyor' veya en yakın tahmini yaz.
 
-2. KATEGORİ ADI KURALI (Sadece ve sadece bu kelimelerden birini seçebilirsin, asla başka kelime uydurma):
-   - Ürün bir tişört ise kesinlikle 'Tişört' yaz.
-   - Ürün kadın bluzu ise kesinlikle 'Bluz' yaz.
-   - Yakalı/düğmeli gömlek ise kesinlikle 'Gömlek' yaz.
-   - Kot pantolon ise kesinlikle 'Jean' yaz.
-   - Kumaş/Kargo/Keten pantolon ise kesinlikle 'Pantolon' yaz.
-   - Diğer net kelimeler: 'Elbise', 'Abiye', 'Şort', 'Etek', 'Çanta', 'Ayakkabı'.
-
-3. AYIRICI ÖZELLİK / STİL ÖNCELİĞİ (ÇOK KRİTİK):
-   - Ayakkabılarda topukluysa kesinlikle 'Stiletto', düzse 'Babet' veya 'Spor' veya 'Makosen' yaz.
-   - Çantalarda kısa askılı omuz çantasıysa 'Baget', elde taşınansa 'Portföy', sırttaysa 'Sırt' yaz.
-   - Giysilerde kesim detayı çok önemlidir: 'Oversize', 'Flare', 'İspanyol Paça', 'Drape', 'Poplin'.
-
-YASAKLAR: Asla açıklama yapma, cümle kurma. Sadece yan yana kelimeleri dön.";
+ÇIKTI ŞABLONU:
+{
+  ""AnaKategori"": ""Kategori adı"",
+  ""AnaRenk"": ""Baskın renk"",
+  ""Materyal"": ""Malzeme tipi"",
+  ""Stil"": ""Tarz örneği"",
+  ""Detaylar"": ""SEO uyumlu kısa açıklama""
+}";
 
         IGoruntuProvider aktifProvider = isLocal ? _yerelProvider : _apiProvider;
 
@@ -84,7 +78,6 @@ YASAKLAR: Asla açıklama yapma, cümle kurma. Sadece yan yana kelimeleri dön."
 
                 byte[] imageBytes = await File.ReadAllBytesAsync(gercekYol, ct);
 
-                // RTX 3060'ın VRAM'ini ve yerel sunucuyu yormamak için her görsel arası es veriyoruz
                 await Task.Delay(2000, ct);
 
                 string rawResponse = await aktifProvider.AnalyzeImageAsync(promptSablonu, imageBytes);
