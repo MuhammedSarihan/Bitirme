@@ -15,11 +15,13 @@ namespace Tasarim.Controllers
         private readonly KumelemeYoneticisi _kumelemeYoneticisi;
         // goruntu isleme icin eklendi
         private readonly IGoruntuProvider _geminiProvider;
-        public UrunlerController(DatabaseContext context, KumelemeYoneticisi kumelemeYoneticisi, IGoruntuProvider geminiProvider)
+        private readonly GoruntuYerelProvider _yerelProvider; // 1. YERELE ALMAK İÇİN BUNU EKLEDİK
+        public UrunlerController(DatabaseContext context, KumelemeYoneticisi kumelemeYoneticisi, IGoruntuProvider geminiProvider, GoruntuYerelProvider yerelProvider)
         {
             _context = context;
             _kumelemeYoneticisi = kumelemeYoneticisi;
             _geminiProvider = geminiProvider;
+            _yerelProvider = yerelProvider;
         }
 
         public async Task<IActionResult> Index(string q = "")
@@ -287,7 +289,8 @@ KRİTİK KURALLAR:
 YASAKLAR: Asla açıklama yapma, cümle kurma. Sadece arama kutusuna yazılacak kelimeleri dön.
 Örn: 'Siyah Taşlı Abiye' veya 'Mavi İspanyol Paça Jean' veya 'Kahverengi Drape Bluz'";
 
-                var analizSonucu = await _geminiProvider.AnalyzeImageAsync(prompt, imageBytes);
+                //var analizSonucu = await _geminiProvider.AnalyzeImageAsync(prompt, imageBytes);
+                var analizSonucu = await _yerelProvider.AnalyzeImageAsync(prompt, imageBytes);
 
                 // Gereksiz boşlukları ve yapay zeka'nın bazen eklediği tırnakları temizle
                 string temizSonuc = analizSonucu.Replace("\"", "").Trim();
